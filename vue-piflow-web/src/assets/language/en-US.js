@@ -29,7 +29,11 @@ module.exports = {
         Example:"Flow Sample",
         admin:"Admin",
         LabelManagement:"Label Management",
-        selectSource:"Select Label"
+        selectSource:"Select Label",
+        visualization: "Visualization",
+        database:'DataBase',
+        datasource:'DataSource',
+        visualconfig:'VisualConfig',
     },
     page: {
         prev_text: "Previous",
@@ -123,6 +127,35 @@ module.exports = {
     template_columns: {
         name: "Name",
         crtDttm: "CreateTime",
+        action: "Actions"
+    },
+    database:{
+        create_title: "Create DataBase",
+        update_title: "Update DataBase",
+        name:'Name',
+        description: "Description",
+        url: "Url",
+        driver: "Driver",
+        user: "User",
+        password: "Password",
+        createTime: "CreateTime",
+        action: "Actions"
+    },
+    datasource:{
+        create_title: "Create DataSource",
+        update_title: "Update DataSource",
+        database:'DataBase',
+        name:'Name',
+        description: "Description",
+        createTime: "CreateTime",
+        action: "Actions"
+    },
+    visualconfig:{
+        create_title: "Create VisualConfig",
+        datasource:'DataBase',
+        name:'Name',
+        description: "Description",
+        createTime: "CreateTime",
         action: "Actions"
     },
     dataSource_columns: {

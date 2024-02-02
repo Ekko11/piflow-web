@@ -100,7 +100,7 @@ module.exports = {
     // host: "localhost",
     proxy: {
       '/piflow-web': {
-        target: 'http://10.0.82.122:6001',
+        target: 'http://10.0.82.208:6001/',
         // target: 'http://localhost:6002/piflow-web/admin',
         // target: 'http://127.0.0.1:6001',
         changeOrigin: true,
@@ -109,7 +109,17 @@ module.exports = {
         // pathRewrite: {
         //   '^/piflow-web': '/'
         // }
-      }
+      },
+      '/visual': {
+        target: 'http://10.0.90.85:8088/',
+        changeOrigin: true,
+        ws: true, // 是否启用websockets
+        secure: false, // 使用的是http协议则设置为false，https协议则设置为true
+        // pathRewrite: {
+        //   '^/visual': '/'
+        // }
+      },
+      
     },
   },
   lintOnSave: false,   // 取消 eslint 验证

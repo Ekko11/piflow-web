@@ -29,7 +29,11 @@ module.exports = {
         Example:"流水线样例",
         admin:"管理员",
         LabelManagement:"标签管理",
-        selectSource:"选择数据源"
+        selectSource:"选择数据源",
+        visualization: "数据可视化",
+        database:'数据库配置',
+        datasource:'数据源配置',
+        visualconfig:'可视化配置',
     },
     page: {
         prev_text: "上一页",
@@ -123,6 +127,35 @@ module.exports = {
     template_columns: {
         name: "名称",
         crtDttm: "创建时间",
+        action: "操作"
+    },
+    database:{
+        create_title: "新增数据库配置",
+        update_title: "编辑数据库配置",
+        name:'名称',
+        description: "描述信息",
+        url: "Url",
+        driver: "Driver",
+        user: "用户名",
+        password: "密码",
+        createTime: "创建时间",
+        action: "操作"
+    },
+    datasource:{
+        create_title: "新建数据源配置",
+        update_title: "更改数据源配置",
+        database:'数据库',
+        name:'名称',
+        description: "描述信息",
+        createTime: "创建时间",
+        action: "操作"
+    },
+    visualconfig:{
+        create_title: "新建可视化配置",
+        datasource:'数据源',
+        name:'名称',
+        description: "描述信息",
+        createTime: "创建时间",
         action: "操作"
     },
     dataSource_columns: {

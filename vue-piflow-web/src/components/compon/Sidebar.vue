@@ -129,6 +129,27 @@ export default {
           name: "publish"
         },
         {
+          btnName: this.$t("sidebar.visualization"),
+          icoName: "ios-pulse",
+          children: [
+            {
+              btnName: this.$t("sidebar.database"),
+              name: "VisualizationDataBase",
+              router: '/visualization/database',
+            },
+            {
+              btnName: this.$t("sidebar.datasource"),
+              name: "VisualizationDataSource",
+              router: '/visualization/datasource',
+            },
+            {
+              btnName: this.$t("sidebar.visualconfig"),
+              name: "VisualizationVisualConfig",
+              router: '/visualization/visualconfig',
+            },
+          ]
+        },
+        {
           btnName: this.$t("sidebar.example"),
           icoName: "md-cube",
           children: [

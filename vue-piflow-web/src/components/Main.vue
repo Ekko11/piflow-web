@@ -40,4 +40,7 @@ export default {
 .main {
   height: 100%;
 }
+.fullScreen{
+  z-index: 9999;
+}
 </style>
