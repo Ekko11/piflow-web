@@ -76,14 +76,13 @@
     </div>
     <div class="item">
       <label class="self">{{$t('visualconfig.datasource')}}：</label>
-      <Select v-model="formData.datesourceId" 
-        style="width:350px"
-        @on-change="handleDatabaseChange">
+      <Select v-model="formData.graphTemplateId" 
+        style="width:350px">
         <Option
             v-for="item in dataSourceList"
             :value="item.id"
             :key="item.id">
-          {{ item.driverClass }}</Option>
+          {{ item.name }}</Option>
       </Select>
     </div>
   </div>
@@ -110,7 +109,8 @@ export default {
       InitFormData: {
         name: "",
         description: "",
-        datesourceId:'',
+        graphTemplateId:'',
+        configInfo:''
       },
       param: "",
       // 操作
@@ -169,17 +169,12 @@ export default {
           break;
       }
     },
-    handleDatabaseChange(){
-      this.$event.emit("loading", true);
-      const datasource = this.dataSourceList.find(v=>v.id === val)
-      console.log(datasource)
-    },
     handleAdd(){
       this.$event.emit("loading", true);
       this.$axios({
           method:'POST',
           baseURL:baseUrl,
-          url:'/visual/addDatabase',
+          url:'/visual/addGraphConf',
           data:this.formData
       }).then((res) => {
           this.$event.emit("loading", false);
@@ -247,7 +242,7 @@ export default {
       });
     },
     getTableData() {
-      let data = { page: this.page, limit: this.limit };
+      let data = { pageNum: this.page, pageSize: this.limit };
       if (this.param) {
         data.param = this.param;
       }
@@ -280,7 +275,8 @@ export default {
       this.$axios({
           method:'POST',
           baseURL:baseUrl,
-          url:'/visual/getDatabaseList'
+          url:'/visual/getGraphTemplateList',
+          data: { pageNum: 1, pageSize: 999 }
       }).then(res=>{
             if (res.data.code === 200) {
               this.dataSourceList = res.data.data;

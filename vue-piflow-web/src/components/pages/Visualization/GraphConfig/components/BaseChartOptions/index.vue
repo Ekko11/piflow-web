@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="card">
     <h1>基础属性</h1>
     <Collapse simple>
       <!-- title 配置 -->
@@ -8,9 +8,14 @@
         <template #content>
           <div class="formWrap">
             <div>
+              <label>显示：</label>
+              <Checkbox v-model="baseOptions.title.show">是</Checkbox>
+            </div>
+            <div>
               <label>文本：</label>
               <Input v-model="baseOptions.title.text" />
             </div>
+
             <div>
               <label>对齐方法：</label>
               <Select v-model="baseOptions.title.textAlign">
@@ -44,6 +49,10 @@
         图例(legend)
         <template #content>
           <div class="formWrap">
+            <div>
+              <label>显示：</label>
+              <Checkbox v-model="baseOptions.legend.show">是</Checkbox>
+            </div>
             <div>
               <label>布局朝向：</label>
               <Select v-model="baseOptions.legend.orient">
@@ -98,6 +107,10 @@
         <template #content>
           <div class="formWrap">
             <div>
+              <label>显示：</label>
+              <Checkbox v-model="baseOptions.tooltip.show">是</Checkbox>
+            </div>
+            <div>
               <label>触发类型：</label>
               <Select v-model="baseOptions.tooltip.trigger">
                 <Option :value="'item'">数据项图形</Option>
@@ -123,7 +136,7 @@
           <div class="formWrap">
             <div>
               <label>颜色：</label>
-              <Input v-model="baseOptions.textStyle.color" />
+              <ColorPicker v-model="baseOptions.textStyle.color" />
             </div>
             <div>
               <label>字体风格：</label>
@@ -149,10 +162,14 @@
         <template #content>
           <div class="formWrap">
             <div>
+              <label>显示：</label>
+              <Checkbox v-model="baseOptions.yAxis.show">是</Checkbox>
+            </div>
+            <div>
               <label>名称：</label>
               <Input v-model="baseOptions.yAxis.name" />
             </div>
-            <div>
+            <!-- <div>
               <label>名称与轴线间距：</label>
               <Input v-model="baseOptions.yAxis.nameGap" type="number" />
             </div>
@@ -163,9 +180,9 @@
             <div>
               <label>刻度最大值：</label>
               <Input v-model="baseOptions.yAxis.max" />
-            </div>
+            </div> -->
             <div>
-              <label>类型</label>
+              <label>类型：</label>
               <Select v-model="baseOptions.yAxis.type">
                 <Option :value="'value'">数值轴</Option>
                 <Option :value="'category'">类目轴</Option>
@@ -182,23 +199,15 @@
         <template #content>
           <div class="formWrap">
             <div>
+              <label>显示：</label>
+              <Checkbox v-model="baseOptions.xAxis.show">是</Checkbox>
+            </div>
+            <div>
               <label>名称：</label>
               <Input v-model="baseOptions.xAxis.name" />
             </div>
             <div>
-              <label>名称与轴线间距：</label>
-              <Input v-model="baseOptions.xAxis.nameGap" type="number" />
-            </div>
-            <div>
-              <label>刻度最小值：</label>
-              <Input v-model="baseOptions.xAxis.min" />
-            </div>
-            <div>
-              <label>刻度最大值：</label>
-              <Input v-model="baseOptions.xAxis.max" />
-            </div>
-            <div>
-              <label>类型</label>
+              <label>类型：</label>
               <Select v-model="baseOptions.xAxis.type">
                 <Option :value="'value'">数值轴</Option>
                 <Option :value="'category'">类目轴</Option>
@@ -214,6 +223,7 @@
 </template>
   
   <script>
+  import {handleFormata} from '../utils'
 export default {
   name: "BaseChartOptions",
   components: {},
@@ -221,6 +231,7 @@ export default {
     return {
       baseOptions: {
         title: {
+          show:false,
           text: "",
           textAlign: "",
           top: "",
@@ -229,40 +240,44 @@ export default {
           right: "",
         },
         legend: {
+          show:false,
           orient: "auto",
           itemGap: 10,
           itemWidth: 25,
           itemHeight: 14,
         },
         grid: {
-          top: "",
-          bottom: "",
-          left: "",
-          right: "",
+          top: "10%",
+          bottom: "10%",
+          left: "10%",
+          right: "10%",
         },
         tooltip: {
+          show:false,
           trigger: "item",
           triggerOn: "mousemove",
         },
         textStyle: {
-          color: "#fff",
+          color: "#000",
           fontStyle: "normal",
           fontWeight: "normal",
           fontSize: 12,
         },
         yAxis: {
+          show:false,
           name: "",
           type: "value",
-          nameGap: "",
-          min: "",
-          max: "",
+          // nameGap: "",
+          // min: "",
+          // max: "",
         },
         xAxis: {
+          show:false,
           name: "",
-          type: "value",
-          nameGap: "",
-          min: "",
-          max: "",
+          type: "category",
+          // nameGap: "",
+          // min: "",
+          // max: "",
         },
       },
     };
@@ -270,7 +285,9 @@ export default {
   watch: {
     baseOptions:{
       handler(val){
-        this.$emit('baseOptionsChange',val)
+        const data = handleFormata(val)
+        console.log(val,data,123)
+        this.$emit('baseOptionsChange',data)
       },
       deep:true,
       immediate:true
@@ -281,17 +298,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.formWrap {
-  > div {
-    label {
-      min-width: 100px;
-      text-align: right;
-    }
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-  }
-}
+@import "../../index.scss";
 </style>
   
   

@@ -27,13 +27,12 @@
   
   <script>
 export default {
-  name: "LineChart",
+  name: "PieChart",
   components: {},
   data() {
     return {
       series: {
-        type: "line",
-        smooth: true,
+        type: "pie",
         label: {
           show: true,
         },

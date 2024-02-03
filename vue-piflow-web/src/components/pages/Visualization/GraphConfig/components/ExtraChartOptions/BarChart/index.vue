@@ -27,12 +27,12 @@
   
   <script>
 export default {
-  name: "LineChart",
+  name: "BarChart",
   components: {},
   data() {
     return {
       series: {
-        type: "line",
+        type: "bar",
         smooth: true,
         label: {
           show: true,

@@ -145,6 +145,7 @@ module.exports = {
         create_title: "新建数据源配置",
         update_title: "更改数据源配置",
         database:'数据库',
+        datasheet:'数据表',
         name:'名称',
         description: "描述信息",
         createTime: "创建时间",

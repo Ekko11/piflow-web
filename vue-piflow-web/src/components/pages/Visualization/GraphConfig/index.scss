@@ -1,0 +1,43 @@
+.card{
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: 0 0.125rem 0.4375rem 0 rgba(0, 0, 0, 0.2);
+    margin: 12px;
+    padding-bottom: 12px;
+}
+
+.formWrap {
+    > div {
+      label {
+        min-width: 100px;
+        text-align: right;
+      }
+      .ivu-checkbox-wrapper{
+        min-width: auto;
+      }
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    opacity: 0;
+    background-color: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background-color: #c1ceda;
+  
+    &:hover {
+      background-color: #c1ceda;
+    }
+  }
+
+  h1{
+    font-size: 16px;
+    padding: 6px 12px;
+    background: #ebeff3;
+  }

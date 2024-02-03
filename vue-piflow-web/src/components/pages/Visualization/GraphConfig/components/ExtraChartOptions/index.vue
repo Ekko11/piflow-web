@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="card">
     <h1>拓展属性</h1>
     <component @change="handleChange"  :is="currentType" />
   </section>
@@ -7,10 +7,14 @@
   
   <script>
 import LineChart from './LineChart'
+import BarChart from './BarChart'
+import PieChart from './PieChart'
 export default {
   name: "ExtraChartOptions",
   components: {
-    LineChart
+    LineChart,
+    BarChart,
+    PieChart
   },
   props:{
     type:String
@@ -39,6 +43,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+@import "../../index.scss";
 </style>
   
   

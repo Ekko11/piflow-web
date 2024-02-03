@@ -145,6 +145,7 @@ module.exports = {
         create_title: "Create DataSource",
         update_title: "Update DataSource",
         database:'DataBase',
+        datasheet:'DataSheet',
         name:'Name',
         description: "Description",
         createTime: "CreateTime",

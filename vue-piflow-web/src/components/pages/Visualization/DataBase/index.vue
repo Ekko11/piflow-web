@@ -53,7 +53,7 @@
         <div class="item">
           <label>{{$t('database.name')}}：</label>
           <Input
-              v-model="formData.name"
+              v-model="formData.dbName"
               show-word-limit
               maxlength="100"
               :placeholder="$t('modal.placeholder')"
@@ -125,10 +125,9 @@ export default {
 
       param: "",
       //
-      param: "",
       // 表单
       InitFormData: {
-        name: "",
+        dbName: "",
         description: "",
         url: "",
         driverClass: "",
@@ -154,7 +153,7 @@ export default {
       return [
         {
           title: this.$t("database.name"),
-          key: "name",
+          key: "dbName",
           sortable: true
         },
         {
@@ -192,8 +191,8 @@ export default {
       }
     },
     handleEdit(row){
-      const  {id,name,description,driverClass,password,url,userName} = row
-      this.formData = {id,name,description,driverClass,password,url,userName}
+      const  {id,dbName,description,driverClass,password,url,userName} = row
+      this.formData = {id,dbName,description,driverClass,password,url,userName}
       this.isOpen = true
     },
     handleComfirm() {
@@ -215,7 +214,7 @@ export default {
           if (res.data.code === 200) {
             this.isOpen = false;
             this.$Message.success({
-              content:  `${this.formData.name} ` + this.$t("tip.add_success_content"),
+              content:  `${this.formData.dbName} ` + this.$t("tip.add_success_content"),
               duration: 3,
             });
             this.getTableData();
@@ -246,7 +245,7 @@ export default {
           if (res.data.code === 200) {
             this.isOpen = false;
             this.$Message.success({
-              content:  `${this.formData.name} ` + this.$t("tip.update_success_content"),
+              content:  `${this.formData.dbName} ` + this.$t("tip.update_success_content"),
               duration: 3,
             });
             this.getTableData();
@@ -270,7 +269,7 @@ export default {
         title: this.$t("tip.title"),
         okText: this.$t("modal.confirm"),
         cancelText: this.$t("modal.cancel_text"),
-        content: `${this.$t("modal.delete_content")} ${row.name}?`,
+        content: `${this.$t("modal.delete_content")} ${row.dbName}?`,
         onOk: () => {
           this.$axios({
           method:'POST',
@@ -282,7 +281,7 @@ export default {
                 this.$Modal.success({
                   title: this.$t("tip.title"),
                   content:
-                    `${row.name} ` + this.$t("tip.delete_success_content"),
+                    `${row.dbName} ` + this.$t("tip.delete_success_content"),
                 });
                 this.getTableData();
               } else {
@@ -303,7 +302,7 @@ export default {
       });
     },
     getTableData() {
-      let data = { page: this.page, limit: this.limit };
+      let data = { pageNum: this.page, pageSize: this.limit };
       if (this.param) {
         data.param = this.param;
       }
@@ -315,7 +314,7 @@ export default {
       }).then(res=>{
             if (res.data.code === 200) {
               this.tableData = res.data.data;
-              this.total = res.data.count;
+              this.total = res.data.totalCount;
             } else {
               this.$Message.error({
                 content: this.$t("tip.request_fail_content"),

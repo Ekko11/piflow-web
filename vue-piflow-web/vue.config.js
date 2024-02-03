@@ -111,7 +111,7 @@ module.exports = {
         // }
       },
       '/visual': {
-        target: 'http://10.0.90.85:8088/',
+        target: 'http://10.0.82.210:8088/',
         changeOrigin: true,
         ws: true, // 是否启用websockets
         secure: false, // 使用的是http协议则设置为false，https协议则设置为true

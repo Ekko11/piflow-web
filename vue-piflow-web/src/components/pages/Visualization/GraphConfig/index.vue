@@ -1,24 +1,25 @@
 <template>
   <div class="wrap">
-    <Split v-model="split1">
-      <template #left>
-        <div class="wrap_left">
-          <Split v-model="split2" mode="vertical">
-            <template #top>
-              <ChartType @typeChange="handleTypeChange"/>
-            </template>
-            <template #bottom>
-              <BaseChartOptions @baseOptionsChange="baseOptionsChange"/>
-              <ExtraChartOptions @extraOptionsChange="extraOptionsChange" :type="chartType"/>
-            </template>
-          </Split>
-        </div>
-      </template>
-      <template #right>
-        <div  class="wrap_right">Right Pane</div>
-        <Chart />
-      </template>
-    </Split>
+    <div style="overflow: auto">
+      <ChartType @typeChange="handleTypeChange" />
+      <div>
+        <BaseChartOptions @baseOptionsChange="baseOptionsChange" />
+        <ExtraChartOptions
+          @extraOptionsChange="extraOptionsChange"
+          :type="chartType"
+        />
+      </div>
+    </div>
+    <div>
+      <AxisSelect
+        :tableData="tableData"
+        :xAxisType="xAxisType"
+        @xAxisTypeChange="xAxisTypeChange"
+        @yAxisTypeChange="yAxisTypeChange"
+        :yAxisType="yAxisType"
+      />
+      <Chart :options="options" @saveOptions="handleUpdate" />
+    </div>
   </div>
 </template>
   
@@ -27,38 +28,175 @@ import { baseUrl } from "../config/index";
 import ChartType from "./components/ChartType";
 import BaseChartOptions from "./components/BaseChartOptions";
 import ExtraChartOptions from "./components/ExtraChartOptions";
+import AxisSelect from "./components/AxisSelect";
 import Chart from "./components/Chart";
 
 export default {
   name: "GraphConfig",
-  components: { ChartType,BaseChartOptions,ExtraChartOptions,Chart },
+  components: {
+    ChartType,
+    BaseChartOptions,
+    ExtraChartOptions,
+    Chart,
+    AxisSelect,
+  },
   data() {
     return {
-      chartType:'lineChart',
-      split1: 0.3,
-      split2: 0.2,
+      chartType: "lineChart",
+      baseOptions: null,
+      extraOptions: {},
+      tableData: [],
+      xAxisType: "",
+      xData: [],
+      yAxisType: [],
+      yData: [],
     };
   },
 
   created() {
-    this.handleEnter();
+    this.handleInit();
+  },
+  watch: {
+    xAxisType(val) {
+      if (this.tableData.length) {
+        this.xData = this.tableData.find((v) => v.label === val).data;
+      }
+    },
+    yAxisType(arr) {
+      if (this.tableData.length) {
+        this.yData = arr.map((item) => {
+          return {
+            name: item,
+            data: this.tableData.find((v) => v.label === item).data,
+          };
+        });
+      }
+    },
+  },
+  computed: {
+    options: {
+      get: function () {
+        if (!this.baseOptions) return {};
+        const data = JSON.parse(JSON.stringify(this.baseOptions));
+        const obj = {
+          ...data,
+          series: this.series,
+        };
+        obj.xAxis.data = this.xData;
+        return obj;
+      },
+      set: function (newVal) {
+        return newVal;
+      },
+    },
+
+    series() {
+      const list = this.yData.map((item) => ({
+        ...this.extraOptions,
+        ...item,
+      }));
+      return list;
+    },
   },
   methods: {
-    baseOptionsChange(baseOptions){
-      console.log(baseOptions)
+    xAxisTypeChange(val) {
+      this.xAxisType = val;
+      this.xData = this.tableData.find((v) => v.label === val).data;
+    },
+    yAxisTypeChange(arr) {
+      this.yAxisType = arr;
+      this.yData = arr.map((item) => {
+        return {
+          name: item,
+          data: this.tableData.find((v) => v.label === item).data,
+        };
+      });
+    },
+    baseOptionsChange(baseOptions) {
+      this.baseOptions = { ...baseOptions };
+    },
+    extraOptionsChange(extraOptions) {
+      this.extraOptions = extraOptions;
+    },
 
+    handleTypeChange(val) {
+      this.chartType = val;
     },
-    extraOptionsChange(extraOptions){
-      console.log(extraOptions)
-    },
+    handleInit() {
+      if (!this.$route.query.id) return;
+      this.$event.emit("loading", true);
+      this.$axios({
+        method: "POST",
+        baseURL: baseUrl,
+        url: "/visual/getGraphConfById",
+        data: { id: this.$route.query.id },
+      })
+        .then((res) => {
+          if (res.data.code === 200) {
+            delete res.data.data.createTime;
+            delete res.data.data.updateTime;
+            this.graphConf = res.data.data;
+            this.handleGetTableData(this.graphConf.graphTemplateId);
 
-    
-    handleTypeChange(val){
-      console.log(val)
-      this.chartType = val
+          } else {
+            this.$Message.error({
+              content: this.$t("tip.request_fail_content"),
+              duration: 3,
+            });
+          }
+        })
+        .catch((error) => {
+          this.$event.emit("loading", false);
+          this.$Message.error({
+            content: this.$t("tip.fault_content"),
+            duration: 3,
+          });
+        });
     },
-    handleEnter() {
-      console.log(this.$route.query.id);
+    handleGetTableData(graphTemplateId) {
+      this.$axios({
+        method: "POST",
+        baseURL: baseUrl,
+        url: "/visual/getTableData",
+        data: { graphTemplateId },
+      })
+        .then((res) => {
+          this.$event.emit("loading", false);
+
+          if (res.data.code === 200 && res.data.data.length) {
+
+            const list = res.data.data;
+            this.tableData = Object.keys(list[0]).map((item) => {
+              const obj = {
+                label: item,
+                data: [],
+              };
+              list.forEach((v) => {
+                obj.data.push(v[item]);
+              });
+              return obj;
+            });
+            if (this.graphConf.configInfo) {
+              const configInfo = JSON.parse(this.graphConf.configInfo);
+              for (const key in configInfo) {
+                this[key] = configInfo[key];
+              }
+            }
+          } else {
+            this.$Message.error({
+              content: this.$t("tip.request_fail_content"),
+              duration: 3,
+            });
+          }
+        })
+        .catch((error) => {
+          this.$event.emit("loading", false);
+          console.log(error);
+          this.$Message.error({
+            content: this.$t("tip.fault_content"),
+            duration: 3,
+          });
+        });
     },
     handleAdd() {
       this.$event.emit("loading", true);
@@ -94,21 +232,29 @@ export default {
         });
     },
     handleUpdate() {
+      const configInfo = {
+        baseOptions: this.baseOptions,
+        extraOptions: this.extraOptions,
+        xAxisType: this.xAxisType,
+        yAxisType: this.yAxisType,
+      };
+      console.log(configInfo);
       this.$event.emit("loading", true);
       this.$axios({
         method: "POST",
         baseURL: baseUrl,
-        url: "/visual/updateDatabase",
-        data: this.formData,
+        url: "/visual/updateGraphConf",
+        data: {
+          ...this.graphConf,
+          configInfo: JSON.stringify(configInfo),
+        },
       })
         .then((res) => {
           this.$event.emit("loading", false);
           if (res.data.code === 200) {
             this.isOpen = false;
             this.$Message.success({
-              content:
-                `${this.formData.name} ` +
-                this.$t("tip.update_success_content"),
+              content: this.$t("tip.update_success_content"),
               duration: 3,
             });
             this.getTableData();
@@ -135,8 +281,13 @@ export default {
 .wrap {
   height: 100%;
   width: 100%;
-  .wrap_left{
-    height: 100%;
+  background: #f2f7ff;
+  display: flex;
+  > div:first-child {
+    width: 400px;
+  }
+  > div:last-child {
+    flex-grow: 1;
   }
 }
 </style>
