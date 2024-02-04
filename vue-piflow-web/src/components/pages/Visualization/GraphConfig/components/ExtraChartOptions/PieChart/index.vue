@@ -26,37 +26,13 @@
 </template>
   
   <script>
+import { mapGetters } from "vuex";
 export default {
   name: "PieChart",
-  components: {},
-  data() {
-    return {
-      series: {
-        type: "pie",
-        label: {
-          show: true,
-        },
-        lineStyle: {
-          color: "#000",
-          width: "2",
-          type: "solid",
-          opacity: "1",
-        },
-      },
-    };
+  computed: {
+    ...mapGetters("graphConf", ["pieChart"]),
   },
-  watch: {
-    series: {
-      handler(val) {
-        this.$emit('change',this.series)
-      },
-      deep: true,
-      immediate:true
-    },
-  },
-  created() {
-  },
-  methods: {},
+
 };
 </script>
 <style lang="scss" scoped>

@@ -1,25 +1,31 @@
 <template>
   <div class="wrap">
     <div style="overflow: auto">
+    {{yAxisType}}
       <ChartType @typeChange="handleTypeChange" />
       <div>
-        <BaseChartOptions @baseOptionsChange="baseOptionsChange" />
-        <ExtraChartOptions
-          @extraOptionsChange="extraOptionsChange"
-          :type="chartType"
-        />
+        <BaseChartOptions/>
+        <ExtraChartOptions  :type="chartType" />
       </div>
     </div>
-    <div>
-      <AxisSelect
-        :tableData="tableData"
-        :xAxisType="xAxisType"
-        @xAxisTypeChange="xAxisTypeChange"
-        @yAxisTypeChange="yAxisTypeChange"
-        :yAxisType="yAxisType"
+    <div class="wrap_r">
+
+      <AxisSelect :tableData="tableData" />
+      <Chart
+        :options="options"
+        @saveOptions="handleUpdate"
+        @showTableData="show = true"
       />
-      <Chart :options="options" @saveOptions="handleUpdate" />
     </div>
+    <Modal
+      v-model="show"
+      title="原始数据预览"
+      footer-hide
+      width="60vw"
+      @on-cancel="show = false"
+    >
+      <OriginDataTable :originalData="originalData" />
+    </Modal>
   </div>
 </template>
   
@@ -30,7 +36,9 @@ import BaseChartOptions from "./components/BaseChartOptions";
 import ExtraChartOptions from "./components/ExtraChartOptions";
 import AxisSelect from "./components/AxisSelect";
 import Chart from "./components/Chart";
-
+import OriginDataTable from "./components/OriginDataTable";
+import {mapGetters, mapState } from 'vuex'
+import {handleDeepMerge,handleFormata} from './utils'
 export default {
   name: "GraphConfig",
   components: {
@@ -39,16 +47,21 @@ export default {
     ExtraChartOptions,
     Chart,
     AxisSelect,
+    OriginDataTable,
   },
   data() {
     return {
       chartType: "lineChart",
-      baseOptions: null,
-      extraOptions: {},
+      show: false,
+      // baseOptions: {},
+      // extraOptions: {},
+      // 格式化的数据
       tableData: [],
-      xAxisType: "",
+      // 原始数据
+      originalData: [],
+      // xAxisType: "",
       xData: [],
-      yAxisType: [],
+      // yAxisType: [],
       yData: [],
     };
   },
@@ -74,9 +87,10 @@ export default {
     },
   },
   computed: {
+    ...mapGetters('graphConf',['xAxisType','yAxisType','baseOptions','extraOptions','lineChart','barChart','PieChart']),
     options: {
       get: function () {
-        if (!this.baseOptions) return {};
+        if (!this.baseOptions.xAxis) return {};
         const data = JSON.parse(JSON.stringify(this.baseOptions));
         const obj = {
           ...data,
@@ -91,34 +105,16 @@ export default {
     },
 
     series() {
+      console.log(this)
+      const obj = JSON.parse(JSON.stringify(this[this.chartType]))
       const list = this.yData.map((item) => ({
-        ...this.extraOptions,
+        ...obj,
         ...item,
       }));
       return list;
     },
   },
   methods: {
-    xAxisTypeChange(val) {
-      this.xAxisType = val;
-      this.xData = this.tableData.find((v) => v.label === val).data;
-    },
-    yAxisTypeChange(arr) {
-      this.yAxisType = arr;
-      this.yData = arr.map((item) => {
-        return {
-          name: item,
-          data: this.tableData.find((v) => v.label === item).data,
-        };
-      });
-    },
-    baseOptionsChange(baseOptions) {
-      this.baseOptions = { ...baseOptions };
-    },
-    extraOptionsChange(extraOptions) {
-      this.extraOptions = extraOptions;
-    },
-
     handleTypeChange(val) {
       this.chartType = val;
     },
@@ -137,7 +133,6 @@ export default {
             delete res.data.data.updateTime;
             this.graphConf = res.data.data;
             this.handleGetTableData(this.graphConf.graphTemplateId);
-
           } else {
             this.$Message.error({
               content: this.$t("tip.request_fail_content"),
@@ -154,6 +149,7 @@ export default {
         });
     },
     handleGetTableData(graphTemplateId) {
+      console.log(this)
       this.$axios({
         method: "POST",
         baseURL: baseUrl,
@@ -164,8 +160,8 @@ export default {
           this.$event.emit("loading", false);
 
           if (res.data.code === 200 && res.data.data.length) {
-
             const list = res.data.data;
+            this.originalData = list;
             this.tableData = Object.keys(list[0]).map((item) => {
               const obj = {
                 label: item,
@@ -176,10 +172,18 @@ export default {
               });
               return obj;
             });
+            // 赋值
             if (this.graphConf.configInfo) {
-              const configInfo = JSON.parse(this.graphConf.configInfo);
-              for (const key in configInfo) {
-                this[key] = configInfo[key];
+              const {baseOptions,extraOptions,xAxisType,yAxisType,chartType}= JSON.parse(this.graphConf.configInfo);
+              this.$store.dispatch("graphConf/changexAxisType", xAxisType);
+              this.$store.dispatch("graphConf/changeyAxisType", yAxisType);
+              this.$store.dispatch("graphConf/changeBaseOptions",handleDeepMerge(this.baseOptions,baseOptions) );
+              if(chartType === 'lineChart'){
+                this.$store.dispatch("graphConf/changeLineOptions",handleDeepMerge(this.baseOptions,baseOptions) );
+              }else if(chartType === 'barChart'){
+                this.$store.dispatch("graphConf/changeBarOptions",handleDeepMerge(this.extraOptions,extraOptions) );
+              }else if(chartType === 'pieChart'){
+                this.$store.dispatch("graphConf/changePieOptions",handleDeepMerge(this.extraOptions,extraOptions) );
               }
             }
           } else {
@@ -198,43 +202,12 @@ export default {
           });
         });
     },
-    handleAdd() {
-      this.$event.emit("loading", true);
-      this.$axios({
-        method: "POST",
-        baseURL: baseUrl,
-        url: "/visual/addDatabase",
-        data: this.formData,
-      })
-        .then((res) => {
-          this.$event.emit("loading", false);
-          if (res.data.code === 200) {
-            this.isOpen = false;
-            this.$Message.success({
-              content:
-                `${this.formData.name} ` + this.$t("tip.add_success_content"),
-              duration: 3,
-            });
-            this.getTableData();
-          } else {
-            this.$Message.error({
-              content: res.data.errorMsg,
-              duration: 3,
-            });
-          }
-        })
-        .catch((error) => {
-          this.$event.emit("loading", false);
-          this.$Message.error({
-            content: this.$t("tip.fault_content"),
-            duration: 3,
-          });
-        });
-    },
+
     handleUpdate() {
       const configInfo = {
-        baseOptions: this.baseOptions,
-        extraOptions: this.extraOptions,
+        chartType:this.chartType,
+        baseOptions: handleFormata(this.baseOptions),
+        extraOptions: this[this.chartType],
         xAxisType: this.xAxisType,
         yAxisType: this.yAxisType,
       };
@@ -281,13 +254,18 @@ export default {
 .wrap {
   height: 100%;
   width: 100%;
-  background: #f2f7ff;
+  background: rgba(247, 248, 250, 1);
   display: flex;
   > div:first-child {
     width: 400px;
   }
   > div:last-child {
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    > section:last-child {
+      flex-grow: 1;
+    }
   }
 }
 </style>

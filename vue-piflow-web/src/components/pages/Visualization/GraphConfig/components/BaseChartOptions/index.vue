@@ -1,7 +1,7 @@
 <template>
   <section class="card">
     <h1>基础属性</h1>
-    <Collapse simple>
+    <Collapse simple v-if="baseOptions">
       <!-- title 配置 -->
       <Panel name="title">
         主标题(title)
@@ -223,78 +223,12 @@
 </template>
   
   <script>
-  import {handleFormata} from '../utils'
+import { mapGetters } from "vuex";
 export default {
   name: "BaseChartOptions",
-  components: {},
-  data() {
-    return {
-      baseOptions: {
-        title: {
-          show:false,
-          text: "",
-          textAlign: "",
-          top: "",
-          bottom: "",
-          left: "",
-          right: "",
-        },
-        legend: {
-          show:false,
-          orient: "auto",
-          itemGap: 10,
-          itemWidth: 25,
-          itemHeight: 14,
-        },
-        grid: {
-          top: "10%",
-          bottom: "10%",
-          left: "10%",
-          right: "10%",
-        },
-        tooltip: {
-          show:false,
-          trigger: "item",
-          triggerOn: "mousemove",
-        },
-        textStyle: {
-          color: "#000",
-          fontStyle: "normal",
-          fontWeight: "normal",
-          fontSize: 12,
-        },
-        yAxis: {
-          show:false,
-          name: "",
-          type: "value",
-          // nameGap: "",
-          // min: "",
-          // max: "",
-        },
-        xAxis: {
-          show:false,
-          name: "",
-          type: "category",
-          // nameGap: "",
-          // min: "",
-          // max: "",
-        },
-      },
-    };
+  computed: {
+    ...mapGetters("graphConf", ["baseOptions", "yAxisType"]),
   },
-  watch: {
-    baseOptions:{
-      handler(val){
-        const data = handleFormata(val)
-        console.log(val,data,123)
-        this.$emit('baseOptionsChange',data)
-      },
-      deep:true,
-      immediate:true
-    }
-  },
-  created() {},
-  methods: {},
 };
 </script>
 <style lang="scss" scoped>

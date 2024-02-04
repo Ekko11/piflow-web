@@ -1,11 +1,15 @@
 <template>
-  <section class="card">
+  <section class="card chart_wrap">
     <h1>图表展示</h1>
+    <div class="chart_wrap-btn">
+        <Button type="primary"  @click="handleShowData">原始数据</Button >
+        <Button type="primary" @click="handleSave">保存配置</Button >
+        <Button type="primary" @click="handleDown">下载图表</Button >
+    </div>
     <div>
       <div class="chart" ref="chart" style="width: 100%"></div>
     </div>
-    <button @click="handleSave">保存配置</button>
-    <button @click="handleDown">下载图表</button>
+
   </section>
 </template>
 <script>
@@ -25,6 +29,9 @@ export default {
     },
     handleSave(){
       this.$emit('saveOptions')
+    },
+    handleShowData(){
+      this.$emit('showTableData')
     },
     handleDown() {
       // 获取ECharts生成的图片对应的base64数据
@@ -61,6 +68,25 @@ export default {
 @import "../../index.scss";
 .chart {
   width: 100%;
-  height: 500px;
+}
+.chart_wrap{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  >div:last-child{
+    flex-grow: 1;
+    margin-top: 50px;
+    >div{
+      height: 100%;
+    }
+  }
+  .chart_wrap-btn{
+    position: absolute;
+    right: 28px;
+    top: 50px;
+    >button{
+      margin-right: 5px;
+    }
+  }
 }
 </style>

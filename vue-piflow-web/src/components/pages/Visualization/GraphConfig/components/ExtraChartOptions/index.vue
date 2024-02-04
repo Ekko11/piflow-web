@@ -1,7 +1,7 @@
 <template>
   <section class="card">
     <h1>拓展属性</h1>
-    <component @change="handleChange"  :is="currentType" />
+    <component :is="currentType" />
   </section>
 </template>
   
@@ -17,7 +17,7 @@ export default {
     PieChart
   },
   props:{
-    type:String
+    type:String    //已有配置初始值
   },
   data() {
     return {
@@ -34,11 +34,6 @@ export default {
   },
   created() {
 
-  },
-  methods: {
-    handleChange(val){
-        this.$emit('extraOptionsChange',val)
-    }
   },
 };
 </script>

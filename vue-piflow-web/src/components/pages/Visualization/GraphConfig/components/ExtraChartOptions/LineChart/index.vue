@@ -1,17 +1,17 @@
 <template>
   <section>
     <div class="formWrap">
-      <div>
+      <!-- <div>
         <label>颜色：</label>
-        <Input v-model="series.lineStyle.color" />
-      </div>
+        <Input v-model="lineChart.lineStyle.color" />
+      </div> -->
       <div>
         <label>线宽：</label>
-        <Input v-model="series.lineStyle.width" />
+        <Input v-model="lineChart.lineStyle.width" />
       </div>
       <div>
         <label>对齐方法：</label>
-        <Select v-model="series.lineStyle.type">
+        <Select v-model="lineChart.lineStyle.type">
           <Option :value="'solid'">实线</Option>
           <Option :value="'dashed'">点线</Option>
           <Option :value="'dotted'">虚线</Option>
@@ -19,45 +19,20 @@
       </div>
       <div>
         <label>不透明度：</label>
-        <Input v-model="series.lineStyle.opacity" />
+        <Input v-model="lineChart.lineStyle.opacity" />
       </div>
     </div>
   </section>
 </template>
   
   <script>
+import { mapGetters } from "vuex";
 export default {
   name: "LineChart",
-  components: {},
-  data() {
-    return {
-      series: {
-        type: "line",
-        smooth: true,
-        label: {
-          show: true,
-        },
-        lineStyle: {
-          color: "#000",
-          width: "2",
-          type: "solid",
-          opacity: "1",
-        },
-      },
-    };
+  computed: {
+    ...mapGetters("graphConf", ["lineChart"]),
   },
-  watch: {
-    series: {
-      handler(val) {
-        this.$emit('change',this.series)
-      },
-      deep: true,
-      immediate:true
-    },
-  },
-  created() {
-  },
-  methods: {},
+
 };
 </script>
 <style lang="scss" scoped>

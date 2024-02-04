@@ -3,7 +3,11 @@
     <h1>维度选择</h1>
     <div class="select">
       <div>
-        <Select v-model="xAxis" style="width: 100%">
+        <Select
+          v-model="xAxisType"
+          @on-change="handleXChange"
+          style="width: 100%"
+        >
           <template #prefix>
             <div class="prefix">X轴</div>
           </template>
@@ -16,7 +20,12 @@
         </Select>
       </div>
       <div>
-        <Select v-model="yAxis" multiple style="width: 100%">
+        <Select
+          :value="yAxisType"
+          @on-change="handleYChange"
+          multiple
+          style="width: 100%"
+        >
           <template #prefix>
             <div class="prefix">Y轴</div>
           </template>
@@ -33,40 +42,22 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 export default {
   name: "AxisSelect",
   props: {
     tableData: Array,
-    xAxisType: String,
-    yAxisType: Array,
   },
-  watch: {
-    xAxisType(val) {
-      if(val === this.xAxis ) return
-      this.xAxis = val;
+  methods: {
+    handleXChange(val) {
+      this.$store.dispatch("graphConf/changexAxisType", val);
     },
-    yAxisType: {
-      handler: function (val) {
-       if(val === this.yAxis ) return
-        this.yAxis = val;
-      },
-      deep:true
-    },
-    xAxis(val) {
-      this.$emit("xAxisTypeChange", val);
-    },
-    yAxis(val) {
-      this.$emit("yAxisTypeChange", val);
+    handleYChange(val) {
+      this.$store.dispatch("graphConf/changeyAxisType", val);
     },
   },
-  data() {
-    return {
-      xAxis: "",
-      yAxis: [],
-    };
-  },
-  created() {
-    console.log(this.tableData);
+  computed: {
+    ...mapGetters("graphConf", ["xAxisType", "yAxisType"]),
   },
 };
 </script>
