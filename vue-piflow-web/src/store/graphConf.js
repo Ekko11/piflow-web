@@ -77,6 +77,10 @@ const InitState = () => ({
       left: "10%",
       right: "10%",
     },
+    tooltip:{
+      show:true,
+      triggerOn:'mousemove'
+    },
     textStyle: {
       color: "#000",
       fontStyle: "normal",
