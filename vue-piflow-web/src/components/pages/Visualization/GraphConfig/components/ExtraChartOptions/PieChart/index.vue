@@ -3,15 +3,15 @@
     <div class="formWrap">
       <div>
         <label>颜色：</label>
-        <Input v-model="series.lineStyle.color" />
+        <Input v-model="pieChart.lineStyle.color" />
       </div>
       <div>
         <label>线宽：</label>
-        <Input v-model="series.lineStyle.width" />
+        <Input v-model="pieChart.lineStyle.width" />
       </div>
       <div>
         <label>对齐方法：</label>
-        <Select v-model="series.lineStyle.type">
+        <Select v-model="pieChart.lineStyle.type">
           <Option :value="'solid'">实线</Option>
           <Option :value="'dashed'">点线</Option>
           <Option :value="'dotted'">虚线</Option>
@@ -19,7 +19,7 @@
       </div>
       <div>
         <label>不透明度：</label>
-        <Input v-model="series.lineStyle.opacity" />
+        <Input v-model="pieChart.lineStyle.opacity" />
       </div>
     </div>
   </section>

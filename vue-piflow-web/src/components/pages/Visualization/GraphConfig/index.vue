@@ -1,11 +1,10 @@
 <template>
   <div class="wrap">
     <div style="overflow: auto">
-    {{yAxisType}}
-      <ChartType @typeChange="handleTypeChange" />
+      <ChartType/>
       <div>
         <BaseChartOptions/>
-        <ExtraChartOptions  :type="chartType" />
+        <ExtraChartOptions  />
       </div>
     </div>
     <div class="wrap_r">
@@ -51,7 +50,6 @@ export default {
   },
   data() {
     return {
-      chartType: "lineChart",
       show: false,
       // baseOptions: {},
       // extraOptions: {},
@@ -87,10 +85,10 @@ export default {
     },
   },
   computed: {
-    ...mapGetters('graphConf',['xAxisType','yAxisType','baseOptions','extraOptions','lineChart','barChart','PieChart']),
+    ...mapGetters('graphConf',['chartType','xAxisType','yAxisType','baseOptions','extraOptions','lineChart','barChart','pieChart']),
     options: {
       get: function () {
-        if (!this.baseOptions.xAxis) return {};
+        if (!this.baseOptions?.xAxis) return {};
         const data = JSON.parse(JSON.stringify(this.baseOptions));
         const obj = {
           ...data,
@@ -105,7 +103,6 @@ export default {
     },
 
     series() {
-      console.log(this)
       const obj = JSON.parse(JSON.stringify(this[this.chartType]))
       const list = this.yData.map((item) => ({
         ...obj,
@@ -115,11 +112,9 @@ export default {
     },
   },
   methods: {
-    handleTypeChange(val) {
-      this.chartType = val;
-    },
     handleInit() {
       if (!this.$route.query.id) return;
+      this.$store.dispatch("graphConf/initState", {});
       this.$event.emit("loading", true);
       this.$axios({
         method: "POST",
@@ -149,7 +144,6 @@ export default {
         });
     },
     handleGetTableData(graphTemplateId) {
-      console.log(this)
       this.$axios({
         method: "POST",
         baseURL: baseUrl,
@@ -177,13 +171,14 @@ export default {
               const {baseOptions,extraOptions,xAxisType,yAxisType,chartType}= JSON.parse(this.graphConf.configInfo);
               this.$store.dispatch("graphConf/changexAxisType", xAxisType);
               this.$store.dispatch("graphConf/changeyAxisType", yAxisType);
+              this.$store.dispatch("graphConf/changeChartType", chartType);
               this.$store.dispatch("graphConf/changeBaseOptions",handleDeepMerge(this.baseOptions,baseOptions) );
               if(chartType === 'lineChart'){
-                this.$store.dispatch("graphConf/changeLineOptions",handleDeepMerge(this.baseOptions,baseOptions) );
+                this.$store.dispatch("graphConf/changeLineOptions",handleDeepMerge(this.lineChart,extraOptions) );
               }else if(chartType === 'barChart'){
-                this.$store.dispatch("graphConf/changeBarOptions",handleDeepMerge(this.extraOptions,extraOptions) );
+                this.$store.dispatch("graphConf/changeBarOptions",handleDeepMerge(this.barChart,extraOptions) );
               }else if(chartType === 'pieChart'){
-                this.$store.dispatch("graphConf/changePieOptions",handleDeepMerge(this.extraOptions,extraOptions) );
+                this.$store.dispatch("graphConf/changePieOptions",handleDeepMerge(this.pieChart,extraOptions) );
               }
             }
           } else {
@@ -193,14 +188,6 @@ export default {
             });
           }
         })
-        .catch((error) => {
-          this.$event.emit("loading", false);
-          console.log(error);
-          this.$Message.error({
-            content: this.$t("tip.fault_content"),
-            duration: 3,
-          });
-        });
     },
 
     handleUpdate() {
@@ -211,7 +198,6 @@ export default {
         xAxisType: this.xAxisType,
         yAxisType: this.yAxisType,
       };
-      console.log(configInfo);
       this.$event.emit("loading", true);
       this.$axios({
         method: "POST",
@@ -238,13 +224,7 @@ export default {
             });
           }
         })
-        .catch((error) => {
-          this.$event.emit("loading", false);
-          this.$Message.error({
-            content: this.$t("tip.fault_content"),
-            duration: 3,
-          });
-        });
+       
     },
   },
 };

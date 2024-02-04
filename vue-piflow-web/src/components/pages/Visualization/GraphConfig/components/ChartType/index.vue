@@ -2,7 +2,7 @@
   <section class="card chart_type">
     <h1>图表类型</h1>
     <div class="chart_select">
-        <div v-for="item  in  typeList"  :class="{'active':item.type === current}" :key="item.name" @click="handleClick(item.type)">
+        <div v-for="item  in  typeList"  :class="{'active':item.type === chartType}" :key="item.name" @click="handleClick(item.type)">
           <img :src="item.img" alt="">
           <p>{{item.name}}</p>
           </div>
@@ -11,12 +11,12 @@
 </template>
   
   <script>
+import { mapGetters } from "vuex";
 export default {
   name: "ChartType",
   components: {},
   data() {
     return {
-      current:'lineChart',
       typeList: [
         {
           type: "lineChart",
@@ -28,22 +28,23 @@ export default {
           name: "柱状图",
           img:require('../../images/bar.png')
         },
-        {
-          type: "PieChart",
-          name: "饼状图",
-          img:require('../../images/pie.png')
-        },
+        // {
+        //   type: "PieChart",
+        //   name: "饼状图",
+        //   img:require('../../images/pie.png')
+        // },
       ],
     };
   },
-
-  created() {},
-  methods: {
-    handleClick(type){
-      this.current = type
-      this.$emit('typeChange',type)
-    }
+  computed: {
+    ...mapGetters("graphConf", ["chartType"]),
   },
+  methods:{
+    handleClick(val){
+      this.$store.dispatch("graphConf/changeChartType", val);
+    }
+  }
+
 };
 </script>
 <style lang="scss" scoped>
@@ -53,10 +54,12 @@ export default {
 }
 .chart_select{
   display: flex;
+  padding-left: 20px;
+  padding-top: 22px;
   >div{
     padding: 4px;
     text-align: center;
-    margin: 5px;
+    margin-right: 10px;
     cursor: pointer;
     border-radius: 5px;
     &.active{

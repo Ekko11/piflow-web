@@ -23,7 +23,7 @@ export  const handleDeepMerge = (base,data)=>{
         if(Object.prototype.toString.call(base[key]) === '[object Object]'){
             base[key] =  handleDeepMerge(base[key],data[key])
         }else{
-            if(data[key] || data[key ===  0 || data[key] === false ] ){
+            if(data[key] || data[key] ===  0 || data[key] === false ){
                 base[key] = data[key]
             }
         }
@@ -31,19 +31,3 @@ export  const handleDeepMerge = (base,data)=>{
     return base
 }
 
-const a  = {
-    a:1,
-    b:2,
-    c:{
-        a:1,
-        b:2
-    }
-}
-const b = {
-    a:2,
-    c:{
-        a:2
-    }
-}
-
-console.log(handleDeepMerge(a,b))

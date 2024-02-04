@@ -2,9 +2,9 @@
   <section class="card chart_wrap">
     <h1>图表展示</h1>
     <div class="chart_wrap-btn">
-        <Button type="primary"  @click="handleShowData">原始数据</Button >
-        <Button type="primary" @click="handleSave">保存配置</Button >
-        <Button type="primary" @click="handleDown">下载图表</Button >
+        <Button type="primary" size="small"  @click="handleShowData">原始数据</Button >
+        <Button type="primary" size="small" @click="handleSave">保存配置</Button >
+        <Button type="primary" size="small" @click="handleDown">下载图表</Button >
     </div>
     <div>
       <div class="chart" ref="chart" style="width: 100%"></div>
@@ -21,7 +21,11 @@ export default {
   },
   methods: {
     handleInit() {
-      this.chart = echarts.init(this.$refs.chart);
+      if(this.chart){
+        this.chart.clear()
+      }else{
+        this.chart = echarts.init(this.$refs.chart);
+      }
       this.chart.setOption(this.options);
       window.addEventListener("resize", () => {
         this.chart.resize();
@@ -75,15 +79,15 @@ export default {
   flex-direction: column;
   >div:last-child{
     flex-grow: 1;
-    margin-top: 50px;
+    margin-top: 20px;
     >div{
       height: 100%;
     }
   }
   .chart_wrap-btn{
     position: absolute;
-    right: 28px;
-    top: 50px;
+    right: 7px;
+    top: 5px;
     >button{
       margin-right: 5px;
     }

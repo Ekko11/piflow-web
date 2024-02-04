@@ -1,7 +1,7 @@
 <template>
   <section class="card">
     <h1>拓展属性</h1>
-    <component :is="currentType" />
+    <component :is="chartType" />
   </section>
 </template>
   
@@ -9,6 +9,7 @@
 import LineChart from './LineChart'
 import BarChart from './BarChart'
 import PieChart from './PieChart'
+import { mapGetters } from "vuex";
 export default {
   name: "ExtraChartOptions",
   components: {
@@ -16,24 +17,8 @@ export default {
     BarChart,
     PieChart
   },
-  props:{
-    type:String    //已有配置初始值
-  },
-  data() {
-    return {
-        currentType:''
-    };
-  },
-  watch: {
-    type:{
-      handler(val){
-         this.currentType = val
-      },
-      immediate:true
-    }
-  },
-  created() {
-
+  computed: {
+    ...mapGetters("graphConf", ["chartType"]),
   },
 };
 </script>

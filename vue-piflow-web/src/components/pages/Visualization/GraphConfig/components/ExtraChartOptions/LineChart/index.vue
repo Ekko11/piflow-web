@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div class="formWrap">
+    <div class="formWrap" v-if="lineChart">
       <!-- <div>
         <label>颜色：</label>
         <Input v-model="lineChart.lineStyle.color" />
@@ -10,7 +10,7 @@
         <Input v-model="lineChart.lineStyle.width" />
       </div>
       <div>
-        <label>对齐方法：</label>
+        <label>线样式：</label>
         <Select v-model="lineChart.lineStyle.type">
           <Option :value="'solid'">实线</Option>
           <Option :value="'dashed'">点线</Option>
@@ -36,17 +36,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.formWrap {
-  > div {
-    label {
-      min-width: 100px;
-      text-align: right;
-    }
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-  }
-}
+@import "../../../index.scss";
 </style>
   
   
