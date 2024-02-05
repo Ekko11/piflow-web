@@ -267,7 +267,7 @@ export default {
             this.getTableData();
           } else {
             this.$Message.error({
-              content: res.data.errorMsg,
+              content: res.data.msg,
               duration: 3,
             });
           }
@@ -301,7 +301,7 @@ export default {
             this.getTableData();
           } else {
             this.$Message.error({
-              content: res.data.errorMsg,
+              content: res.data.msg,
               duration: 3,
             });
           }
@@ -337,7 +337,7 @@ export default {
                 this.getTableData();
               } else {
                 this.$Message.error({
-                  content: res.data.errorMsg,
+                  content: res.data.msg,
                   duration: 3,
                 });
               }

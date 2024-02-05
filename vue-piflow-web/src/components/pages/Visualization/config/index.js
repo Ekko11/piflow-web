@@ -1,1 +1,1 @@
-export  const  baseUrl = process.env.NODE_ENV == 'development' ?'/':'http://10.0.82.210:8088/'
+export  const  baseUrl = process.env.NODE_ENV == 'development' ?'/':window.$VISUALIZATION_BASE
