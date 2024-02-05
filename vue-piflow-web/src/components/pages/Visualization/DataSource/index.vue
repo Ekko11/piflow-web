@@ -190,6 +190,13 @@ export default {
     this.getTableData();
     this.getDataBaseList();
   },
+    watch:{
+    param(val){
+      this.page = 1 
+      this.limit = 10 
+      this.getTableData()
+    }
+  },
   methods: {
     // 获取数据库表列表
     async handleGetDBtables(data) {

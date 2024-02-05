@@ -177,6 +177,13 @@ export default {
   created() {
     this.getTableData();
   },
+  watch:{
+    param(val){
+      this.page = 1 
+      this.limit = 10 
+      this.getTableData()
+    }
+  },
   methods: {
     handleButtonSelect(row, key) {
       switch (key) {
@@ -304,7 +311,7 @@ export default {
     getTableData() {
       let data = { pageNum: this.page, pageSize: this.limit };
       if (this.param) {
-        data.param = this.param;
+        data.queryContent = this.param;
       }
       this.$axios({
           method:'POST',
