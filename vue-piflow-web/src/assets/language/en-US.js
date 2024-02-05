@@ -146,6 +146,8 @@ module.exports = {
         update_title: "Update DataSource",
         database:'DataBase',
         datasheet:'DataSheet',
+        type:'Type',
+        upload:'Upload Excel',
         name:'Name',
         description: "Description",
         createTime: "CreateTime",

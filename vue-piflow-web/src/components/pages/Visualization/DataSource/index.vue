@@ -73,6 +73,13 @@
     >
       <div class="modal-warp">
         <div class="item">
+          <label>{{ $t("datasource.type") }}：</label>
+          <Select v-model="formData.type" style="width: 350px">
+            <Option value="mysql">mysql</Option>
+            <Option value="excel">excel</Option>
+          </Select>
+        </div>
+        <div class="item">
           <label>{{ $t("datasource.name") }}：</label>
           <Input
             v-model="formData.name"
@@ -92,7 +99,28 @@
             style="width: 350px"
           />
         </div>
-        <div class="item">
+        <div class="item" v-if="formData.type === 'excel'">
+          <label class="self">{{ $t("datasource.upload") }}：</label>
+          <Upload
+          :action="url + 'visual/uploadExcel'"
+          :on-success="handleFileSuccess"
+          :on-error="handleFileError"
+          :before-upload="handleFileBefore"
+          :show-upload-list="false"
+          style="width: 350px"
+          class="upload"
+          >
+            <div cla>
+              <Icon
+                type="ios-cloud-upload"
+                size="52"
+                style="color: #3399ff"
+              ></Icon>
+              <p>Click or drag files here to upload</p>
+            </div>
+          </Upload>
+        </div>
+        <div class="item" v-if="formData.type === 'mysql'">
           <label class="self">{{ $t("datasource.database") }}：</label>
           <Select
             v-model="formData.dataBaseId"
@@ -108,7 +136,10 @@
             >
           </Select>
         </div>
-        <div class="item" v-if="dataSheetList.length">
+        <div
+          class="item"
+          v-if="dataSheetList.length && formData.type === 'mysql'"
+        >
           <label class="self">{{ $t("datasource.datasheet") }}：</label>
           <Select v-model="formData.tableName" style="width: 350px">
             <Option v-for="item in dataSheetList" :value="item" :key="item">
@@ -142,6 +173,7 @@ export default {
       // 表单
       InitFormData: {
         name: "",
+        type: "mysql",
         description: "",
         dataBaseId: "",
         tableName: "",
@@ -190,12 +222,12 @@ export default {
     this.getTableData();
     this.getDataBaseList();
   },
-    watch:{
-    param(val){
-      this.page = 1 
-      this.limit = 10 
-      this.getTableData()
-    }
+  watch: {
+    param(val) {
+      this.page = 1;
+      this.limit = 10;
+      this.getTableData();
+    },
   },
   methods: {
     // 获取数据库表列表
@@ -465,6 +497,15 @@ export default {
   label {
     margin-top: 5px;
   }
+}
+.upload{
+    background: #fff;
+    border: 1px dashed #dcdee2;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    width: 350px;
+    padding: 20px  0;
 }
 </style>
 
