@@ -34,6 +34,14 @@ module.exports = {
         database:'数据库配置',
         datasource:'数据源配置',
         visualconfig:'可视化配置',
+        operationManagement:'操作管理',
+        categoryManagement:'分级分类管理',
+        flowManagement: "流水线管理",
+        publishManagement: "发布管理",
+        dataProductManagement: "数据产品管理",
+        authorizationManagement: "授权管理",
+        operatingHistory: "运行历史",
+        preferenceSettings: "偏好设置",
     },
     page: {
         prev_text: "上一页",
@@ -80,6 +88,7 @@ module.exports = {
     },
     modal: {
         placeholder: "请输入内容...",
+        placeholder_select: "请选择",
         template_title: "保存模板名称",
         ok_text: "提交",
         upload_text: "提交",

@@ -21,6 +21,7 @@
       title="原始数据预览"
       footer-hide
       width="60vw"
+      height="70vh"
       @on-cancel="show = false"
     >
       <OriginDataTable :originalData="originalData" />

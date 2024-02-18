@@ -34,6 +34,14 @@ module.exports = {
         database:'DataBase',
         datasource:'DataSource',
         visualconfig:'VisualConfig',
+        operationManagement:'Operation Management',
+        categoryManagement:'Category Management',
+        flowManagement: "Flow Management",
+        publishManagement: "Publish Management",
+        dataProductManagement: "Data Product Management",
+        authorizationManagement: "Authorization Management",
+        operatingHistory: "Operating History",
+        preferenceSettings: "Preference Settings",
     },
     page: {
         prev_text: "Previous",
@@ -80,6 +88,7 @@ module.exports = {
     },
     modal: {
         placeholder: "Please enter…",
+        placeholder_select: "Please select",
         template_title: "Template name",
         ok_text: "Submit",
         upload_text: "upload",

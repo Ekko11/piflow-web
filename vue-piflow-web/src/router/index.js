@@ -21,7 +21,42 @@ export default new Router({
       name: 'GraphConfig',
       component: () => import('../components/pages/Visualization/GraphConfig')
     },
-    
+    // 门户界面
+    {
+      path: '/home',
+      name: 'home',
+      component: () => import('../components/pages/Home/index.vue'),
+      children:[
+        {
+          path: '/',
+          name: 'homeIndex',
+          component: () => import('../components/pages/Home/Index/index'),
+          children:[
+            {
+              path: '/',
+              name: 'homeProcess',
+              component: () => import('../components/pages/Home/Index/Process'),
+            },
+            {
+              path: 'product',
+              name: 'homeProduct',
+              component: () => import('../components/pages/Home/Index/Product'),
+            },
+            {
+              path: 'intro',
+              name: 'homeIntro',
+              component: () => import('../components/pages/Home/Index/Intro'),
+            },
+          ],
+        },
+        {
+          path: 'list',
+          name: 'homeList',
+          component: () => import('../components/pages/Home/List'),
+        }
+      ],
+    },
+    // 后台界面
     {
       path: '/',
       name: 'main',
@@ -34,6 +69,11 @@ export default new Router({
           component: () => import('../components/Content.vue'),
           redirect: '/',
           children: [
+            {
+              path: '/categoryManagement',
+              name: 'categoryManagement',
+              component: () => import('../components/pages/CategoryManagement')
+            },
             {
               path: '/',
               name: 'sections',
@@ -119,12 +159,11 @@ export default new Router({
               name: 'globalVariable',
               component: () => import('../components/pages/Admin/globalVariable')
             },
-
-            {
-              path: '/user',
-              name: 'user',
-              component: () => import('../components/pages/User')
-            },
+            // {
+            //   path: '/user',
+            //   name: 'user',
+            //   component: () => import('../components/pages/User')
+            // },
             {
               path: '/user',
               name: 'user',

@@ -1,4 +1,5 @@
 // const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const path = require('path')
 const CompressionPlugin = require("compression-webpack-plugin")
 module.exports = {
   // pluginOptions: {
@@ -20,7 +21,9 @@ module.exports = {
       config.optimization.minimizer[0].options.terserOptions.compress.drop_debugger = true
       config.optimization.minimizer[0].options.terserOptions.compress.pure_funcs = ['console.log']
     }
-
+    config.resolve.alias = {
+      '@': path.join(__dirname, 'src')
+    }
     if (process.env.NODE_ENV === 'production') {
       return {
         plugins: [

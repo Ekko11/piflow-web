@@ -22,7 +22,7 @@ Vue.locale = () => { };
 
 let lang = Cookies.get('lang');
 const i18n = new VueI18n({
-  locale: lang ? lang : 'en', // 语言标识
+  locale: lang ? lang : 'zh', // 语言标识
   messages: {
     'zh': Object.assign(require('./assets/language/zh-CN'), zh), // 中文语言包
     'en': Object.assign(require('./assets/language/en-US'), en) // 英文语言包
@@ -44,6 +44,11 @@ import VXETable from 'vxe-table'
 import './assets/style/my-vxe-table.scss';
 
 Vue.use(VXETable)
+
+import Treeselect from '@riophae/vue-treeselect' // 导入vue-treeselect
+import '@riophae/vue-treeselect/dist/vue-treeselect.css' // 导入样式
+
+Vue.component('Treeselect', Treeselect); // 注册组件
 
 import store from './store';
 
@@ -109,19 +114,16 @@ Vue.config.productionTip = false;
 //引入路由文件
 import router from './router';
 //// 路由拦截
-const whiteList = ['/task']; //不需要登录能访问的path
+const whiteList = ['/login','/home']; //不需要登录能访问的path
 router.beforeEach((to, from, next) => {
   let state = Cookies.get('state'); //获取缓存看是否登录过
   if (state == 'jwtok') { //登录过来直接进去
     next();
   } else {
-    if (to.path == '/login') {
+    if ( whiteList.includes(to.path) || to.path.includes('home')) {
       next();
-    } else {
-      next({
-        path: '/login',
-        query: { redirect: to.fullPath } // 将要跳转路由的path作为参数，传递到登录页面
-      });
+    } else{
+      next({path: '/home'});
     }
   }
 });
