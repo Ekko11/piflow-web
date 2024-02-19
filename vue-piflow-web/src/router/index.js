@@ -75,6 +75,16 @@ export default new Router({
               component: () => import('../components/pages/CategoryManagement')
             },
             {
+              path: '/producePublishManagement',
+              name: 'producePublishManagement',
+              component: () => import('../components/pages/DataProductManagement/Publish')
+            },
+            {
+              path: '/produceAccreditManagement',
+              name: 'produceAccreditManagement',
+              component: () => import('../components/pages/DataProductManagement/Accredit')
+            },
+            {
               path: '/',
               name: 'sections',
               component: () => import('../components/pages/index')

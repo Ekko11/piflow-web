@@ -111,14 +111,14 @@ export default {
             {
               btnName: this.$t("sidebar.publishManagement"),
               icoName: "ios-ionitron",
-              router: "/flow",
-              name: "flow",
+              router: "/producePublishManagement",
+              name: "producePublishManagement",
             },
             {
               btnName: this.$t("sidebar.authorizationManagement"),
               icoName: "ios-ionitron",
-              router: "/flow",
-              name: "flow",
+              router: "/produceAccreditManagement",
+              name: "produceAccreditManagement",
             },
           ],
         },

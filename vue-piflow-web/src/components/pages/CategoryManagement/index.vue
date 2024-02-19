@@ -2,11 +2,6 @@
   <section class="content">
     <div class="contain">
       <div class="contain_l">
-        <h4>数据产品分类 
-          <span class="button-warp" @click="handleAddChild">
-            <Icon type="md-add" />
-          </span>
-        </h4>
         <Tree
           :data="treeData"
           :render="renderContent"
@@ -41,7 +36,7 @@
     <Modal
       v-model="isOpen"
       :title="
-        formData.id ? $t('database.update_title') : $t('database.create_title')
+        formData.id ? '编辑' : '新增'
       "
       :ok-text="$t('modal.ok_text')"
       :cancel-text="$t('modal.cancel_text')"
@@ -49,7 +44,7 @@
     >
       <div class="modal-warp">
         <div class="item">
-          <label>{{ $t("database.name") }}：</label>
+          <label>上级分类：</label>
           <treeselect
             v-model="formData.parentId"
             :placeholder="$t('modal.placeholder_select')"
@@ -59,7 +54,7 @@
           />
         </div>
         <div class="item">
-          <label>{{ $t("database.name") }}：</label>
+          <label>名称：</label>
           <Input
             v-model="formData.name"
             show-word-limit
@@ -69,7 +64,7 @@
           />
         </div>
         <div class="item">
-          <label class="self">{{ $t("database.description") }}：</label>
+          <label class="self">描述：</label>
           <Input
             v-model="formData.description"
             type="textarea"
@@ -103,10 +98,14 @@ export default {
           title: "名称",
           key: "name",
         },
+        // {
+        //   title: "描述",
+        //   key: "description",
+        // },
         {
           title: "操作",
           slot: "action",
-          width: 200,
+          width: 300,
           align: "center",
         },
       ],
@@ -138,13 +137,12 @@ export default {
     handleEdit(node) {
       this.isOpen = true;
       this.formData = node;
+      this.formData.parentId = this.currentNode.id
     },
     handleGetData() {
-      this.treeData = [
+      const data = [
         {
           name: "生态系统要素数据",
-          expand: true,
-          level: 1,
           id: 1,
           children: [
             {
@@ -159,9 +157,7 @@ export default {
         },
         {
           name: "生态系统服务功能数据",
-          expand: true,
           id: 2,
-          level: 1,
           children: [
             {
               name: "生产力和固碳功能",
@@ -174,12 +170,24 @@ export default {
           ],
         },
       ];
+      this.treeData = [
+        {
+          name: "数据产品分类",
+          id:999,
+          expand: true,
+          children:data,
+          ischecked:true
+        }
+      ]
       this.handleChangeSelectNode(null, this.treeData[0]);
       this.currentNode = this.treeData[0];
     },
     handleChangeSelectNode(list, node) {
       this.currentNode = node;
-      this.tableData = node.children;
+      this.tableData = node.children?.map(v=>({
+        name:v.name,
+        id:v.id
+      }));
     },
 
 
@@ -212,8 +220,10 @@ export default {
 ::v-deep .contain {
   display: flex;
   padding: 20px;
+  height: 100%;
   &_l {
     width: 308px;
+    height: 100%;
     margin-right: 24px;
     flex-shrink: 0;
     box-shadow: 4px 4px 8px 0px #3974aa1f;
@@ -223,6 +233,16 @@ export default {
       font-size: 16px;
       margin-bottom: 16px;
       margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .button{
+        font-size: 14px;
+        font-weight: 400;
+        border: 1px solid #eee;
+        padding: 3px 6px;
+        cursor: pointer;
+      }
     }
     .ivu-tree ul li .ivu-tree-title {
       overflow: hidden;
@@ -233,6 +253,11 @@ export default {
   }
   &_r {
     flex-grow: 1;
+    .btn{
+      button{
+        margin-right: 5px;
+      }
+    }
   }
 }
 </style>
