@@ -6,16 +6,6 @@
         <span>{{ $t("sidebar.data_source") }}</span>
       </div>
       <div class="right">
-        <Upload
-          class="button-warp"
-          :action="url + 'visual/uploadExcel'"
-          :on-success="handleFileSuccess"
-          :on-error="handleFileError"
-          :before-upload="handleFileBefore"
-          :show-upload-list="false"
-        >
-          <Icon type="md-cloud-upload" />
-        </Upload>
         <span class="button-warp" @click="handleModalSwitch">
           <Icon type="md-add" />
         </span>
@@ -72,7 +62,7 @@
       @on-ok="handleComfirm"
     >
       <div class="modal-warp">
-        <div class="item">
+        <div class="item" v-if="!formData.id">
           <label>{{ $t("datasource.type") }}：</label>
           <Select v-model="formData.type" style="width: 350px">
             <Option value="mysql">mysql</Option>
@@ -99,7 +89,7 @@
             style="width: 350px"
           />
         </div>
-        <div class="item" v-if="formData.type === 'excel'">
+        <div class="item" v-if="formData.type === 'excel' &&  !formData.id">
           <label class="self">{{ $t("datasource.upload") }}：</label>
           <Upload
           :action="url + 'visual/uploadExcel'"
@@ -109,8 +99,9 @@
           :show-upload-list="false"
           style="width: 350px"
           class="upload"
+          v-if="!this.file"
           >
-            <div cla>
+            <div>
               <Icon
                 type="ios-cloud-upload"
                 size="52"
@@ -119,8 +110,12 @@
               <p>Click or drag files here to upload</p>
             </div>
           </Upload>
+          <div  class="fileList" v-else>
+            <p><Icon type="ios-paper"/>{{file.name}}</p>
+            <Icon type="ios-trash"  @click="handleDelFile"/>
+          </div>
         </div>
-        <div class="item" v-if="formData.type === 'mysql'">
+        <div class="item" v-if="formData.type === 'mysql' || formData.id">
           <label class="self">{{ $t("datasource.database") }}：</label>
           <Select
             v-model="formData.dataBaseId"
@@ -138,7 +133,7 @@
         </div>
         <div
           class="item"
-          v-if="dataSheetList.length && formData.type === 'mysql'"
+          v-if="dataSheetList.length && (formData.type === 'mysql' || formData.id)"
         >
           <label class="self">{{ $t("datasource.datasheet") }}：</label>
           <Select v-model="formData.tableName" style="width: 350px">
@@ -178,6 +173,7 @@ export default {
         dataBaseId: "",
         tableName: "",
       },
+      file:null,
       formData: {},
       // 操作
       promptContent: [
@@ -274,8 +270,8 @@ export default {
       }
     },
     handleEdit(row) {
-      const { id, name, description, dataBaseId, tableName } = row;
-      this.formData = { id, name, description, dataBaseId, tableName };
+      const { id, name, description, dataBaseId, tableName,type } = row;
+      this.formData = { id, name, description, dataBaseId, tableName ,type};
       this.handleDatabaseChange(dataBaseId);
       this.isOpen = true;
     },
@@ -283,8 +279,63 @@ export default {
       if (this.formData.id) {
         this.handleUpdate();
       } else {
-        this.handleAdd();
+        if(this.formData.type === 'mysql'){
+          this.handleAdd();
+        }else{
+          this.handleUploadExcel()
+        }
       }
+    },
+    handleUploadExcel(){
+      if(!this.file){
+          this.$Message.error({
+            content: '文件不能为空',
+            duration: 3,
+          });
+        return 
+      }
+      const  formData = new FormData()
+      for (const key in this.formData) {
+        if(key !== 'dataBaseId' &&  key !== 'tableName'){
+          formData.append(key,this.formData[key])
+        }
+      }
+      formData.append('file',this.file)
+      this.$axios({
+        method: "POST",
+        baseURL: baseUrl,
+        url: "/visual/uploadExcel",
+        data: formData,
+        headers:{
+          'Content-Type':'multipart/form-data'
+        },
+      })
+        .then((res) => {
+          this.$event.emit("loading", false);
+          if (res.data.code === 200) {
+            this.isOpen = false;
+            this.$Message.success({
+              content:
+                `${this.formData.name} ` + this.$t("tip.add_success_content"),
+              duration: 3,
+            });
+            this.getTableData();
+          } else {
+            this.$Message.error({
+              content: res.data.msg,
+              duration: 3,
+            });
+          }
+        })
+        .catch((error) => {
+          this.$event.emit("loading", false);
+          this.$Message.error({
+            content: this.$t("tip.fault_content"),
+            duration: 3,
+          });
+        });
+
+
     },
     handleAdd() {
       this.$event.emit("loading", true);
@@ -457,6 +508,7 @@ export default {
     },
     handleModalSwitch() {
       this.isOpen = !this.isOpen;
+      this.file = null
       this.formData = { ...this.InitFormData };
     },
     // 上传
@@ -484,8 +536,12 @@ export default {
       });
     },
 
-    handleFileBefore() {
-      this.$event.emit("loading", true);
+    handleFileBefore(file) {
+      this.file = file
+      return false
+    },
+    handleDelFile(){
+      this.file = null
     },
   },
 };
@@ -506,6 +562,13 @@ export default {
     cursor: pointer;
     width: 350px;
     padding: 20px  0;
+}
+.fileList{
+  display: flex;
+  justify-content: space-between;
+  width: 345px;
+  font-size: 18px;
+  align-items: center;
 }
 </style>
 
