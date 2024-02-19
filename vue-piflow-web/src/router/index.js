@@ -95,6 +95,11 @@ export default new Router({
               component: () => import('../components/pages/Flow')
             },
             {
+              path: '/flowPublish',
+              name: 'flowPublish',
+              component: () => import('../components/pages/Flow/FlowPublish')
+            },
+            {
               path: '/group',
               name: 'group',
               component: () => import('../components/pages/Group')

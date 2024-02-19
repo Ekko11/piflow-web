@@ -21,8 +21,9 @@
         <div class="btn">
           <Button @click="handleEdit(row)">编辑</Button>
           <Button @click="handleEdit(row)">下载</Button>
-          <Button @click="handleEdit(row)">发布</Button>
-          <Button @click="handleEdit(row)">下架</Button>
+          <Button v-if="user !== 'ADMIN'" :disabled="row.status === '审核中'" @click="handleEdit(row)">发布</Button>
+          <Button v-if="user === 'ADMIN'" @click="handleEdit(row)">下架</Button>
+          <Button v-if="user === 'ADMIN'" @click="handleVerify(row)">审核</Button>
           <Button @click="handleDelete(row)">删除</Button>
         </div>
       </template>
@@ -72,7 +73,7 @@
         </div>
         <div class="item">
           <label>权限：</label>
-          <RadioGroup v-model="animal">
+          <RadioGroup v-model="formData.permission">
             <Radio value="0">公开</Radio>
             <Radio value="1">授权</Radio>
           </RadioGroup>
@@ -90,7 +91,7 @@
         <div class="item">
           <label>关键词：</label>
           <Input
-            v-model="formData.name"
+            v-model="formData.keyword"
             show-word-limit
             maxlength="100"
             :placeholder="$t('modal.placeholder')"
@@ -101,7 +102,7 @@
         <div class="item">
           <label>发布者姓名：</label>
           <Input
-            v-model="formData.name"
+            v-model="formData.sdPublisher"
             show-word-limit
             maxlength="100"
             :placeholder="$t('modal.placeholder')"
@@ -112,7 +113,7 @@
         <div class="item">
           <label>发布者邮箱：</label>
           <Input
-            v-model="formData.name"
+            v-model="formData.email"
             show-word-limit
             maxlength="100"
             :placeholder="$t('modal.placeholder')"
@@ -123,7 +124,7 @@
         <div class="item">
           <label class="self">封面：</label>
           <Upload
-          :action="url + 'visual/uploadExcel'"
+          action="/null"
           :on-success="handleFileSuccess"
           :on-error="handleFileError"
           :before-upload="handleFileBefore"
@@ -132,12 +133,12 @@
           class="upload"
           >
             <div>
-              <!-- <Icon
+              <img v-if="formData.file || formData.fileName" style="width:100px;height:40px" :src="formData.fileName" alt="">
+              <Icon  v-else
                 type="ios-cloud-upload"
                 size="52"
                 style="color: #3399ff"
-              ></Icon> -->
-              <img style="width:100px;height:40px" src="https://file.iviewui.com/dist/bf31433c102ed612fbe82afe000dda40.png" alt="">
+              ></Icon>
               <p>Click or drag files here to upload</p>
             </div>
           </Upload>
@@ -145,23 +146,72 @@
 
       </div>
     </Modal>
+
+    <!-- 审核 -->
+    <Modal
+      v-model="applyIsOpen"
+      width="520px"
+      title="审核"
+      :ok-text="$t('modal.ok_text')"
+      :cancel-text="$t('modal.cancel_text')"
+      @on-ok="handleResultApply"
+      class="custom-modal"
+    >
+      <div style="width: 100%; height: 100%">
+        <Form
+          class="formApplyInfo"
+          ref="formApplyInfo"
+          :model="formApplyInfo"
+          :label-width="100"
+        >
+          <Form-item label="审核">
+            <Radio-group v-model="formApplyInfo.auditStatus">
+              <Radio label="PASS">通过</Radio>
+              <Radio label="REJECT">拒绝</Radio>
+            </Radio-group>
+          </Form-item>
+          <Form-item
+            label="理由"
+            prop="messsage"
+          >
+            <Input
+              type="textarea"
+              :rows="3"
+              v-model="formApplyInfo.messsage"
+              placeholder="请输入"
+            ></Input>
+          </Form-item>
+        </Form>
+      </div>
+    </Modal>
+
   </section>
 </template>
 
 <script>
+import {saveDataProduct} from '@/apis/dataProduct'
+import Cookies from "js-cookie";
 export default {
   name: "VisualizationDataBase",
   components: {},
   data() {
     return {
       isOpen: false,
+      applyIsOpen: false,
       page: 1,
       limit: 10,
       total: 0,
+      user:'USER',
       tableData: [],
       treeData: [],
       param: "",
       formData: {},
+      // 审核
+      formApplyInfo: {
+        id: "",
+        auditStatus: "PASS", //默认通过
+        messsage: "",
+      },
     };
   },
   computed: {
@@ -195,13 +245,14 @@ export default {
         {
           title: this.$t("database.action"),
           slot: "action",
-          width: 350,
+          width: this.user === 'ADMIN' ? 360: 300,
           align: "center",
         },
       ];
     },
   },
   created() {
+    this.getRole()
     this.getTableData();
     this.handleGetTreeData();
   },
@@ -213,6 +264,23 @@ export default {
     },
   },
   methods: {
+    handleVerify(row){
+      this.applyIsOpen = true
+      this.formApplyInfo.id = row.id
+    },
+    async handleResultApply(){
+        const res = await aaa(this.formApplyInfo)
+        this.applyIsOpen = false
+    },
+    getRole(){
+      let user = JSON.parse(Cookies.get("setUser"));
+      if(user && user[0].role.stringValue){
+        console.log(user[0].role.stringValue)
+          this.user = user[0].role.stringValue
+      }else{
+        this.user = "USER"
+      }
+    },
     handleGetTreeData() {
       const data = [
         {
@@ -247,61 +315,30 @@ export default {
       this.treeData = data;
     },
 
-    handleEdit(row) {
-      const { id, dbName, description, driverClass, password, url, userName } =
-        row;
+     handleEdit(row) {
+      const { id, name, description, permission, keyword, sdPublisher, email, file } = row;
       this.formData = {
         id,
-        dbName,
+        name,
         description,
-        driverClass,
-        password,
-        url,
-        userName,
+        permission,
+        keyword,
+        sdPublisher,
+        email,
+        file,
       };
       this.isOpen = true;
+
     },
-    handleComfirm() {
-      if (this.formData.id) {
-        this.handleUpdate();
-      } else {
-        this.handleAdd();
+    async handleComfirm() {
+      const  formData = new FormData()
+      for (const key in this.formData) {
+          formData.append(key,this.formData[key])
       }
+      const rss = await saveDataProduct(formData)
+      console.log(res)
     },
 
-    handleUpdate() {
-      this.$event.emit("loading", true);
-      this.$axios({
-        method: "POST",
-        url: "/visual/updateDatabase",
-        data: this.formData,
-      })
-        .then((res) => {
-          this.$event.emit("loading", false);
-          if (res.data.code === 200) {
-            this.isOpen = false;
-            this.$Message.success({
-              content:
-                `${this.formData.dbName} ` +
-                this.$t("tip.update_success_content"),
-              duration: 3,
-            });
-            this.getTableData();
-          } else {
-            this.$Message.error({
-              content: res.data.msg,
-              duration: 3,
-            });
-          }
-        })
-        .catch((error) => {
-          this.$event.emit("loading", false);
-          this.$Message.error({
-            content: this.$t("tip.fault_content"),
-            duration: 3,
-          });
-        });
-    },
     handleDelete(row) {
       this.$Modal.confirm({
         title: this.$t("tip.title"),
@@ -368,6 +405,18 @@ export default {
       //     });
     },
 
+    // 手动上传
+    handleFileSuccess(response, file, fileList) {},
+    handleFileError(error, file, fileList) {},
+    handleFileBefore(file) {
+      this.formData.file = file
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        this.formData.fileName = reader.result;
+      };
+      return false
+    },
     onPageChange(pageNo) {
       this.page = pageNo;
       this.getTableData();
@@ -404,6 +453,9 @@ export default {
   cursor: pointer;
   width: 350px;
   padding: 20px  0;
+}
+.btn button{ 
+  margin-right: 3px;
 }
 </style>
 

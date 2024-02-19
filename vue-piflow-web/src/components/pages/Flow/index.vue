@@ -124,13 +124,15 @@
         </div>
       </div>
     </Modal>
+    <PublishModal ref="PublishModal"/>
   </section>
 </template>
 
 <script>
+import PublishModal from './PublishModal'
 export default {
   name: "flow",
-  components: {},
+  components: {PublishModal},
   data() {
     return {
       isOpen: false,
@@ -178,9 +180,11 @@ export default {
         },{
           content: 'Save Template',
           icon: 'md-checkbox-outline'
+        },{
+          content: 'Save Template',
+          icon: 'ios-paper-plane'
         }
       ],
-
       globalParamsList: []
     };
   },
@@ -218,7 +222,7 @@ export default {
         {
           title: this.$t("flow_columns.action"),
           slot: "action",
-          width: 350,
+          width: 380,
           align: "center",
         },
       ];
@@ -272,6 +276,10 @@ export default {
         case 6:
           this.row = row;
           this.isTemplateOpen = true;
+          break;
+        case 7:
+          this.row = row;
+          this.$refs.PublishModal.handleAdd(123)
           break;
         default:
           break;

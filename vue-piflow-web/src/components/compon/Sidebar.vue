@@ -85,8 +85,8 @@ export default {
             {
               btnName: this.$t("sidebar.publishManagement"),
               icoName: "ios-ionitron",
-              router: "/flow",
-              name: "flow",
+              router: "/flowPublish",
+              name: "flowPublish",
             },
             {
               btnName: this.$t("sidebar.flow"),

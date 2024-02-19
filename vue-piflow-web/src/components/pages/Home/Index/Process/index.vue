@@ -19,7 +19,7 @@
     </div>
 </template>
 <script>
-import {getDataProductType} from '../../apis/index'
+import {getDataProductType} from '@/apis/dataProduct'
 export default {
     data(){
         return {

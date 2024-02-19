@@ -102,6 +102,10 @@ axios.interceptors.response.use(response => {
   }
   return response;
 }, error => {
+  iView.Message.error({
+    content: error,
+    duration: 3,
+  });
   return Promise.reject(error.response.data)
 })
 
