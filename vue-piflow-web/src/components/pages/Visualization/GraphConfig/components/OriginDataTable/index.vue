@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div style="height:600px">
     <!-- Table button -->
-    <Table border :columns="columns" :data="tableData"> </Table>
+    <Table border size="small"  height="560" :columns="columns" :data="tableData"> </Table>
     <!-- paging -->
-    <div class="page">
+    <div class="page" style="margin-top: 10px;display: flex;justify-content: flex-end;">
       <Page
         :prev-text="$t('page.prev_text')"
         :next-text="$t('page.next_text')"

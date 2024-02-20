@@ -2,14 +2,23 @@
   <section class="card chart_wrap">
     <h1>图表展示</h1>
     <div class="chart_wrap-btn">
-        <Button type="primary" size="small"  @click="handleShowData">原始数据</Button >
-        <Button type="primary" size="small" @click="handleSave">保存配置</Button >
-        <Button type="primary" size="small" @click="handleDown">下载图表</Button >
+      <Button type="primary" size="small" @click="handleShowData"
+        >原始数据</Button
+      >
+
+      <Poptip placement="top">
+        <Button type="primary" size="small"  style="margin-right:5px">保存配置</Button>
+        <template #content>
+          <Button type="primary" size="small" @click="handleSave('add')">新增</Button>
+          <Button type="primary" size="small" @click="handleSave('update')">更新</Button>
+        </template>
+      </Poptip>
+
+      <Button type="primary" size="small" @click="handleDown">下载图表</Button>
     </div>
     <div>
       <div class="chart" ref="chart" style="width: 100%"></div>
     </div>
-
   </section>
 </template>
 <script>
@@ -21,9 +30,9 @@ export default {
   },
   methods: {
     handleInit() {
-      if(this.chart){
-        this.chart.clear()
-      }else{
+      if (this.chart) {
+        this.chart.clear();
+      } else {
         this.chart = echarts.init(this.$refs.chart);
       }
       this.chart.setOption(this.options);
@@ -31,11 +40,11 @@ export default {
         this.chart.resize();
       });
     },
-    handleSave(){
-      this.$emit('saveOptions')
+    handleSave(type) {
+      this.$emit("saveOptions",type);
     },
-    handleShowData(){
-      this.$emit('showTableData')
+    handleShowData() {
+      this.$emit("showTableData");
     },
     handleDown() {
       // 获取ECharts生成的图片对应的base64数据
@@ -63,8 +72,7 @@ export default {
       }
     },
   },
-  mounted() {
-  },
+  mounted() {},
 };
 </script>
 
@@ -73,22 +81,22 @@ export default {
 .chart {
   width: 100%;
 }
-.chart_wrap{
+.chart_wrap {
   position: relative;
   display: flex;
   flex-direction: column;
-  >div:last-child{
+  > div:last-child {
     flex-grow: 1;
     margin-top: 20px;
-    >div{
+    > div {
       height: 100%;
     }
   }
-  .chart_wrap-btn{
+  .chart_wrap-btn {
     position: absolute;
     right: 7px;
     top: 5px;
-    >button{
+     button {
       margin-right: 5px;
     }
   }

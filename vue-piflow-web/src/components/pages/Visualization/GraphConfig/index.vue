@@ -190,7 +190,8 @@ export default {
         })
     },
 
-    handleUpdate() {
+    handleUpdate(type) {
+      console.log(type)
       const configInfo = {
         chartType:this.chartType,
         baseOptions: handleFormata(this.baseOptions),
@@ -206,6 +207,7 @@ export default {
         data: {
           ...this.graphConf,
           configInfo: JSON.stringify(configInfo),
+          addFlag:type,
         },
       })
         .then((res) => {
@@ -216,7 +218,6 @@ export default {
               content: this.$t("tip.update_success_content"),
               duration: 3,
             });
-            this.getTableData();
           } else {
             this.$Message.error({
               content: res.data.msg,
