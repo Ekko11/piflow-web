@@ -155,6 +155,7 @@ module.exports = {
     },
     visualconfig:{
         create_title: "新建可视化配置",
+        update_title: "编辑可视化配置",
         datasource:'数据源',
         name:'名称',
         description: "描述信息",

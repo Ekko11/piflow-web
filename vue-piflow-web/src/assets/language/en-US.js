@@ -155,6 +155,7 @@ module.exports = {
     },
     visualconfig:{
         create_title: "Create VisualConfig",
+        update_title: "Update VisualConfig",
         datasource:'DataBase',
         name:'Name',
         description: "Description",

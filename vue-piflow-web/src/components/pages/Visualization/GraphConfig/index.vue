@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="wrap_r">
-
+    <p @click="handleReturn" class="wrap_r-return">返回列表<Icon type="ios-arrow-forward" /></p>
       <AxisSelect :tableData="tableData" />
       <Chart
         :options="options"
@@ -227,6 +227,9 @@ export default {
         })
        
     },
+    handleReturn(){
+      this.$router.push('/visualization/visualconfig')
+    }
   },
 };
 </script>
@@ -241,11 +244,19 @@ export default {
     width: 400px;
   }
   > div:last-child {
+    position: relative;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     > section:last-child {
       flex-grow: 1;
+    }
+    .wrap_r-return{
+      position: absolute;
+      right: 23px;
+      top: 18px;
+      cursor: pointer;
+      z-index: 1;
     }
   }
 }
