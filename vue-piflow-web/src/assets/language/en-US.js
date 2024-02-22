@@ -31,9 +31,9 @@ module.exports = {
         LabelManagement:"Label Management",
         selectSource:"Select Label",
         visualization: "Visualization",
-        database:'DataBase',
-        datasource:'DataSource',
-        visualconfig:'VisualConfig',
+        database:'MySQLConfig',
+        datasource:'VisualizationSource',
+        visualconfig:'Visualization',
     },
     page: {
         prev_text: "Previous",
@@ -130,8 +130,8 @@ module.exports = {
         action: "Actions"
     },
     database:{
-        create_title: "Create DataBase",
-        update_title: "Update DataBase",
+        create_title: "MySQL Connection",
+        update_title: "MySQL Connection",
         name:'Name',
         description: "Description",
         url: "Url",
@@ -142,10 +142,10 @@ module.exports = {
         action: "Actions"
     },
     datasource:{
-        create_title: "Create DataSource",
-        update_title: "Update DataSource",
-        database:'DataBase',
-        datasheet:'DataSheet',
+        create_title: "Visualization Source Configuration",
+        update_title: "Visualization Source Configuration",
+        database:'MySQL',
+        datasheet:'Table',
         type:'Type',
         upload:'Upload Excel',
         name:'Name',
@@ -156,7 +156,7 @@ module.exports = {
     visualconfig:{
         create_title: "Create VisualConfig",
         update_title: "Update VisualConfig",
-        datasource:'DataBase',
+        datasource:'Visualization Source',
         name:'Name',
         description: "Description",
         createTime: "CreateTime",

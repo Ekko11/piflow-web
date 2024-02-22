@@ -3,7 +3,7 @@
     <!-- header -->
     <div class="navbar">
       <div class="left">
-        <span>{{ $t("sidebar.data_source") }}</span>
+        <span>{{ $t("sidebar.visualconfig") }}</span>
       </div>
       <div class="right">
         <span class="button-warp" @click="handleModalSwitch">

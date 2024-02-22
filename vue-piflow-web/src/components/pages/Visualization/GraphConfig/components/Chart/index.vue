@@ -35,7 +35,9 @@ export default {
       } else {
         this.chart = echarts.init(this.$refs.chart);
       }
-      this.chart.setOption(this.options);
+      this.$nextTick(()=>{
+        this.chart.setOption(this.options);
+      })
       window.addEventListener("resize", () => {
         this.chart.resize();
       });
@@ -68,6 +70,7 @@ export default {
   watch: {
     options(newVal) {
       if (newVal.grid) {
+        // this.$emit("autoSave");
         this.handleInit();
       }
     },

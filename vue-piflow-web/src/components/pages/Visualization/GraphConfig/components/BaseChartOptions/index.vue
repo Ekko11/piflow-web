@@ -1,6 +1,6 @@
 <template>
   <section class="card">
-    <h1>基础属性</h1>
+    <h1>高级配置</h1>
     <Collapse simple v-if="baseOptions">
       <!-- title 配置 -->
       <Panel name="title">

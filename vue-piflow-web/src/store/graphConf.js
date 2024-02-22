@@ -28,13 +28,21 @@ const InitState = () => ({
         color: "#000",
       },
     },
+    dataZoom:[
+      {
+        type: 'slider',
+        id : 'sliderX',
+        show: true,
+      }
+    ],
     legend: {
       show: true,
       orient: "auto",
-      left: "20",
+      left: "40",
+      top:'20'
     },
     grid: {
-      top: "10%",
+      top: '15%',
       bottom: "10%",
       left: "10%",
       right: "10%",

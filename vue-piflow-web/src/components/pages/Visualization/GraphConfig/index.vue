@@ -1,18 +1,18 @@
 <template>
   <div class="wrap">
     <div style="overflow: auto">
-      <ChartType/>
+      <ChartType />
       <div>
-        <BaseChartOptions/>
-        <ExtraChartOptions  />
+        <BaseChartOptions />
+        <ExtraChartOptions />
       </div>
     </div>
     <div class="wrap_r">
-    <p @click="handleReturn" class="wrap_r-return">返回列表<Icon type="ios-arrow-forward" /></p>
       <AxisSelect :tableData="tableData" />
       <Chart
         :options="options"
         @saveOptions="handleUpdate"
+        @autoSave="handleAutoUpdate"
         @showTableData="show = true"
       />
     </div>
@@ -36,8 +36,8 @@ import ExtraChartOptions from "./components/ExtraChartOptions";
 import AxisSelect from "./components/AxisSelect";
 import Chart from "./components/Chart";
 import OriginDataTable from "./components/OriginDataTable";
-import {mapGetters, mapState } from 'vuex'
-import {handleDeepMerge,handleFormata} from './utils'
+import { mapGetters, mapState } from "vuex";
+import { handleDeepMerge, handleFormata } from "./utils";
 export default {
   name: "GraphConfig",
   components: {
@@ -69,11 +69,14 @@ export default {
   },
   watch: {
     xAxisType(val) {
-      if (this.tableData.length) {
+      if (this.tableData.length && val) {
         this.xData = this.tableData.find((v) => v.label === val).data;
+      }else{
+        this.xData= []
       }
     },
     yAxisType(arr) {
+      console.log(arr)
       if (this.tableData.length) {
         this.yData = arr.map((item) => {
           return {
@@ -85,7 +88,16 @@ export default {
     },
   },
   computed: {
-    ...mapGetters('graphConf',['chartType','xAxisType','yAxisType','baseOptions','extraOptions','lineChart','barChart','pieChart']),
+    ...mapGetters("graphConf", [
+      "chartType",
+      "xAxisType",
+      "yAxisType",
+      "baseOptions",
+      "extraOptions",
+      "lineChart",
+      "barChart",
+      "pieChart",
+    ]),
     options: {
       get: function () {
         if (!this.baseOptions?.xAxis) return {};
@@ -103,7 +115,7 @@ export default {
     },
 
     series() {
-      const obj = JSON.parse(JSON.stringify(this[this.chartType]))
+      const obj = JSON.parse(JSON.stringify(this[this.chartType]));
       const list = this.yData.map((item) => ({
         ...obj,
         ...item,
@@ -112,6 +124,14 @@ export default {
     },
   },
   methods: {
+    handleAutoUpdate() {
+      if (this.autoSaveTimeout) {
+        clearTimeout(this.autoSaveTimeout);
+      }
+      this.autoSaveTimeout = setTimeout(() => {
+        this.handleUpdate("update");
+      }, 3000);
+    },
     handleInit() {
       if (!this.$route.query.id) return;
       this.$store.dispatch("graphConf/initState", {});
@@ -149,51 +169,75 @@ export default {
         baseURL: baseUrl,
         url: "/visual/getTableData",
         data: { graphTemplateId },
-      })
-        .then((res) => {
-          this.$event.emit("loading", false);
+      }).then((res) => {
+        this.$event.emit("loading", false);
 
-          if (res.data.code === 200 && res.data.data.length) {
-            const list = res.data.data;
-            this.originalData = list;
-            this.tableData = Object.keys(list[0]).map((item) => {
-              const obj = {
-                label: item,
-                data: [],
-              };
-              list.forEach((v) => {
-                obj.data.push(v[item]);
-              });
-              return obj;
+        if (res.data.code === 200 && res.data.data.length) {
+          const list = res.data.data;
+          this.originalData = list;
+          this.tableData = Object.keys(list[0]).map((item) => {
+            const obj = {
+              label: item,
+              data: [],
+            };
+            list.forEach((v) => {
+              obj.data.push(v[item]);
             });
-            // 赋值
-            if (this.graphConf.configInfo) {
-              const {baseOptions,extraOptions,xAxisType,yAxisType,chartType}= JSON.parse(this.graphConf.configInfo);
-              this.$store.dispatch("graphConf/changexAxisType", xAxisType);
-              this.$store.dispatch("graphConf/changeyAxisType", yAxisType);
-              this.$store.dispatch("graphConf/changeChartType", chartType);
-              this.$store.dispatch("graphConf/changeBaseOptions",handleDeepMerge(this.baseOptions,baseOptions) );
-              if(chartType === 'lineChart'){
-                this.$store.dispatch("graphConf/changeLineOptions",handleDeepMerge(this.lineChart,extraOptions) );
-              }else if(chartType === 'barChart'){
-                this.$store.dispatch("graphConf/changeBarOptions",handleDeepMerge(this.barChart,extraOptions) );
-              }else if(chartType === 'pieChart'){
-                this.$store.dispatch("graphConf/changePieOptions",handleDeepMerge(this.pieChart,extraOptions) );
-              }
+            return obj;
+          });
+
+          // 赋值
+          if (this.graphConf.configInfo) {
+            const {
+              baseOptions,
+              extraOptions,
+              xAxisType,
+              yAxisType,
+              chartType,
+            } = JSON.parse(this.graphConf.configInfo);
+            this.$store.dispatch("graphConf/changexAxisType", xAxisType);
+            this.$store.dispatch("graphConf/changeyAxisType", yAxisType);
+            this.$store.dispatch("graphConf/changeChartType", chartType);
+            this.$store.dispatch(
+              "graphConf/changeBaseOptions",
+              handleDeepMerge(this.baseOptions, baseOptions)
+            );
+            if (chartType === "lineChart") {
+              this.$store.dispatch(
+                "graphConf/changeLineOptions",
+                handleDeepMerge(this.lineChart, extraOptions)
+              );
+            } else if (chartType === "barChart") {
+              this.$store.dispatch(
+                "graphConf/changeBarOptions",
+                handleDeepMerge(this.barChart, extraOptions)
+              );
+            } else if (chartType === "pieChart") {
+              this.$store.dispatch(
+                "graphConf/changePieOptions",
+                handleDeepMerge(this.pieChart, extraOptions)
+              );
             }
           } else {
-            this.$Message.error({
-              content: this.$t("tip.request_fail_content"),
-              duration: 3,
-            });
+            //如果第一次进来没有配置项
+            this.baseOptions.title.text = this.graphConf.name;
+            this.$store.dispatch(
+              "graphConf/changeBaseOptions",
+              this.baseOptions
+            );
           }
-        })
+        } else {
+          this.$Message.error({
+            content: this.$t("tip.request_fail_content"),
+            duration: 3,
+          });
+        }
+      });
     },
 
     handleUpdate(type) {
-      console.log(type)
       const configInfo = {
-        chartType:this.chartType,
+        chartType: this.chartType,
         baseOptions: handleFormata(this.baseOptions),
         extraOptions: this[this.chartType],
         xAxisType: this.xAxisType,
@@ -207,36 +251,31 @@ export default {
         data: {
           ...this.graphConf,
           configInfo: JSON.stringify(configInfo),
-          addFlag:type,
+          addFlag: type,
         },
-      })
-        .then((res) => {
-          this.$event.emit("loading", false);
-          if (res.data.code === 200) {
-            this.isOpen = false;
-            this.$Message.success({
-              content: this.$t("tip.update_success_content"),
-              duration: 3,
-            });
-          } else {
-            this.$Message.error({
-              content: res.data.msg,
-              duration: 3,
-            });
-          }
-        })
-       
+      }).then((res) => {
+        this.$event.emit("loading", false);
+        if (res.data.code === 200) {
+          this.isOpen = false;
+          this.$Message.success({
+            content: this.$t("tip.update_success_content"),
+            duration: 3,
+          });
+        } else {
+          this.$Message.error({
+            content: res.data.msg,
+            duration: 3,
+          });
+        }
+      });
     },
-    handleReturn(){
-      this.$router.push('/visualization/visualconfig')
-    }
   },
 };
 </script>
   <style lang="scss" scoped>
 @import "./index.scss";
 .wrap {
-  height: 100%;
+  height: calc(100% - 89px);
   width: 100%;
   background: rgba(247, 248, 250, 1);
   display: flex;
@@ -248,15 +287,9 @@ export default {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    height: 100%;
     > section:last-child {
       flex-grow: 1;
-    }
-    .wrap_r-return{
-      position: absolute;
-      right: 23px;
-      top: 18px;
-      cursor: pointer;
-      z-index: 1;
     }
   }
 }
