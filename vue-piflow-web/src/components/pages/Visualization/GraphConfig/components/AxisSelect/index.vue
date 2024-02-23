@@ -2,35 +2,60 @@
   <section class="card">
     <h1>维度选择</h1>
     <div class="axisList">
-      <div v-for="item in optionsList" draggable="true"  
-      @dragstart="handleDragStart"
-      class="options"
-      :key="item">{{item}}</div>
+      <div
+        v-for="item in optionsList"
+        draggable="true"
+        @dragstart="handleDragStart"
+        class="options"
+        :key="item"
+      >{{ item }}</div>
     </div>
     <div class="select">
       <div>
         <p>横轴</p>
-        <div @dragover.prevent @drop="handleXDrop"  >
+        <div @dragover.prevent @drop="handleXDrop">
           <p v-if="!xAxisType" class="placehold">请拖入上方字段</p>
-          <div v-else class="options">{{xAxisType}}
+          <div v-else class="options">
+            <Tooltip placement="top" theme="light">
+              <span class="checkedSpan">{{ xAxisType.sort }}</span>
+              <div slot="content">
+                <span
+                  :class="{
+                    optionsSpan: 'true',
+                    active: xAxisType.sort === '字符',
+                  }"
+                  @click="xAxisType.sort = '字符'"
+                  >字符型</span
+                >
+                <span
+                  :class="{
+                    optionsSpan: 'true',
+                    active: xAxisType.sort === '数值',
+                  }"
+                  @click="xAxisType.sort = '数值'"
+                  >数值型</span
+                >
+              </div>
+            </Tooltip>
+
+            {{ xAxisType.label }}
             <span class="close" @click="handleRemoveX">x</span>
           </div>
         </div>
       </div>
       <div>
         <p>纵轴</p>
-        <div @dragover.prevent @drop="handleYDrop"  >
-          <p v-if="!yAxis.length" class="placehold">请拖入上方字段</p>
-          <div 
-           v-for="(item,index) in yAxis" :key="item"
-           class="options">
-           {{item}}
+        <div @dragover.prevent @drop="handleYDrop">
+          <p v-if="!yAxisType.length" class="placehold">请拖入上方字段</p>
+          <div v-for="(item, index) in yAxisType" :key="index" class="options">
+            <ColorPicker v-model="item.color" recommend />
+            {{ item.label }}
             <span class="close" @click="handleRemoveY(index)">x</span>
           </div>
         </div>
       </div>
-        
-        <!-- <Select
+
+      <!-- <Select
           v-model="xAxisType"
           @on-change="handleXChange"
           style="width: 100%"
@@ -45,7 +70,7 @@
             >{{ item.label }}</Option
           >
         </Select> -->
-        <!-- <Select
+      <!-- <Select
           :value="yAxisType"
           @on-change="handleYChange"
           multiple
@@ -72,73 +97,74 @@ export default {
   props: {
     tableData: Array,
   },
-  data(){
+  data() {
     return {
-      dragType:'',
-      dragAxis:'',
-    }
+      dragType: "",
+      dragAxis: "",
+      list:[]
+    };
   },
   methods: {
-    handleXDrop(e){
+    handleXDrop(e) {
       e.preventDefault();
-      this.$store.dispatch("graphConf/changexAxisType", this.dragType);
+      const data = {
+        sort: "字符",
+        label: this.dragType,
+      };
+      this.$store.dispatch("graphConf/changexAxisType", data);
     },
-    handleYDrop(e){
+    handleYDrop(e) {
       e.preventDefault();
-      this.yAxis.push(this.dragType)
+      this.yAxisType.push({
+        label: this.dragType,
+        color: this.baseOptions.color[this.yAxisType.length],
+      });
     },
-    handleRemoveY(index){
-      this.yAxis.splice(index,1)
+    handleRemoveY(index) {
+      this.yAxisType.splice(index, 1);
     },
-    handleRemoveX(){
+    handleRemoveX() {
+      this.xAxisType = null;
       this.$store.dispatch("graphConf/changexAxisType", null);
     },
-    handleDragStart(e){
-      this.dragType = e.target.innerHTML
+    handleDragStart(e) {
+      this.dragType = e.target.innerHTML;
     },
-    handleRemove(list,target){
-      const index =  list.findIndex(v=>v === target)
-      if(index) list.splice(index,1)
-      return list
-    }
-
+    handleRemove(list, target) {
+      const index = list.findIndex((v) => v === target);
+      if (index) list.splice(index, 1);
+      return list;
+    },
   },
   computed: {
-    ...mapGetters("graphConf", ["xAxisType", "yAxisType"]),
+    ...mapGetters("graphConf", ["xAxisType", "yAxisType", "baseOptions"]),
     optionsList(){
-      if(!this.tableData) return []
-      const list = this.tableData.map(v=>v.label)
-      if(this.xAxisType){
-        this.handleRemove(list,this.xAxisType)
-      }
-      if(this.yAxisType.length){
-        this.yAxisType.forEach(item => {
-          this.handleRemove(list,item)
-        });
-      }
-      return list
-    },
-    yAxis(){
-      return this.yAxisType
-    },
+        if (!this.tableData) return [];
+        const list = this.tableData.map((v) => v.label);
+        if (this.xAxisType) {
+          this.handleRemove(list, this.xAxisType.label);
+        }
+        if (this.yAxisType.length) {
+          this.yAxisType.forEach((item) => {
+            this.handleRemove(list, item.label);
+          });
+        }
+        return list;
+      },
   },
-  watch:{
-    tableData(val){
-      this.optionsList = val
-    },
-  }
+
 };
 </script>
 
 <style lang="scss" scoped>
 @import "../../index.scss";
 $primary: var(--primary-color);
-.options{
+.options {
   background: #9cbfef;
   padding: 2px 13px;
   margin-right: 5px;
   margin-bottom: 5px;
-  border-radius:10px  0 ;
+  border-radius: 10px 0;
 }
 .select {
   padding: 10px 24px;
@@ -148,38 +174,45 @@ $primary: var(--primary-color);
     margin-bottom: 10px;
     width: 100%;
     height: 40px;
-    >p{
+    > p {
       background: #f7f8fa;
       margin-right: 2px;
       line-height: 40px;
       padding: 0 10px;
     }
-    >div{
+    > div {
       background: #f7f8fa;
       flex-grow: 1;
       display: flex;
       align-items: center;
       padding-left: 5px;
-      .placehold{
+      .placehold {
         line-height: 40px;
-        color: rgba(0,0,0,0.3);
+        color: rgba(0, 0, 0, 0.3);
         text-indent: 10px;
       }
-      .options{
+      .options {
         margin-bottom: 0;
         height: 27px;
         position: relative;
-        &:hover{
-          .close{
+        &:hover {
+          .close {
             display: block;
           }
         }
-        .close{
+        .colorLenged {
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          vertical-align: middle;
+          cursor: pointer;
+        }
+        .close {
           display: none;
           position: absolute;
           right: -10px;
           top: -5px;
-          content: 'x';
+          content: "x";
           width: 16px;
           height: 16px;
           background: #fff;
@@ -190,14 +223,40 @@ $primary: var(--primary-color);
         }
       }
     }
-
   }
-
 }
 
-.axisList{
+.axisList {
   display: flex;
   padding: 24px 24px 0;
   flex-wrap: wrap;
+}
+::v-deep .ivu-color-picker-default {
+  height: 20px;
+  .ivu-icon {
+    display: none;
+  }
+  .ivu-color-picker-input {
+    padding: 0;
+    background: none;
+    border: none;
+  }
+}
+.optionsSpan {
+  margin-right: 5px;
+  background: #eee;
+  padding: 2px;
+  cursor: pointer;
+  &.active {
+    color: #009688;
+  }
+}
+.checkedSpan {
+  color: #009688;
+  border: 1px solid #009688;
+  padding: 0 2px;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1;
 }
 </style>

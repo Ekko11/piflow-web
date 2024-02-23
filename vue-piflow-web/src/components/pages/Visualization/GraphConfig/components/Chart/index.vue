@@ -7,17 +7,25 @@
       >
 
       <Poptip placement="top">
-        <Button type="primary" size="small"  style="margin-right:5px">保存配置</Button>
+        <Button type="primary" size="small" style="margin-right: 5px"
+          >保存配置</Button
+        >
         <template #content>
-          <Button type="primary" size="small" @click="handleSave('add')">新增</Button>
-          <Button type="primary" size="small" @click="handleSave('update')">更新</Button>
+          <Button type="primary" size="small" @click="handleSave('add')"
+            >新增</Button
+          >
+          <Button type="primary" size="small" @click="handleSave('update')"
+            >更新</Button
+          >
         </template>
       </Poptip>
 
       <Button type="primary" size="small" @click="handleDown">下载图表</Button>
     </div>
     <div>
-      <div class="chart" ref="chart" style="width: 100%"></div>
+      <div>
+        <div class="chart" ref="chart" style="width: 100%"></div>
+      </div>
     </div>
   </section>
 </template>
@@ -32,18 +40,17 @@ export default {
     handleInit() {
       if (this.chart) {
         this.chart.clear();
-      } else {
-        this.chart = echarts.init(this.$refs.chart);
-      }
-      this.$nextTick(()=>{
         this.chart.setOption(this.options);
-      })
-      window.addEventListener("resize", () => {
-        this.chart.resize();
-      });
+      } else {
+        setTimeout(() => {
+          this.chart = echarts.init(this.$refs.chart);
+          this.chart.setOption(this.options);
+        }, 1000);
+      }
+
     },
     handleSave(type) {
-      this.$emit("saveOptions",type);
+      this.$emit("saveOptions", type);
     },
     handleShowData() {
       this.$emit("showTableData");
@@ -61,21 +68,30 @@ export default {
       link.download = "image.png"; // 可以自定义文件名
       link.click();
     },
+    resizeChart(){
+      if(this.chart) this.chart.resize();
+    }
+  },
+  mounted(){
+     window.addEventListener("resize",this.resizeChart);
   },
   beforeDestroy() {
     if (this.chart) {
       this.chart.clear();
+      window.removeEventListener("resize",this.resizeChart)
     }
   },
   watch: {
-    options(newVal) {
+    options(newVal, oldVal) {
       if (newVal.grid) {
-        // this.$emit("autoSave");
+        if (oldVal.series.length || oldVal.xAxis.data.length) {
+          //防止每次渲染时加载默认配置调用保存接口
+          this.$emit("autoSave");
+        }
         this.handleInit();
       }
     },
   },
-  mounted() {},
 };
 </script>
 
@@ -88,18 +104,31 @@ export default {
   position: relative;
   display: flex;
   flex-direction: column;
+  > div:first-child {
+    height: 100px;
+    overflow: hidden;
+  }
   > div:last-child {
     flex-grow: 1;
     margin-top: 20px;
+    position: relative;
     > div {
-      height: 100%;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      > div {
+        width: 100%;
+        height: 100%;
+      }
     }
   }
   .chart_wrap-btn {
     position: absolute;
     right: 7px;
     top: 5px;
-     button {
+    button {
       margin-right: 5px;
     }
   }

@@ -32,12 +32,14 @@ const InitState = () => ({
       {
         type: 'slider',
         id : 'sliderX',
-        show: true,
+        show: false,
+        bottom: 5,
+        height: 10
       }
     ],
     legend: {
       show: true,
-      orient: "auto",
+      orient: "horizontal",
       left: "40",
       top:'20'
     },

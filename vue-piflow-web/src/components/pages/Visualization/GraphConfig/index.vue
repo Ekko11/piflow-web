@@ -68,23 +68,62 @@ export default {
     this.handleInit();
   },
   watch: {
-    xAxisType(val) {
-      if (this.tableData.length && val) {
-        this.xData = this.tableData.find((v) => v.label === val).data;
-      }else{
-        this.xData= []
-      }
+    xAxisType: {
+      handler: function (val) {
+        if (this.tableData.length && val) {
+          // try {
+            if (val.sort === "数值") {
+              this.originalData = this.originalData.sort((a, b) => {
+                const numA = parseFloat(a[val.label]);
+                const numB = parseFloat(b[val.label]);
+                if (numA < numB) return -1;
+                if (numA > numB) return 1;
+                return 0;
+              });
+            } else {
+              this.originalData = this.originalData.sort((a, b) =>
+                String(a[val.label]).localeCompare(String(b[val.label]))
+              );
+            }
+            this.xData = this.handleGetColums(val.label);
+            if(this.xData.length > 12 && this.baseOptions.dataZoom[0].show == false){
+               this.baseOptions.dataZoom[0].show = true
+            //  this.$store.dispatch("graphConf/changeBaseOptions", this.baseOptions)
+            }
+
+
+            // 由于大表的排序改变，所以y轴数据也需要重新生成
+            this.yData = this.yAxisType.map((item) => {
+              return {
+                itemStyle: {
+                  color: item.color,
+                },
+                name: item.label,
+                data: this.handleGetColums(item.label),
+              };
+            });
+          // } catch (err) {}
+        } else {
+          this.xData = [];
+        }
+      },
+      deep: true,
     },
-    yAxisType(arr) {
-      console.log(arr)
-      if (this.tableData.length) {
-        this.yData = arr.map((item) => {
-          return {
-            name: item,
-            data: this.tableData.find((v) => v.label === item).data,
-          };
-        });
-      }
+    yAxisType: {
+      handler: function (arr) {
+        if (this.originalData.length) {
+          this.yData = arr.map((item) => {
+            return {
+              itemStyle: {
+                color: item.color,
+              },
+              name: item.label,
+              data: this.handleGetColums(item.label),
+            };
+          });
+        }
+      },
+      deep: true,
     },
   },
   computed: {
@@ -124,13 +163,14 @@ export default {
     },
   },
   methods: {
+    // 自动保存   
     handleAutoUpdate() {
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);
       }
       this.autoSaveTimeout = setTimeout(() => {
         this.handleUpdate("update");
-      }, 3000);
+      }, 4000);
     },
     handleInit() {
       if (!this.$route.query.id) return;
@@ -163,6 +203,16 @@ export default {
           });
         });
     },
+    handleGetColums(label) {
+      let list = [];
+      this.originalData.forEach((item) => {
+        for (const key in item) {
+          if (key === label) list.push(item[key]);
+        }
+      });
+
+      return list;
+    },
     handleGetTableData(graphTemplateId) {
       this.$axios({
         method: "POST",
@@ -180,12 +230,11 @@ export default {
               label: item,
               data: [],
             };
-            list.forEach((v) => {
+            this.originalData.forEach((v) => {
               obj.data.push(v[item]);
             });
             return obj;
           });
-
           // 赋值
           if (this.graphConf.configInfo) {
             const {
