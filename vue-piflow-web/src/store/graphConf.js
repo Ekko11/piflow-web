@@ -7,10 +7,10 @@ const InitState = () => ({
   baseOptions: {
     color: [
       "#7cb5ec",
-      "#058DC7",
       "#90ed7d",
       "#f7a35c",
       "#8085e9",
+      "#058DC7",
       "#f15c80",
       "#e4d354",
       "#2b908f",
@@ -40,11 +40,11 @@ const InitState = () => ({
     legend: {
       show: true,
       orient: "horizontal",
-      left: "40",
-      top:'20'
+      left: "20",
+      top:'25'
     },
     grid: {
-      top: '15%',
+      top: '20%',
       bottom: "10%",
       left: "10%",
       right: "10%",

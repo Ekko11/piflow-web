@@ -1,5 +1,5 @@
 <template>
-  <section class="card chart_wrap">
+  <section class="card chart_wrap" ref="chart_wrap">
     <h1>图表展示</h1>
     <div class="chart_wrap-btn">
       <Button type="primary" size="small" @click="handleShowData"
@@ -23,9 +23,7 @@
       <Button type="primary" size="small" @click="handleDown">下载图表</Button>
     </div>
     <div>
-      <div>
         <div class="chart" ref="chart" style="width: 100%"></div>
-      </div>
     </div>
   </section>
 </template>
@@ -36,12 +34,19 @@ export default {
   props: {
     options: Object,
   },
+  data(){
+    return {
+      chart:null
+    }
+  },
   methods: {
     handleInit() {
       if (this.chart) {
         this.chart.clear();
         this.chart.setOption(this.options);
       } else {
+        // 某些浏览器大小下，由于父元素设置了flex-grow:1,导致获取高度异常
+        console.log(this.$refs.chart.offsetHeight)
         setTimeout(() => {
           this.chart = echarts.init(this.$refs.chart);
           this.chart.setOption(this.options);
@@ -49,6 +54,7 @@ export default {
       }
 
     },
+    
     handleSave(type) {
       this.$emit("saveOptions", type);
     },
@@ -73,11 +79,15 @@ export default {
     }
   },
   mounted(){
-     window.addEventListener("resize",this.resizeChart);
+    window.addEventListener("resize",this.resizeChart);
+    this.resizeObserver = new ResizeObserver(this.resizeChart);  
+    this.resizeObserver.observe(this.$refs.chart);  
   },
+
   beforeDestroy() {
     if (this.chart) {
       this.chart.clear();
+      this.resizeObserver.disconnect(); 
       window.removeEventListener("resize",this.resizeChart)
     }
   },
@@ -109,20 +119,12 @@ export default {
     overflow: hidden;
   }
   > div:last-child {
-    flex-grow: 1;
+    height: calc( 100% - 60px);
     margin-top: 20px;
-    position: relative;
-    > div {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
       > div {
         width: 100%;
         height: 100%;
       }
-    }
   }
   .chart_wrap-btn {
     position: absolute;

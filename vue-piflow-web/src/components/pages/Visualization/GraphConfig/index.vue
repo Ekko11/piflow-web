@@ -4,7 +4,7 @@
       <ChartType />
       <div>
         <BaseChartOptions />
-        <ExtraChartOptions />
+        <!-- <ExtraChartOptions /> -->
       </div>
     </div>
     <div class="wrap_r">
@@ -330,6 +330,7 @@ export default {
   display: flex;
   > div:first-child {
     width: 400px;
+    flex-shrink: 0;
   }
   > div:last-child {
     position: relative;
@@ -339,6 +340,7 @@ export default {
     height: 100%;
     > section:last-child {
       flex-grow: 1;
+      overflow: hidden;
     }
   }
 }

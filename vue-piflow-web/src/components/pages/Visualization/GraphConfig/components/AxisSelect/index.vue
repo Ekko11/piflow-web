@@ -54,38 +54,6 @@
           </div>
         </div>
       </div>
-
-      <!-- <Select
-          v-model="xAxisType"
-          @on-change="handleXChange"
-          style="width: 100%"
-        >
-          <template #prefix>
-            <div class="prefix">X轴</div>
-          </template>
-          <Option
-            v-for="item in tableData"
-            :value="item.label"
-            :key="item.label"
-            >{{ item.label }}</Option
-          >
-        </Select> -->
-      <!-- <Select
-          :value="yAxisType"
-          @on-change="handleYChange"
-          multiple
-          style="width: 100%"
-        >
-          <template #prefix>
-            <div class="prefix">Y轴</div>
-          </template>
-          <Option
-            v-for="item in tableData"
-            :value="item.label"
-            :key="item.label"
-            >{{ item.label }}</Option
-          >
-        </Select> -->
     </div>
   </section>
 </template>
