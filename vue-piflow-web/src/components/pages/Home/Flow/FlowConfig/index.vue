@@ -306,7 +306,7 @@ export default {
 }
 .page {
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
   margin-top: 32px;
 }
 </style>

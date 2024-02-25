@@ -153,6 +153,7 @@ export default {
       const formData = await getDataProductType();
       const fileList = formData.getAll("file");
       const data = JSON.parse(formData.getAll("data")[0]);
+      console.log(JSON.stringify(JSON.parse(data)))
       this.treeData = [
         {
           name: "数据产品分类",

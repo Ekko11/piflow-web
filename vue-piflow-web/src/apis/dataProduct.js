@@ -15,7 +15,7 @@ export function getDataProductType () {
 export function saveDataProduct (data) {
     return axios({
         method:'post',
-        url:'/dataProduct/save',
+        url:'/dataProductType/save',
         data:formDataFormat(data),
         headers:{
             'Content-Type':'multipart/form-data'
@@ -46,11 +46,11 @@ export function publishingStops (data) {
 }
 
 // 获取数据产品列表
-export function getDataProductList (data) {
+export function getDataProductList (params) {
     return axios({
-        method:'post',
-        url:'/dataProduct/getByPage',
-        data
+        method:'get',
+        url:'/paramsProduct/getByPage',
+        params
     })
 }
 
