@@ -20,10 +20,19 @@
       <template slot-scope="{ row }" slot="action">
         <div class="btn">
           <Button @click="handleEdit(row)">编辑</Button>
-          <Button @click="handleEdit(row)">下载</Button>
-          <Button v-if="user !== 'ADMIN'" :disabled="row.status === '审核中'" @click="handleEdit(row)">发布</Button>
-          <Button v-if="user === 'ADMIN'" @click="handleEdit(row)">下架</Button>
-          <Button v-if="user === 'ADMIN'" @click="handleVerify(row)">审核</Button>
+          <Button @click="handleDown(row)">下载</Button>
+          <Button
+            v-if="user !== 'ADMIN'"
+            :disabled="row.status === '审核中'"
+            @click="handleEdit(row)"
+            >发布</Button
+          >
+          <Button v-if="user === 'ADMIN'" @click="handleOpenDelist(row)"
+            >下架</Button
+          >
+          <Button v-if="user === 'ADMIN'" @click="handleOpenApply(row)"
+            >审核</Button
+          >
           <Button @click="handleDelete(row)">删除</Button>
         </div>
       </template>
@@ -124,17 +133,23 @@
         <div class="item">
           <label class="self">封面：</label>
           <Upload
-          action="/null"
-          :on-success="handleFileSuccess"
-          :on-error="handleFileError"
-          :before-upload="handleFileBefore"
-          :show-upload-list="false"
-          style="width: 350px"
-          class="upload"
+            action="/null"
+            :on-success="handleFileSuccess"
+            :on-error="handleFileError"
+            :before-upload="handleFileBefore"
+            :show-upload-list="false"
+            style="width: 350px"
+            class="upload"
           >
             <div>
-              <img v-if="formData.file || formData.fileName" style="width:100px;height:40px" :src="formData.fileName" alt="">
-              <Icon  v-else
+              <img
+                v-if="formData.file || formData.fileName"
+                style="width: 100px; height: 40px"
+                :src="formData.fileName"
+                alt=""
+              />
+              <Icon
+                v-else
                 type="ios-cloud-upload"
                 size="52"
                 style="color: #3399ff"
@@ -143,7 +158,6 @@
             </div>
           </Upload>
         </div>
-
       </div>
     </Modal>
 
@@ -165,19 +179,16 @@
           :label-width="100"
         >
           <Form-item label="审核">
-            <Radio-group v-model="formApplyInfo.auditStatus">
-              <Radio label="PASS">通过</Radio>
-              <Radio label="REJECT">拒绝</Radio>
+            <Radio-group v-model="formApplyInfo.state">
+              <Radio :label="5">允许发布</Radio>
+              <Radio :label="6">拒绝发布</Radio>
             </Radio-group>
           </Form-item>
-          <Form-item
-            label="理由"
-            prop="messsage"
-          >
+          <Form-item label="理由">
             <Input
               type="textarea"
               :rows="3"
-              v-model="formApplyInfo.messsage"
+              v-model="formApplyInfo.opinion"
               placeholder="请输入"
             ></Input>
           </Form-item>
@@ -185,11 +196,41 @@
       </div>
     </Modal>
 
+    <!-- 下架 -->
+    <Modal
+      v-model="delistIsOpen"
+      width="520px"
+      title="下架"
+      :ok-text="$t('modal.ok_text')"
+      :cancel-text="$t('modal.cancel_text')"
+      @on-ok="handleDelist"
+      class="custom-modal"
+    >
+      <div style="width: 100%; height: 100%">
+        <Form class="formDelistData" :model="formDelistData" :label-width="100">
+          <Form-item label="下架理由：">
+            <Input
+              type="textarea"
+              :rows="3"
+              v-model="formDelistData.downReason"
+              placeholder="请输入"
+            ></Input>
+          </Form-item>
+        </Form>
+      </div>
+    </Modal>
   </section>
 </template>
 
 <script>
-import {saveDataProduct} from '@/apis/dataProduct'
+import {
+  saveDataProduct,
+  getDataProductList,
+  downProductFile,
+  deleteDataProduct,
+  permissionForPublishing,
+  delistDataProduct,
+} from "@/apis/dataProduct";
 import Cookies from "js-cookie";
 export default {
   name: "VisualizationDataBase",
@@ -198,10 +239,11 @@ export default {
     return {
       isOpen: false,
       applyIsOpen: false,
+      delistIsOpen: false,
       page: 1,
       limit: 10,
       total: 0,
-      user:'USER',
+      user: "USER",
       tableData: [],
       treeData: [],
       param: "",
@@ -209,8 +251,13 @@ export default {
       // 审核
       formApplyInfo: {
         id: "",
-        auditStatus: "PASS", //默认通过
-        messsage: "",
+        state: 5, //默认通过
+        opinion: "",
+      },
+      // 下架
+      formDelistData: {
+        id: "",
+        downReason: "",
       },
     };
   },
@@ -227,34 +274,17 @@ export default {
           key: "description",
         },
         {
-          title: "封面",
-          key: "createTime",
-          render: (h, params) => {
-            return h("div", [
-              h("img", {
-                attrs: {
-                  src: "https://file.iviewui.com/dist/bf31433c102ed612fbe82afe000dda40.png",
-                  with:'40px',
-                  height:'40px'
-                },
-              }),
-             ,
-            ]);
-          },
-        },
-        {
           title: this.$t("database.action"),
           slot: "action",
-          width: this.user === 'ADMIN' ? 360: 300,
+          width: this.user === "ADMIN" ? 360 : 300,
           align: "center",
         },
       ];
     },
   },
   created() {
-    this.getRole()
+    this.getRole();
     this.getTableData();
-    this.handleGetTreeData();
   },
   watch: {
     param(val) {
@@ -264,59 +294,50 @@ export default {
     },
   },
   methods: {
-    handleVerify(row){
-      this.applyIsOpen = true
-      this.formApplyInfo.id = row.id
+    // 下架
+    handleOpenDelist(row) {
+      this.delistIsOpen = true;
+      this.formDelistData.id = row.id;
     },
-    async handleResultApply(){
-        const res = await aaa(this.formApplyInfo)
-        this.applyIsOpen = false
+    async handleDelist() {
+      const res = await delistDataProduct(this.formDelistData);
+      this.applyIsOpen = false;
     },
-    getRole(){
+    // 下载
+    async handleDown(row) {
+      const res = await downProductFile(row.id);
+      console.log(res);
+    },
+    // 审核
+    handleOpenApply(row) {
+      this.applyIsOpen = true;
+      this.formApplyInfo.id = row.id;
+    },
+    async handleResultApply() {
+      const res = await permissionForPublishing(this.formApplyInfo);
+      this.applyIsOpen = false;
+    },
+    getRole() {
       let user = JSON.parse(Cookies.get("setUser"));
-      if(user && user[0].role.stringValue){
-        console.log(user[0].role.stringValue)
-          this.user = user[0].role.stringValue
-      }else{
-        this.user = "USER"
+      if (user && user[0].role.stringValue) {
+        console.log(user[0].role.stringValue);
+        this.user = user[0].role.stringValue;
+      } else {
+        this.user = "USER";
       }
     },
-    handleGetTreeData() {
-      const data = [
-        {
-          name: "生态系统要素数据",
-          id: 1,
-          children: [
-            {
-              name: "大气环境要素",
-              id: 3,
-            },
-            {
-              name: "生物要素",
-              id: 4,
-            },
-          ],
-        },
-        {
-          name: "生态系统服务功能数据",
-          id: 2,
-          children: [
-            {
-              name: "生产力和固碳功能",
-              id: 5,
-            },
-            {
-              name: "生物多样性维护功能生物多样性维护功能",
-              id: 6,
-            },
-          ],
-        },
-      ];
-      this.treeData = data;
-    },
 
-     handleEdit(row) {
-      const { id, name, description, permission, keyword, sdPublisher, email, file } = row;
+    handleEdit(row) {
+      const {
+        id,
+        name,
+        description,
+        permission,
+        keyword,
+        sdPublisher,
+        email,
+        file,
+      } = row;
       this.formData = {
         id,
         name,
@@ -328,15 +349,14 @@ export default {
         file,
       };
       this.isOpen = true;
-
     },
     async handleComfirm() {
-      const  formData = new FormData()
+      const formData = new FormData();
       for (const key in this.formData) {
-          formData.append(key,this.formData[key])
+        formData.append(key, this.formData[key]);
       }
-      const rss = await saveDataProduct(formData)
-      console.log(res)
+      const rss = await saveDataProduct(formData);
+      console.log(res);
     },
 
     handleDelete(row) {
@@ -344,44 +364,32 @@ export default {
         title: this.$t("tip.title"),
         okText: this.$t("modal.confirm"),
         cancelText: this.$t("modal.cancel_text"),
-        content: `${this.$t("modal.delete_content")} ${row.dbName}?`,
-        onOk: () => {
-          this.$axios({
-            method: "POST",
-            url: "/visual/delDatabase",
-            data: { id: row.id },
-          })
-            .then((res) => {
-              if (res.data.code === 200) {
-                this.$Modal.success({
-                  title: this.$t("tip.title"),
-                  content:
-                    `${row.dbName} ` + this.$t("tip.delete_success_content"),
-                });
-                this.getTableData();
-              } else {
-                this.$Message.error({
-                  content: res.data.msg,
-                  duration: 3,
-                });
-              }
-            })
-            .catch((error) => {
-              console.log(error);
-              this.$Message.error({
-                content: this.$t("tip.fault_content"),
-                duration: 3,
-              });
+        content: `${this.$t("modal.delete_content")} ${row.name}?`,
+        onOk: async () => {
+          const res = await deleteDataProduct(row.id);
+          if (res.data.code === 200) {
+            this.$Modal.success({
+              title: this.$t("tip.title"),
+              content: `${row.name} ` + this.$t("tip.delete_success_content"),
             });
+            this.getTableData();
+          } else {
+            this.$Message.error({
+              content: res.data.msg,
+              duration: 3,
+            });
+          }
         },
       });
     },
-    getTableData() {
-      let data = { pageNum: this.page, pageSize: this.limit };
+    async getTableData() {
+      let data = { page: this.page, limit: this.limit };
       if (this.param) {
-        data.queryContent = this.param;
+        data.keyword = this.param;
       }
-      this.tableData = [{ name: 123 }];
+      const res = await getDataProductList(data);
+      console.log(res);
+      this.tableData = [{ name: 123, id: 999 }];
       // this.$axios({
       //     method:'POST',
       //     url:'/visual/getDatabaseList',
@@ -409,13 +417,13 @@ export default {
     handleFileSuccess(response, file, fileList) {},
     handleFileError(error, file, fileList) {},
     handleFileBefore(file) {
-      this.formData.file = file
+      this.formData.file = file;
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
         this.formData.fileName = reader.result;
       };
-      return false
+      return false;
     },
     onPageChange(pageNo) {
       this.page = pageNo;
@@ -445,16 +453,16 @@ export default {
     margin-top: 5px;
   }
 }
-.upload{
+.upload {
   background: #fff;
   border: 1px dashed #dcdee2;
   border-radius: 4px;
   text-align: center;
   cursor: pointer;
   width: 350px;
-  padding: 20px  0;
+  padding: 20px 0;
 }
-.btn button{ 
+.btn button {
   margin-right: 3px;
 }
 </style>

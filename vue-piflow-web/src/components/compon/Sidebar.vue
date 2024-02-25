@@ -131,8 +131,8 @@ export default {
         {
           btnName: this.$t("sidebar.preferenceSettings"),
           icoName: "md-options",
-          router: "/",
-          name: "home",
+          router: "/preference",
+          name: "preference",
         },
         {
           btnName: this.$t("sidebar.operationManagement"),

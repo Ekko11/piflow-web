@@ -41,24 +41,20 @@
       <div style="width: 100%; height: 100%">
         <Form
           class="formApplyInfo"
-          ref="formApplyInfo"
           :model="formApplyInfo"
           :label-width="100"
         >
           <Form-item label="审核">
-            <Radio-group v-model="formApplyInfo.auditStatus">
-              <Radio label="PASS">通过</Radio>
-              <Radio label="REJECT">拒绝</Radio>
+            <Radio-group  v-model="formApplyInfo.state">
+              <Radio :label="2">通过</Radio>
+              <Radio :label="3">拒绝</Radio>
             </Radio-group>
           </Form-item>
-          <Form-item
-            label="理由"
-            prop="messsage"
-          >
+          <Form-item label="理由">
             <Input
+            v-model="formApplyInfo.opinion"
               type="textarea"
               :rows="3"
-              v-model="formApplyInfo.messsage"
               placeholder="请输入"
             ></Input>
           </Form-item>
@@ -70,9 +66,9 @@
 </template>
 
 <script>
-import {saveDataProduct} from '@/apis/dataProduct'
+import {getPermissionByPage,permissionForUse} from '@/apis/dataProduct'
 export default {
-  name: "VisualizationDataBase",
+  name: "Accredit",
   components: {},
   data() {
     return {
@@ -84,8 +80,8 @@ export default {
       // 审核
       formApplyInfo: {
         id: "",
-        auditStatus: "PASS", //默认通过
-        messsage: "",
+        state: 2, //默认通过
+        opinion: "",
       },
     };
   },
@@ -100,22 +96,6 @@ export default {
         {
           title: "描述",
           key: "description",
-        },
-        {
-          title: "封面",
-          key: "createTime",
-          render: (h, params) => {
-            return h("div", [
-              h("img", {
-                attrs: {
-                  src: "https://file.iviewui.com/dist/bf31433c102ed612fbe82afe000dda40.png",
-                  with:'40px',
-                  height:'40px'
-                },
-              }),
-             ,
-            ]);
-          },
         },
         {
           title: "申请者",
@@ -144,7 +124,7 @@ export default {
       this.formApplyInfo.id = row.id
     },
     async handleComfirm(){
-        const res = await aaa(this.formApplyInfo)
+        const res = await permissionForUse(this.formApplyInfo)
         this.applyIsOpen = false
     },
 
@@ -152,12 +132,13 @@ export default {
 
 
  
-    getTableData() {
-      let data = { pageNum: this.page, pageSize: this.limit };
+   async getTableData() {
+      let data = { page: this.page, limit: this.limit };
       if (this.param) {
-        data.queryContent = this.param;
+        data.keyword = this.param;
       }
       this.tableData = [{ name: 123 }];
+      // const res = await getPermissionByPage(data)
       // this.$axios({
       //     method:'POST',
       //     url:'/visual/getDatabaseList',

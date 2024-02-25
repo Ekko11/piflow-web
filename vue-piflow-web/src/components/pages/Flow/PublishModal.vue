@@ -17,7 +17,7 @@
         </FormItem>
         <FormItem label="分类：" prop="name">
           <treeselect
-            v-model="formData.parentId"
+            v-model="formData.productTypeId"
             :placeholder="$t('modal.placeholder_select')"
             :normalizer="normalizer"
             :options="treeData"
@@ -27,19 +27,19 @@
         <h4>选择发布组件</h4>
         <div v-for="(item, index) in stops" label="" class="stop" :key="index">
           <div class="stop_checked">
-            <p>{{ item.name }}</p>
+            <p>{{ item.stopName }}</p>
             <label><Checkbox v-model="item.checked"></Checkbox></label>
           </div>
           <div class="stop_props">
             <div
-              v-for="(child, idx) in item.props"
+              v-for="(child, idx) in item.stopPublishingPropertyVos"
               :key="idx"
               class="stop_props-item"
             >
               <div class="item">
                 <label>参数名称：</label>
                 <Checkbox style="width: 200px" v-model="child.checked">{{
-                  child.name
+                  child.stopPublishingPropertyName
                 }}</Checkbox>
               </div>
               <div class="item">
@@ -60,7 +60,7 @@
                       >Upload files</Button
                     >
                   </Upload>
-                  <p>{{ child.file.name }}</p>
+                  <p>{{ child.fileName }}</p>
                 </div>
               </div>
             </div>
@@ -80,14 +80,18 @@
 </template>
 
 <script>
-import { saveDataProduct } from "@/apis/dataProduct";
+import { getDataProductType,getStopsInfoByFlowId,publishingStops } from "@/apis/dataProduct";
+import { findTree } from '@/utils/tree';
+
 export default {
   data() {
     return {
       formData: {},
-      open: true,
+      open: false,
       currentUpload: 0,
       stops: [],
+      treeData:[],
+      fileList:[],
       ruleValidate: {
         name: [
           {
@@ -101,122 +105,49 @@ export default {
   },
   created() {
     this.getTreeData();
-    this.handleAdd();
   },
   methods: {
-    getTreeData() {
-      const data = [
-        {
-          name: "生态系统要素数据",
-          id: 1,
-          children: [
-            {
-              name: "大气环境要素",
-              id: 3,
-            },
-            {
-              name: "生物要素",
-              id: 4,
-            },
-          ],
-        },
-        {
-          name: "生态系统服务功能数据",
-          id: 2,
-          children: [
-            {
-              name: "生产力和固碳功能",
-              id: 5,
-            },
-            {
-              name: "生物多样性维护功能生物多样性维护功能",
-              id: 6,
-            },
-          ],
-        },
-      ];
+  async getTreeData() {
+      const formData = await getDataProductType();
+      const data = JSON.parse(formData.getAll("data")[0]);
       this.treeData = data;
     },
-    handleAdd(id) {
+    async handleAdd(id) {
+      this.formData.flowId = id
       this.open = true;
-      this.stops = [
-        {
-          name: "CheckPoint-1707034274860",
-          id: "067ce994de4c4f65b3d572c182d9b5dc",
-          checked: true,
-          props: [
-            {
-              name: "参数1",
-              checked: true,
-              id: "参数1的id",
-              publishName: "",
-              file: "",
-            },
-            {
-              name: "参数2",
-              id: "参数2的id",
-              publishName: "",
-              file: "",
-            },
-          ],
-        },
-        {
-          name: "ExcelWriteMultipleSheetsExcelWriteMultipleSheets",
-          id: "0d29686378ff4570b121d999201c473e",
-          props: [
-            {
-              name: "参数1",
-              id: "参数1的id",
-              publishName: "",
-              file: "",
-            },
-            {
-              name: "参数2",
-              id: "参数1的id",
-              publishName: "",
-              file: "",
-            },
-          ],
-        },
-        {
-          name: "ExcelWriteMultipleSheets",
-          id: "29cdb70fccae4076a27bb43faba917ae",
-        },
-        {
-          name: "CheckPoint",
-          id: "2b684d2c4bc04611af6a68dd914d35c2",
-        },
-        {
-          name: "CheckPoint-1707034274860",
-          id: "38ca38fe711146c787084aa2d982a352",
-        },
-        {
-          name: "ExcelRead",
-          id: "56005ead871a4ce3b69098e3c58bf2a7",
-        },
-        {
-          name: "CheckPoint-1707034268302",
-          id: "9d3440440ae84d78acf37dcfa7bbed7c",
-        },
-        {
-          name: "CsvParser",
-          id: "b41e9aa428034230bc9980b5b4e916c8",
-        },
-      ];
+      const  res = await getStopsInfoByFlowId(id)
+      console.log(res)
+      this.stops =res.data.data.map(v=>{
+        return {
+          stopId:v.id,
+          stopName:v.name,
+          stopPublishingPropertyVos:v.properties.map(item=>({
+            propertyId:item.id,
+            stopPublishingPropertyName:item.name,
+            fileName:item.fileName,
+            name:item.name,
+          }))
+        }
+      })
     },
-    handleEdit() {},
+    handleEdit() {
+      this.open = true;
+    },
     // 编辑或者更新
     async handleSaveUpdateData() {
-      this.formData.stops = this.stops;
+      const productNode = findTree(this.treeData,this.formData.productTypeId)
+      this.formData.productTypeName = productNode.name
+      this.formData.productTypeDescription = productNode.description
+
       let errMsg = '';
       // 筛选选中项
       const filteredArray = this.stops
         .filter((item) => item.checked)
         .map((item) => ({
           ...item,
-          props: item.props.filter((prop) => {
-            if (prop.checked && !prop.file){
-              errMsg = `请确保组件 ${item.name} 的参数 ${prop.name} 的文件不为空`
+          stopPublishingPropertyVos: item.stopPublishingPropertyVos.filter((prop) => {
+            if (prop.checked && !prop.fileName){
+              errMsg = `请确保组件 ${item.stopPublishingPropertyName} 的参数 ${prop.stopPublishingPropertyName} 的文件不为空`
             };
             return prop.checked;
           }),
@@ -228,13 +159,19 @@ export default {
           });
           return 
         }
-      console.log(errMsg, filteredArray);
+        this.formData.stops = filteredArray
+      console.log(this.formData,filteredArray);
+      const formData = new FormData()
+      this.fileList.forEach(v => {
+        formData.append('files',v)
+      });
+        formData.append('flowPublishingVo',JSON.stringify(this.formData))
       // const data= this.objectToFormData(filteredArray)
 
       // const formData = new FormData();
       // formData.append("stops", this.stops);
-      // const res = await saveDataProduct(data);
-
+      const res = await publishingStops(formData);
+      console.log(res)
       // console.log(this.formData, this.stops);
     },
     // 将对象递归转换为formData
@@ -276,11 +213,18 @@ export default {
     },
     // 标记选择上传的节点
     handleClickUpload(index, idx) {
-      this.currentProps = this.stops[index].props[idx];
+      this.currentProps = this.stops[index].stopPublishingPropertyVos[idx];
     },
     handleBeforeUpload(e) {
-      this.currentProps.file = e;
-      console.log(e, this.currentUpload);
+      if(this.fileList.findIndex(v=>v.name === e.name) !== -1){
+        this.$Message.error({
+                  content: '文件名重复，请修改文件名后再上传',
+                  duration: 3,
+          });
+          return false
+      }
+      this.currentProps.fileName = e.name;
+      this.fileList.push(e)
       return false;
     },
     normalizer(node) {

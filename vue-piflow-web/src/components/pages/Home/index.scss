@@ -29,6 +29,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        position: relative;
+        z-index: 2;
         >div{
             margin-left: 20px;
             display: flex;

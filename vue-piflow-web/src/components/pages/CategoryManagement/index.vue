@@ -12,10 +12,10 @@
       <div class="contain_r">
         <div class="navbar">
           <div class="left">
-            <span>{{ currentNode.name }}</span>
+            <span>{{ parentNode.name }}</span>
           </div>
           <div class="right">
-            <span class="button-warp" @click="handleAddChild(currentNode)">
+            <span class="button-warp" @click="handleAddChild(parentNode)">
               <Icon type="md-add" />
             </span>
           </div>
@@ -35,9 +35,7 @@
     <!-- add / update -->
     <Modal
       v-model="isOpen"
-      :title="
-        formData.id ? '编辑' : '新增'
-      "
+      :title="formData.id ? '编辑' : '新增'"
       :ok-text="$t('modal.ok_text')"
       :cancel-text="$t('modal.cancel_text')"
       @on-ok="handleComfirm"
@@ -73,24 +71,37 @@
             style="width: 350px"
           />
         </div>
+        <div class="item">
+          <label>上传文件：</label>
+          <div>
+            <Upload  action="/aaa" :before-upload="handleBeforeUpload">
+              <Button icon="ios-cloud-upload-outline"
+                >Upload files</Button
+              >
+            </Upload>
+            <p v-if="formData.file">{{formData.file.name}}</p>
+          </div>
+        </div>
       </div>
     </Modal>
   </section>
 </template>
 <script>
+import { getDataProductType,saveDataProduct } from "@/apis/dataProduct";
+import { findTree } from '@/utils/tree';
+
 export default {
   data() {
     return {
       isOpen: false,
 
       InitFormData: {
-        id: "",
         description: "",
         name: "",
         parentId: "",
       },
       formData: {},
-      currentNode: {},
+      parentNode: {},
       treeData: [],
       tableData: [],
       columns: [
@@ -120,13 +131,12 @@ export default {
     this.handleGetData();
   },
   methods: {
-
-    handleComfirm() {
-      if (this.formData.id) {
-        // this.handleUpdate()
-      } else {
-        // this.handleAdd()
-      }
+   async handleComfirm() {
+      console.log(this.formData)
+      if(!this.formData.id) this.formData.level = this.parentNode.level  + 1
+      if(this.parentNode.level === 0)this.formData.parentId = 0
+      const res = await saveDataProduct(this.formData)
+      console.log(res)
     },
 
     handleAddChild(node) {
@@ -134,63 +144,40 @@ export default {
       this.formData = { ...this.InitFormData };
       this.formData.parentId = node ? node.id : "";
     },
-    handleEdit(node) {
+    handleEdit(row) {
       this.isOpen = true;
-      this.formData = node;
-      this.formData.parentId = this.currentNode.id
+      const {id,parentId,level,name,description,file} = row
+      this.formData = {id,parentId,level,name,description,file};
     },
-    handleGetData() {
-      const data = [
-        {
-          name: "生态系统要素数据",
-          id: 1,
-          children: [
-            {
-              name: "大气环境要素",
-              id: 3,
-            },
-            {
-              name: "生物要素",
-              id: 4,
-            },
-          ],
-        },
-        {
-          name: "生态系统服务功能数据",
-          id: 2,
-          children: [
-            {
-              name: "生产力和固碳功能",
-              id: 5,
-            },
-            {
-              name: "生物多样性维护功能生物多样性维护功能",
-              id: 6,
-            },
-          ],
-        },
-      ];
+    async handleGetData() {
+      const formData = await getDataProductType();
+      const fileList = formData.getAll("file");
+      const data = JSON.parse(formData.getAll("data")[0]);
       this.treeData = [
         {
           name: "数据产品分类",
-          id:999,
+          id: 0,
           expand: true,
-          children:data,
-          ischecked:true
-        }
-      ]
+          level:0,
+          children: data,
+          ischecked: true,
+        },
+      ];
       this.handleChangeSelectNode(null, this.treeData[0]);
-      this.currentNode = this.treeData[0];
+      this.parentNode = this.treeData[0];
     },
     handleChangeSelectNode(list, node) {
-      this.currentNode = node;
-      this.tableData = node.children?.map(v=>({
-        name:v.name,
-        id:v.id
-      }));
+      this.parentNode = node;
+      this.tableData = node.children?.map((v) => {
+        const obj = {...v}
+        delete obj.children
+        return obj
+      });
     },
-
-
+    handleBeforeUpload(e){
+      this.formData.file = e;
+      return false
+    },
     renderContent(h, { root, node, data }) {
       return h(
         "span",
@@ -207,8 +194,7 @@ export default {
       return {
         id: node.id,
         label: node.name,
-        children:
-          node.children && node.children.length ? node.children : undefined,
+        children:node.children && node.children.length ? node.children : undefined,
       };
     },
   },
@@ -236,7 +222,7 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      .button{
+      .button {
         font-size: 14px;
         font-weight: 400;
         border: 1px solid #eee;
@@ -253,8 +239,8 @@ export default {
   }
   &_r {
     flex-grow: 1;
-    .btn{
-      button{
+    .btn {
+      button {
         margin-right: 5px;
       }
     }

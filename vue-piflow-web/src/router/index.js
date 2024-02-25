@@ -75,6 +75,11 @@ export default new Router({
               component: () => import('../components/pages/CategoryManagement')
             },
             {
+              path: '/preference',
+              name: 'preference',
+              component: () => import('../components/pages/CategoryManagement/Preference')
+            },
+            {
               path: '/producePublishManagement',
               name: 'producePublishManagement',
               component: () => import('../components/pages/DataProductManagement/Publish')

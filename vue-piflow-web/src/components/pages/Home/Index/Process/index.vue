@@ -1,106 +1,70 @@
 <template>
-    <div class="process">
-         <div v-for="(item,index) in list" :key="index">
-            <div class="process_title">
-                <img src="@/assets/img/home/title.png" alt="">
-                <h4>{{item.title}}</h4>
-            </div>
-            <div class="process_list" @click="handleEnter">
-                <div v-for="(child,idx) in item.list" :key="idx">
-                    <img :src="imgList[0]" alt="">
-                    <div>
-                        <p>{{child.title}}</p>
-                        <p>{{child.subTitle}}</p>
-                    </div>
-                 </div>
-            </div>
-
-         </div>
+  <div class="process">
+    <div v-for="(item, index) in list" :key="index">
+      <div class="process_title">
+        <img src="@/assets/img/home/title.png" alt="" />
+        <h4>{{ item.name }}</h4>
+      </div>
+      <div class="process_list">
+        <div
+          v-for="(child, idx) in item.children"
+          :key="idx"
+          @click="handleEnter"
+        >
+          <img :src="imgList[0]" alt="" />
+          <div>
+            <p>{{ child.name }}</p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 <script>
-import {getDataProductType} from '@/apis/dataProduct'
+import { getDataProductType } from "@/apis/dataProduct";
 export default {
-    data(){
+  data() {
+    return {
+      list: [],
+      imgList: [require("@/assets/img/home/p2.png")],
+    };
+  },
+  created() {
+    this.getList();
+  },
+  methods: {
+    handleEnter() {
+      this.$router.push("/home/list");
+    },
+    async getList() {
+      const formData = await getDataProductType();
+      const fileList = formData.getAll("file");
+      const list = JSON.parse(formData.getAll("data")[0]);
+      console.log(list);
+      this.list = list.map((v) => {
         return {
-            list:[],
-            imgList:[
-                require("@/assets/img/home/p2.png"),
-            ]
-        }
+          ...v,
+          children: this.flatArr(v.children),
+        };
+      });
+      this.list;
     },
-    created(){
-        this.getList()
-    },
-    methods:{
-        handleEnter(){
-            this.$router.push('/home/list')
-        },
-        async getList(){
-            // const res = await getDataProductType()
-            this.list = [
-                {
-                    title:'生态系统要素数据产品生产流水线',
-                    list:[
-                        {
-                            title:'大气环境要素数据产品',
-                            subTitle:'生产流水线',
-                            link:'123',
-                            image:''
-                        },
-                        {
-                            title:'大气环境要素数据产品',
-                            subTitle:'生产流水线',
-                            link:'123',
-                            image:''
-                        },
-                        {
-                            title:'大气环境要素数据产品',
-                            subTitle:'生产流水线',
-                            link:'123',
-                            image:''
-                        },
-                        {
-                            title:'大气环境要素数据产品',
-                            subTitle:'生产流水线',
-                            link:'123',
-                            image:''
-                        }
-                    ]
-                },
-                {
-                    title:'生态系统要素数据产品生产流水线',
-                    list:[
-                        {
-                            title:'大气环境要素数据产品',
-                            subTitle:'生产流水线',
-                            link:'123',
-                            image:''
-                        },
-                        {
-                            title:'大气环境要素数据产品',
-                            subTitle:'生产流水线',
-                            link:'123',
-                            image:''
-                        },
-                        {
-                            title:'大气环境要素数据产品',
-                            subTitle:'生产流水线',
-                            link:'123',
-                            image:''
-                        },
-                        {
-                            title:'大气环境要素数据产品',
-                            subTitle:'生产流水线',
-                            link:'123',
-                            image:''
-                        }
-                    ]
-                }
-            ]
+    flatArr(arr) {
+      if (!arr) return [];
+      let result = [];
+      arr.forEach((item) => {
+        var res = JSON.parse(JSON.stringify(item)); // 先克隆一份数据作为第一层级的填充
+        delete res["children"];
+        result.push(res);
+        if (item.children instanceof Array && item.children.length > 0) {
+          // 如果当前children为数组并且长度大于0，才可进入flag()方法
+          result = result.concat(this.flatArr(item.children));
         }
-    }
-}
+      });
+      return result;
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
