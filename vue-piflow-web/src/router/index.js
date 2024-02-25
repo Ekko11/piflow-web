@@ -49,6 +49,11 @@ export default new Router({
           path: 'list',
           name: 'homeList',
           component: () => import('../components/pages/Home/List'),
+        },
+        {
+          path: 'flowConfig',
+          name: 'flowConfig',
+          component: () => import('../components/pages/Home/Flow/FlowConfig'),
         }
       ],
     },

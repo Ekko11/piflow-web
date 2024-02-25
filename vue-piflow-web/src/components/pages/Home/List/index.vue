@@ -86,6 +86,7 @@ export default {
   methods: {
     handleEnter(row){
         console.log(row)
+        this.$router.push('/home/flowConfig')
     },
     handShowInstructions(row){
         console.log(row)
