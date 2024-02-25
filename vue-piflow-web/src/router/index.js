@@ -16,11 +16,7 @@ export default new Router({
       name: 'bootPage',
       component: () => import('../components/pages/bootPage')
     },
-    {
-      path: '/graphconfig',
-      name: 'GraphConfig',
-      component: () => import('../components/pages/Visualization/GraphConfig')
-    },
+
     // 门户界面
     {
       path: '/home',
@@ -225,7 +221,12 @@ export default new Router({
           path: '/drawingBoard',
           name: 'drawingboard',
           component: () => import('../components/pages/DrawingBoard')
-        }
+        },
+        {
+          path: '/graphconfig',
+          name: 'GraphConfig',
+          component: () => import('../components/pages/Visualization/GraphConfig')
+        },
       ]
     }
   ]

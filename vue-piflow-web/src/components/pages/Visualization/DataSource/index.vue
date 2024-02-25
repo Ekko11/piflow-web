@@ -3,7 +3,7 @@
     <!-- header -->
     <div class="navbar">
       <div class="left">
-        <span>{{ $t("sidebar.data_source") }}</span>
+        <span>{{ $t("sidebar.datasource") }}</span>
       </div>
       <div class="right">
         <span class="button-warp" @click="handleModalSwitch">
@@ -65,8 +65,8 @@
         <div class="item" v-if="!formData.id">
           <label>{{ $t("datasource.type") }}：</label>
           <Select v-model="formData.type" style="width: 350px">
-            <Option value="mysql">mysql</Option>
-            <Option value="excel">excel</Option>
+            <Option value="mysql">Mysql</Option>
+            <Option value="excel">Excel</Option>
           </Select>
         </div>
         <div class="item">
@@ -194,7 +194,10 @@ export default {
         {
           title: this.$t("datasource.name"),
           key: "name",
-          sortable: true,
+        },
+        {
+          title: this.$t("datasource.type"),
+          key: "type",
         },
         {
           title: this.$t("datasource.description"),

@@ -13,8 +13,8 @@
         <label>线样式：</label>
         <Select v-model="lineChart.lineStyle.type">
           <Option :value="'solid'">实线</Option>
-          <Option :value="'dashed'">点线</Option>
-          <Option :value="'dotted'">虚线</Option>
+          <Option :value="'dotted'">点线</Option>
+          <Option :value="'dashed'">虚线</Option>
         </Select>
       </div>
       <div>

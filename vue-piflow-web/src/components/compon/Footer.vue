@@ -1,5 +1,12 @@
 <template>
   <footer>
+    <Breadcrumb v-if="VisualConfig" id="BreadcrumbVisualization">
+      <span class="spanPointer" @click="handleClick('visualconfig')">Visualization
+        <span style="margin: 0 5px;display: inline-block">&gt;&gt;</span>
+      </span>
+      <span style="font-weight: bold">Visualization Graphconfig</span>
+    </Breadcrumb>
+
     <Breadcrumb id="BreadcrumbFlow">
       <span class="spanPointer" @click="handleClick('flow')">Flow
         <span style="margin: 0 5px;display: inline-block">&gt;&gt;</span>
@@ -65,6 +72,9 @@ export default {
             document.getElementById('BreadcrumbFlow').style.display = 'none';
           });
           break;
+          case 'visualconfig':
+          this.$router.push('/visualization/visualconfig');
+          break;
           case 'group':
             window.sessionStorage.setItem("menuName", 'group');
             this.$router.push({
@@ -98,6 +108,19 @@ export default {
           break;
       }
     }
+  },
+  data(){
+    return {
+      VisualConfig:false
+    }
+  },
+  watch:{
+    $route:{
+      handler(val){
+      this.VisualConfig = val.name === 'GraphConfig' ?true: false
+    },
+    immediate:true
+    }
   }
 };
 </script>
@@ -124,9 +147,10 @@ footer {
     span, a{
       color: #ffffff
     }
+
+  }
   .spanPointer{
     cursor: pointer;
-  }
   }
 }
 </style>

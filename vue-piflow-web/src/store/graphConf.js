@@ -7,10 +7,10 @@ const InitState = () => ({
   baseOptions: {
     color: [
       "#7cb5ec",
-      "#058DC7",
       "#90ed7d",
       "#f7a35c",
       "#8085e9",
+      "#058DC7",
       "#f15c80",
       "#e4d354",
       "#2b908f",
@@ -28,13 +28,23 @@ const InitState = () => ({
         color: "#000",
       },
     },
+    dataZoom:[
+      {
+        type: 'slider',
+        id : 'sliderX',
+        show: false,
+        bottom: 5,
+        height: 10
+      }
+    ],
     legend: {
       show: true,
-      orient: "auto",
+      orient: "horizontal",
       left: "20",
+      top:'25'
     },
     grid: {
-      top: "10%",
+      top: '20%',
       bottom: "10%",
       left: "10%",
       right: "10%",

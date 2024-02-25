@@ -3,7 +3,7 @@
     <!-- header -->
     <div class="navbar">
       <div class="left">
-        <span>{{ $t("sidebar.data_source") }}</span>
+        <span>{{ $t("sidebar.visualconfig") }}</span>
       </div>
       <div class="right">
         <span class="button-warp" @click="handleModalSwitch">
@@ -51,10 +51,10 @@
 
     <Modal
     v-model="isOpen"
-    :title="$t('visualconfig.create_title')"
+    :title="formData.id?$t('visualconfig.update_title'):$t('visualconfig.create_title')"
     :ok-text="$t('modal.ok_text')"
     :cancel-text="$t('modal.cancel_text')"
-    @on-ok="handleAdd">
+    @on-ok="handleConfirm">
   <div class="modal-warp">
     <div class="item">
       <label>{{$t('visualconfig.name')}}：</label>
@@ -74,7 +74,7 @@
           :placeholder="$t('modal.placeholder')"
           style="width: 350px"/>
     </div>
-    <div class="item">
+    <div class="item" v-if="!formData.id">
       <label class="self">{{$t('visualconfig.datasource')}}：</label>
       <Select v-model="formData.graphTemplateId" 
         style="width:350px">
@@ -115,9 +115,13 @@ export default {
       param: "",
       // 操作
       promptContent: [
-        {
+         {
           content: "Enter",
           icon: "ios-redo",
+        },
+        {
+          content: "Edit",
+          icon: "ios-create-outline",
         },
         {
           content: "Delete",
@@ -146,7 +150,7 @@ export default {
         {
           title: this.$t("visualconfig.action"),
           slot: "action",
-          width: 150,
+          width: 180,
           align: "center",
         },
       ];
@@ -170,11 +174,55 @@ export default {
           this.handleEnter(row);
           break;
         case 2:
+          this.handleEdit(row);
+          break;
+        case 3:
           this.handleDelete(row);
           break;
         default:
           break;
       }
+    },
+    handleEdit(row){
+      const {id,name,description} = row
+      this.formData = {id,name,description}
+      this.isOpen = true
+    },
+    handleConfirm(){
+      if( this.formData.id){
+        this.handleUpdate()
+      }else{
+         this.handleAdd()
+      }
+    },
+    handleUpdate(){
+      const {id,name,description} = this.formData
+      this.$event.emit("loading", true);
+      this.$axios({
+        method: "POST",
+        baseURL: baseUrl,
+        url: "/visual/updateGraphConf",
+        data: {
+          id,name,description,
+          addFlag:'update',
+        },
+      })
+        .then((res) => {
+          this.$event.emit("loading", false);
+          if (res.data.code === 200) {
+            this.isOpen = false;
+            this.$Message.success({
+              content: this.$t("tip.update_success_content"),
+              duration: 3,
+            });
+            this.getTableData();
+          } else {
+            this.$Message.error({
+              content: res.data.msg,
+              duration: 3,
+            });
+          }
+        })
     },
     handleAdd(){
       this.$event.emit("loading", true);

@@ -1,8 +1,8 @@
 <template>
-  <section>
-    <Collapse simple v-if="barChart">
+  <div>
+    <Collapse simple  :value="['bar','label']" v-if="barChart">
       <!-- title 配置 -->
-      <Panel name="title">
+      <Panel name="bar">
         柱设置(bar)
         <template #content>
           <div class="formWrap">
@@ -28,7 +28,7 @@
           </div>
           <div>
             <label>颜色：</label>
-            <ColorPicker v-model="barChart.label.color" />
+            <ColorPicker recommend v-model="barChart.label.color" />
           </div>
           <div>
             <label>位置：</label>
@@ -42,7 +42,7 @@
       </template>
     </Panel>
     </Collapse>
-  </section>
+  </div>
 </template>
   
   <script>

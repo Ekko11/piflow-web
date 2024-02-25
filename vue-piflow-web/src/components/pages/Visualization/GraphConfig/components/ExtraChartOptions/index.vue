@@ -1,8 +1,8 @@
 <template>
-  <section class="card">
-    <h1>拓展属性</h1>
+  <!-- <section class="card">
+    <h1>图表配置</h1> -->
     <component :is="chartType" />
-  </section>
+  <!-- </section> -->
 </template>
   
   <script>

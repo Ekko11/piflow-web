@@ -1,6 +1,31 @@
 <template>
   <section class="card">
-    <h1>基础属性</h1>
+    <div class="card">
+      <h1>图表配置</h1>
+    </div>
+    <div class="formWrap" style="padding: 0 16px;">
+      <div>
+        <label>图表标题：</label>
+        <Input v-model="baseOptions.title.text" />
+      </div>
+      <div>
+        <label>横轴类型：</label>
+        <Select v-model="baseOptions.xAxis.type">
+          <Option value="value">数值轴</Option>
+          <Option value="category">类目轴</Option>
+        </Select>
+      </div>
+      <div>
+        <label>纵轴类型：</label>
+        <Select v-model="baseOptions.yAxis.type">
+          <Option value="value">数值轴</Option>
+          <Option value="category">类目轴</Option>
+        </Select>
+      </div>
+    </div>
+    <ExtraChartOptions />
+
+    <h1>高级配置</h1>
     <Collapse simple v-if="baseOptions">
       <!-- title 配置 -->
       <Panel name="title">
@@ -13,12 +38,15 @@
             </div>
             <div>
               <label>颜色：</label>
-              <ColorPicker v-model="baseOptions.title.textStyle.color" />
+              <ColorPicker
+                v-model="baseOptions.title.textStyle.color"
+                recommend
+              />
             </div>
-            <div>
+            <!-- <div>
               <label>文本：</label>
               <Input v-model="baseOptions.title.text" />
-            </div>
+            </div> -->
             <div>
               <label>位置：</label>
               <Select v-model="baseOptions.title.left">
@@ -62,50 +90,6 @@
           </div>
         </template>
       </Panel>
-      <!-- grid 配置 -->
-      <Panel name="grid">
-        网格(grid)
-        <template #content>
-          <div class="formWrap">
-            <div>
-              <label>top：</label>
-              <Input v-model="baseOptions.grid.top" />
-            </div>
-            <div>
-              <label>bottom：</label>
-              <Input v-model="baseOptions.grid.bottom" />
-            </div>
-            <div>
-              <label>left：</label>
-              <Input v-model="baseOptions.grid.left" />
-            </div>
-            <div>
-              <label>right：</label>
-              <Input v-model="baseOptions.grid.right" />
-            </div>
-          </div>
-        </template>
-      </Panel>
-      <!-- tooltip 配置 -->
-      <Panel name="tooltip">
-        提示框(tooltip)
-        <template #content>
-          <div class="formWrap">
-            <div>
-              <label>显示：</label>
-              <Checkbox v-model="baseOptions.tooltip.show">是</Checkbox>
-            </div>
-            <div>
-              <label>触发条件：</label>
-              <Select v-model="baseOptions.tooltip.triggerOn">
-                <Option value="mousemove">鼠标移动</Option>
-                <Option value="click">鼠标点击</Option>
-                <Option value="none">不触发</Option>
-              </Select>
-            </div>
-          </div>
-        </template>
-      </Panel>
       <!-- textStyle 配置 -->
       <Panel name="textStyle">
         字体样式(textStyle)
@@ -113,7 +97,7 @@
           <div class="formWrap">
             <div>
               <label>颜色：</label>
-              <ColorPicker v-model="baseOptions.textStyle.color" />
+              <ColorPicker v-model="baseOptions.textStyle.color" recommend />
             </div>
             <div>
               <label>字体风格：</label>
@@ -154,20 +138,17 @@
                 <Option value="center">居中</Option>
               </Select>
             </div>
-            <div>
-              <label>类型：</label>
-              <Select v-model="baseOptions.xAxis.type">
-                <Option value="value">数值轴</Option>
-                <Option value="category">类目轴</Option>
-              </Select>
-            </div>
+
             <div>
               <label>显示轴线：</label>
               <Checkbox v-model="baseOptions.xAxis.axisLine.show">是</Checkbox>
             </div>
             <div>
               <label>轴线颜色：</label>
-              <ColorPicker v-model="baseOptions.xAxis.axisLine.lineStyle.color" />
+              <ColorPicker
+                recommend
+                v-model="baseOptions.xAxis.axisLine.lineStyle.color"
+              />
             </div>
             <div>
               <label>两侧留白：</label>
@@ -217,20 +198,17 @@
                 <Option value="center">居中</Option>
               </Select>
             </div>
-            <div>
-              <label>类型：</label>
-              <Select v-model="baseOptions.yAxis.type">
-                <Option value="value">数值轴</Option>
-                <Option value="category">类目轴</Option>
-              </Select>
-            </div>
+
             <div>
               <label>显示轴线：</label>
               <Checkbox v-model="baseOptions.yAxis.axisLine.show">是</Checkbox>
             </div>
             <div>
               <label>轴线颜色：</label>
-              <ColorPicker v-model="baseOptions.yAxis.axisLine.lineStyle.color" />
+              <ColorPicker
+                recommend
+                v-model="baseOptions.yAxis.axisLine.lineStyle.color"
+              />
             </div>
             <div>
               <label>两侧留白：</label>
@@ -259,14 +237,60 @@
           </div>
         </template>
       </Panel>
+      <!-- grid 配置 -->
+      <Panel name="grid">
+        网格(grid)
+        <template #content>
+          <div class="formWrap">
+            <div>
+              <label>top：</label>
+              <Input v-model="baseOptions.grid.top" />
+            </div>
+            <div>
+              <label>bottom：</label>
+              <Input v-model="baseOptions.grid.bottom" />
+            </div>
+            <div>
+              <label>left：</label>
+              <Input v-model="baseOptions.grid.left" />
+            </div>
+            <div>
+              <label>right：</label>
+              <Input v-model="baseOptions.grid.right" />
+            </div>
+          </div>
+        </template>
+      </Panel>
+      <!-- tooltip 配置 -->
+      <Panel name="tooltip">
+        提示框(tooltip)
+        <template #content>
+          <div class="formWrap">
+            <div>
+              <label>显示：</label>
+              <Checkbox v-model="baseOptions.tooltip.show">是</Checkbox>
+            </div>
+            <div>
+              <label>触发条件：</label>
+              <Select v-model="baseOptions.tooltip.triggerOn">
+                <Option value="mousemove">鼠标移动</Option>
+                <Option value="click">鼠标点击</Option>
+                <Option value="none">不触发</Option>
+              </Select>
+            </div>
+          </div>
+        </template>
+      </Panel>
     </Collapse>
   </section>
 </template>
   
   <script>
 import { mapGetters } from "vuex";
+import ExtraChartOptions from "../ExtraChartOptions";
 export default {
   name: "BaseChartOptions",
+  components: { ExtraChartOptions },
   computed: {
     ...mapGetters("graphConf", ["baseOptions", "yAxisType"]),
   },
