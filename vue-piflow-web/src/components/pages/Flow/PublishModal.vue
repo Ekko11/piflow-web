@@ -4,6 +4,7 @@
     :title="formData.id ? '编辑' : '发布'"
     :ok-text="$t('modal.ok_text')"
     :cancel-text="$t('modal.cancel_text')"
+    width='600'
   >
     <div class="modal-warp">
       <Form
@@ -51,6 +52,14 @@
                   :placeholder="$t('modal.placeholder')"
                   style="width: 200px"
                 />
+              </div>
+               <div class="item">
+                <label>发布类型：</label>
+                <Radio-group  v-model="child.state">
+                  <Radio :label="0">输入</Radio>
+                  <Radio :label="1">其他</Radio>
+                  <Radio :label="2">输出</Radio>
+                </Radio-group>
               </div>
               <div class="item" @click="handleClickUpload(index, idx)">
                 <label>上传文件：</label>
@@ -126,6 +135,7 @@ export default {
             stopPublishingPropertyName:item.name,
             fileName:item.fileName,
             name:item.name,
+            state:item.state
           }))
         }
       })
@@ -163,7 +173,7 @@ export default {
       console.log(this.formData,filteredArray);
       const formData = new FormData()
       this.fileList.forEach(v => {
-        formData.append('files',v)
+        formData.append('file',v)
       });
         formData.append('flowPublishingVo',JSON.stringify(this.formData))
       // const data= this.objectToFormData(filteredArray)

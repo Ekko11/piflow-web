@@ -74,12 +74,10 @@
         <div class="item">
           <label>上传文件：</label>
           <div>
-            <Upload  action="/aaa" :before-upload="handleBeforeUpload">
-              <Button icon="ios-cloud-upload-outline"
-                >Upload files</Button
-              >
+            <Upload action="/aaa" :before-upload="handleBeforeUpload">
+              <Button icon="ios-cloud-upload-outline">Upload files</Button>
             </Upload>
-            <p v-if="formData.file">{{formData.file.name}}</p>
+            <p v-if="formData.file">{{ formData.file.name }}</p>
           </div>
         </div>
       </div>
@@ -87,8 +85,8 @@
   </section>
 </template>
 <script>
-import { getDataProductType,saveDataProduct } from "@/apis/dataProduct";
-import { findTree } from '@/utils/tree';
+import { getDataProductType, saveDataProduct } from "@/apis/dataProduct";
+import { findTree } from "@/utils/tree";
 
 export default {
   data() {
@@ -131,12 +129,24 @@ export default {
     this.handleGetData();
   },
   methods: {
-   async handleComfirm() {
-      console.log(this.formData)
-      if(!this.formData.id) this.formData.level = this.parentNode.level  + 1
-      if(this.parentNode.level === 0)this.formData.parentId = 0
-      const res = await saveDataProduct(this.formData)
-      console.log(res)
+    async handleComfirm() {
+      console.log(this.formData);
+      if (!this.formData.id) this.formData.level = this.parentNode.level + 1;
+      if (this.parentNode.level === 0) this.formData.parentId = 0;
+      const res = await saveDataProduct(this.formData);
+      if (res.data.code == 200) {
+        this.$Modal.success({
+          title: this.$t("tip.title"),
+          content: this.$t("tip.update_success_content"),
+        });
+      }else{
+         this.$Modal.error({
+          title: this.$t("tip.title"),
+          content: this.$t("tip.update_fail_content")
+        });
+        
+      }
+      console.log(res);
     },
 
     handleAddChild(node) {
@@ -146,38 +156,38 @@ export default {
     },
     handleEdit(row) {
       this.isOpen = true;
-      const {id,parentId,level,name,description,file} = row
-      this.formData = {id,parentId,level,name,description,file};
+      const { id, parentId, level, name, description, file } = row;
+      this.formData = { id, parentId, level, name, description, file };
     },
     async handleGetData() {
       const formData = await getDataProductType();
       const fileList = formData.getAll("file");
       const data = JSON.parse(formData.getAll("data")[0]);
-      console.log(JSON.stringify(JSON.parse(data)))
       this.treeData = [
         {
           name: "数据产品分类",
           id: 0,
           expand: true,
-          level:0,
+          level: 0,
           children: data,
           ischecked: true,
         },
       ];
       this.handleChangeSelectNode(null, this.treeData[0]);
       this.parentNode = this.treeData[0];
+      console.log(formData);
     },
     handleChangeSelectNode(list, node) {
       this.parentNode = node;
       this.tableData = node.children?.map((v) => {
-        const obj = {...v}
-        delete obj.children
-        return obj
+        const obj = { ...v };
+        delete obj.children;
+        return obj;
       });
     },
-    handleBeforeUpload(e){
+    handleBeforeUpload(e) {
       this.formData.file = e;
-      return false
+      return false;
     },
     renderContent(h, { root, node, data }) {
       return h(
@@ -195,7 +205,8 @@ export default {
       return {
         id: node.id,
         label: node.name,
-        children:node.children && node.children.length ? node.children : undefined,
+        children:
+          node.children && node.children.length ? node.children : undefined,
       };
     },
   },

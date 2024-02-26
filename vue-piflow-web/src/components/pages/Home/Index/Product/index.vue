@@ -42,6 +42,7 @@ export default {
   data() {
     return {
         treeData: [],
+        
     };
   },
   created(){

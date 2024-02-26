@@ -9,7 +9,7 @@
         <div
           v-for="(child, idx) in item.children"
           :key="idx"
-          @click="handleEnter"
+          @click="handleEnter(child.id)"
         >
           <img :src="imgList[0]" alt="" />
           <div>
@@ -33,36 +33,16 @@ export default {
     this.getList();
   },
   methods: {
-    handleEnter() {
-      this.$router.push("/home/list");
+    handleEnter(id) {
+      this.$router.push(`/home/list?type=${id}`);
     },
     async getList() {
       const formData = await getDataProductType();
       const fileList = formData.getAll("file");
       const list = JSON.parse(formData.getAll("data")[0]);
-      console.log(list);
-      this.list = list.map((v) => {
-        return {
-          ...v,
-          children: this.flatArr(v.children),
-        };
-      });
-      this.list;
+      this.list = list
     },
-    flatArr(arr) {
-      if (!arr) return [];
-      let result = [];
-      arr.forEach((item) => {
-        var res = JSON.parse(JSON.stringify(item)); // 先克隆一份数据作为第一层级的填充
-        delete res["children"];
-        result.push(res);
-        if (item.children instanceof Array && item.children.length > 0) {
-          // 如果当前children为数组并且长度大于0，才可进入flag()方法
-          result = result.concat(this.flatArr(item.children));
-        }
-      });
-      return result;
-    },
+
   },
 };
 </script>

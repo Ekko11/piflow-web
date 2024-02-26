@@ -28,6 +28,9 @@
           </DropdownMenu>
         </Dropdown>
       </li>
+      <li class="homeBtn"  style="font-size:16px" @click="handleToHome">
+         <Icon type="ios-aperture"  style="margin-right:5px"/>门户
+      </li>
     </ul>
   </header>
 </template>
@@ -63,6 +66,9 @@ export default {
             path: '/',
             name: 'sections',
         });
+    },
+    handleToHome(){
+      this.$router.push('/home')
     }
   },
 };

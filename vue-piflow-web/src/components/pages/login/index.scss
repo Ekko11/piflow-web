@@ -43,11 +43,23 @@
       }
     }
     .header {
+      >div:first-child{
+        display: flex;
+        align-items: center;
+      }
       display: flex;
-      // justify-content: center;
+      justify-content: space-between;
       align-items: center;
       padding: 5px 30px;
       background: var(--primary-color);
+    }
+    .homeBtn{
+      font-size: 16px;
+      color: #fff;
+      cursor: pointer;
+      i{
+        margin-right: 5px;
+      }
     }
     .header .logo {
       width: 30px;

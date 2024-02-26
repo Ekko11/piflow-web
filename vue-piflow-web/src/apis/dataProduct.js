@@ -11,6 +11,12 @@ export function getDataProductType () {
         }
       })
 }
+// export function getDataProductType () {
+//     return axios({
+//         method:'get',
+//         url:'/dataProductType/get',
+//     })
+// }
 // 数据产品编辑或新增
 export function saveDataProduct (data) {
     return axios({

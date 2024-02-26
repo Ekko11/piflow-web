@@ -1,18 +1,33 @@
 <template>
   <div class="content">
-    <h4 class="content_title">· 大气环境要素数据产品加工 ·</h4>
+    <h4 class="content_title">· {{ currentNode.name }} ·</h4>
     <div class="desc">
-      参照气象行业标准《地面气象观测资料质量控制》，对自动气象观测站观测的逐时地面气象要素（气温、降水量、湿度、风速、大气压等）和辐射要素数据（L0级数据）进行质量控制、数据插补和统计分析等处理，生成日尺度、月尺度和年尺度的大气环境要素数据产品（L1-L3级数据）。
+      {{ currentNode.description }}
+    </div>
+
+    <div v-if="currentNode.children && currentNode.children.length" class="process flow_process" >
+      <div class="process_list">
+        <div
+          v-for="(child, idx) in currentNode.children"
+          :key="idx"
+          @click="handleChangeNode(child.id)"
+        >
+          <img :src="imgList[0]" alt="" />
+          <div>
+            <p>{{ child.name }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="list">
       <Table :columns="columns" :data="data">
         <template slot-scope="{ row }" slot="action">
-            <div class="btn">
-                <Button @click="handleEnter(row)">进入</Button>
-                <Button @click="handShowInstructions(row)">说明</Button>
-            </div>
-          </template>
+          <div class="btn">
+            <Button @click="handleEnter(row)">进入</Button>
+            <Button @click="handShowInstructions(row)">说明</Button>
+          </div>
+        </template>
       </Table>
       <div class="page">
         <Page
@@ -29,12 +44,16 @@
 </template>
 
 <script>
+import { findTree } from "@/utils/tree";
+import { getDataProductType } from "@/apis/dataProduct";
 export default {
   data() {
     return {
       page: 1,
       limit: 10,
       total: 30,
+      currentNode: {},
+      imgList: [require("@/assets/img/home/p2.png")],
       columns: [
         {
           title: "名称",
@@ -52,7 +71,7 @@ export default {
           title: "操作",
           slot: "action",
           width: 200,
-          align: "center"
+          align: "center",
         },
       ],
       data: [
@@ -83,29 +102,53 @@ export default {
       ],
     };
   },
+  created() {
+    this.getList();
+  },
   methods: {
-    handleEnter(row){
-        console.log(row)
-        this.$router.push('/home/flowConfig')
+    async getList() {
+        const formData = await getDataProductType();
+      const fileList = formData.getAll("file");
+      const list = JSON.parse(formData.getAll("data")[0]);
+      this.list = list;
+      this.handleSetCurrentNode(this.$route.query.type)
     },
-    handShowInstructions(row){
-        console.log(row)
+    handleChangeNode(id){
+       this.$router.replace(`/home/list?type=${id}`);
+      this.handleSetCurrentNode(id)
+
+    },
+    handleSetCurrentNode(id){
+      const node = findTree(this.list, id);
+      this.currentNode = node;
+    },
+    handleEnter(row) {
+      console.log(row);
+      this.$router.push("/home/flowConfig");
+    },
+    handShowInstructions(row) {
+      console.log(row);
     },
     onPageChange(pageNo) {
       this.page = pageNo;
-      this.getTableData()
+      this.getTableData();
     },
 
     onPageSizeChange(pageSize) {
       this.limit = pageSize;
-      this.getTableData()
+      this.getTableData();
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+@import "../Index/index.scss";
 @import "../index.scss";
+.flow_process{
+    border: 1px dashed rgb(0, 111, 238);
+    margin-top: 20px;
+}
 ::v-deep .list {
   margin-top: 32px;
   .ivu-table {
@@ -116,14 +159,14 @@ export default {
         line-height: 65px;
         font-size: 14px;
         padding: 0;
-        &:not(:last-child){
-            position: relative;
-            &::after{
-                content: '|';
-                position: absolute;
-                right: 0;
-                top: 0;
-            }
+        &:not(:last-child) {
+          position: relative;
+          &::after {
+            content: "|";
+            position: absolute;
+            right: 0;
+            top: 0;
+          }
         }
         &:first-child {
           border-radius: 8px 0 0 0;
@@ -134,35 +177,35 @@ export default {
       }
     }
     .ivu-table-tbody {
-        td{
-            background: #f7f9fa;
-        }
+      td {
+        background: #f7f9fa;
+      }
     }
   }
 }
-.btn{
-    button{
-        line-height: 24px;
-        height: 24px;
-        font-size: 11px;
-        padding: 0 12px;
-        margin-right: 8px;
-        border-radius: 8px;
-        &:first-child{
-            background: #006FEE;
-            color: #fff;
-        }
-        &:last-child{
-            background: #F2EAFA;
-            border:1px solid #6020A0;
-            color: #6020A0;
-            box-sizing: border-box;
-        }
+.btn {
+  button {
+    line-height: 24px;
+    height: 24px;
+    font-size: 11px;
+    padding: 0 12px;
+    margin-right: 8px;
+    border-radius: 8px;
+    &:first-child {
+      background: #006fee;
+      color: #fff;
     }
+    &:last-child {
+      background: #f2eafa;
+      border: 1px solid #6020a0;
+      color: #6020a0;
+      box-sizing: border-box;
+    }
+  }
 }
-.page{
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 32px;
+.page {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
 }
 </style>

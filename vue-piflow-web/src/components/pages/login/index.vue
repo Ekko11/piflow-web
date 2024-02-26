@@ -1,10 +1,13 @@
 <template>
   <div class="login">
     <div class="header">
+    <div>
       <div class="logo"></div>
       <div class="title">
         <h1>{{title }}</h1>
       </div>
+    </div>
+      <div class="homeBtn" @click="handleToHome"><Icon type="md-globe" />门户</div>
     </div>
 
     <i class="map"></i>
@@ -163,6 +166,9 @@ export default {
     window.addEventListener('keydown',this.keyDown);
   },
   methods: {
+    handleToHome(){
+      this.$router.push('/home')
+    },
     onChange() {
       this.isLogin = !this.isLogin;
       this.handleReset();
