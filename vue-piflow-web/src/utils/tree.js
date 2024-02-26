@@ -49,7 +49,7 @@ export const findTree = (data, value, key = 'id') => {
     while (stack.length) {
       const current = stack.pop()
       if (!current) continue
-      if (current[key] === value) return current
+      if (current[key] == value) return current
   
       if (current.children && current.children.length) {
         for (let i = 0; i < current.children.length; i++) {

@@ -1,20 +1,20 @@
 <template>
   <div class="content">
-    <h4 class="content_title">· 大气环境要素数据产品加工 ·</h4>
-    <div class="desc">
-      参照气象行业标准《地面气象观测资料质量控制》，对自动气象观测站观测的逐时地面气象要素（气温、降水量、湿度、风速、大气压等）和辐射要素数据（L0级数据）进行质量控制、数据插补和统计分析等处理，生成日尺度、月尺度和年尺度的大气环境要素数据产品（L1-L3级数据）。
+    <h4 class="content_title">· {{ publishInfo.name }} ·</h4>
+    <div class="desc" v-if="publishInfo.description">
+      {{ publishInfo.description }}
     </div>
 
-    <div class="contain">
+    <div class="contain" v-if="publishInfo.stops">
       <div class="config">
         <div class="config_l">
-          <template v-for="item in stops">
+          <template v-for="item in publishInfo.stops">
             <div
               v-for="child in item.stopPublishingPropertyVos"
               :key="child.id"
             >
               <div class="label">
-                {{ child.name }} <Icon type="md-cloud-download" />
+                {{ child.name }} <Icon type="md-cloud-download"  @click="handleDownload(child.id)"/>
               </div>
               <div>
                 <Upload action="/null" :before-upload="handleBeforeUpload">
@@ -23,7 +23,6 @@
                   >
                 </Upload>
                 <p v-if="child.file">{{ child.fileName }}</p>
-                <p>文件123.txt</p>
               </div>
             </div>
           </template>
@@ -71,6 +70,9 @@
 </template>
   
   <script>
+import { getPublishingById } from "@/apis/flowPublish";
+import { downloadFile } from "@/apis/file";
+
 export default {
   data() {
     return {
@@ -78,42 +80,7 @@ export default {
       limit: 5,
       total: 30,
       historyIsShow:false,
-      stops: [
-        {
-          stopId: "1",
-          stopPublishingPropertyVos: [
-            {
-              id: "2",
-              propertyId: "3",
-              name: "生物量数据输入",
-              customValue: "",
-            },
-            {
-              id: "4",
-              propertyId: "5",
-              name: "表层土壤统计数据输入",
-              customValue: "",
-            },
-          ],
-        },
-        {
-          stopId: "6",
-          stopPublishingPropertyVos: [
-            {
-              id: "7",
-              propertyId: "8",
-              name: "剖面土壤统计数据输入",
-              customValue: "",
-            },
-            {
-              id: "9",
-              propertyId: "10",
-              name: "参数设置",
-              customValue: "",
-            },
-          ],
-        },
-      ],
+      publishInfo:{},
       columns: [
         {
           title: "名称",
@@ -166,7 +133,17 @@ export default {
       ],
     };
   },
+  created(){
+    this.handleGetStopsById()
+  },
   methods: {
+    async handleGetStopsById(){
+      const res = await getPublishingById(this.$route.query.id);
+      this.publishInfo = res.data.data
+    },
+  async handleDownload(id){
+      const  res = await downloadFile(id)
+    },
     handleEnter(row) {
       console.log(row);
     },

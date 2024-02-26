@@ -68,7 +68,7 @@ export default {
         },
         {
           title: "类型",
-          key: "name",
+          key: "productTypeName",
         },
         {
           title: "描述",
@@ -76,15 +76,11 @@ export default {
         },
         {
           title: "创建人",
-          key: "description",
+          key: "crtUser",
         },
         {
           title: "创建时间",
-          key: "description",
-        },
-        {
-          title: "状态",
-          key: "description",
+          key: "crtDttm",
         },
         {
           title: this.$t("database.action"),
@@ -106,44 +102,9 @@ export default {
     },
   },
   methods: {
-    handleGetTreeData() {
-      const data = [
-        {
-          name: "生态系统要素数据",
-          id: 1,
-          children: [
-            {
-              name: "大气环境要素",
-              id: 3,
-            },
-            {
-              name: "生物要素",
-              id: 4,
-            },
-          ],
-        },
-        {
-          name: "生态系统服务功能数据",
-          id: 2,
-          children: [
-            {
-              name: "生产力和固碳功能",
-              id: 5,
-            },
-            {
-              name: "生物多样性维护功能生物多样性维护功能",
-              id: 6,
-            },
-          ],
-        },
-      ];
-      this.treeData = data;
-    },
-
     handleEdit(row) {
-      this.$refs.PublishModal.handleEdit(row.id);
+      this.$refs.PublishModal.handleEdit(row);
     },
-
     handleDelete(row) {
       this.$Modal.confirm({
         title: this.$t("tip.title"),
@@ -151,10 +112,9 @@ export default {
         cancelText: this.$t("modal.cancel_text"),
         content: `${this.$t("modal.delete_content")} ${row.name}?`,
         onOk: async () => {
-          const res = await deleteFlowPublish();
+          const res = await deleteFlowPublish(row.id);
           if (res.data.code === 200) {
-            this.$Modal.success({
-              title: this.$t("tip.title"),
+            this.$Message.success({
               content: `${row.name} ` + this.$t("tip.delete_success_content"),
             });
             this.getTableData();
@@ -172,11 +132,10 @@ export default {
       if (this.param) {
         data.keyword = this.param;
       }
-      // const res = await getflowPublishList(data)
-      // console.log(res)
-      this.tableData = [{ name: 123 }];
+      const res = await getflowPublishList(data)
+      this.tableData = res.data.data;
+      this.total = res.data.count
     },
-
     onPageChange(pageNo) {
       this.page = pageNo;
       this.getTableData();

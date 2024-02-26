@@ -21,7 +21,7 @@
     </div>
 
     <div class="list">
-      <Table :columns="columns" :data="data">
+      <Table :columns="columns" :data="tableData">
         <template slot-scope="{ row }" slot="action">
           <div class="btn">
             <Button @click="handleEnter(row)">进入</Button>
@@ -46,12 +46,14 @@
 <script>
 import { findTree } from "@/utils/tree";
 import { getDataProductType } from "@/apis/dataProduct";
+import { getflowPublishListByProductTypeId } from "@/apis/flowPublish";
 export default {
   data() {
     return {
       page: 1,
       limit: 10,
-      total: 30,
+      total: 0,
+      tableData:[],
       currentNode: {},
       imgList: [require("@/assets/img/home/p2.png")],
       columns: [
@@ -61,43 +63,17 @@ export default {
         },
         {
           title: "描述信息",
-          key: "age",
+          key: "description",
         },
         {
           title: "创建时间",
-          key: "address",
+          key: "crtDttm",
         },
         {
           title: "操作",
           slot: "action",
           width: 200,
           align: "center",
-        },
-      ],
-      data: [
-        {
-          name: "John Brown",
-          age: 18,
-          address: "New York No. 1 Lake Park",
-          date: "2016-10-03",
-        },
-        {
-          name: "Jim Green",
-          age: 24,
-          address: "London No. 1 Lake Park",
-          date: "2016-10-01",
-        },
-        {
-          name: "Joe Black",
-          age: 30,
-          address: "Sydney No. 1 Lake Park",
-          date: "2016-10-02",
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park",
-          date: "2016-10-04",
         },
       ],
     };
@@ -121,10 +97,20 @@ export default {
     handleSetCurrentNode(id){
       const node = findTree(this.list, id);
       this.currentNode = node;
+      this.getTableData()
+    },
+    async getTableData(){
+      const data = {
+        page:this.page,
+        limit:this.limit,
+        productTypeId:this.currentNode.id
+      }
+      const res  = await getflowPublishListByProductTypeId(data)
+      this.tableData = res.data.data
+      this.total = res.data.count
     },
     handleEnter(row) {
-      console.log(row);
-      this.$router.push("/home/flowConfig");
+      this.$router.push(`/home/flowConfig?id=${row.id}`);
     },
     handShowInstructions(row) {
       console.log(row);

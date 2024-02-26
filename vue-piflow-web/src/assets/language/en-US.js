@@ -54,6 +54,7 @@ module.exports = {
     tip: {
         title: "πFlow system tips",
         existed: "UserName Existed！",
+        success:'Operation successful!',
         fault_content: "An unknown error occurred in the background run！",
         update_success_content: "update succeeded！",
         update_fail_content: "update failed or admin information cannot be changed！",

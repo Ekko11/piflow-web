@@ -278,7 +278,7 @@ export default {
           this.isTemplateOpen = true;
           break;
         case 7:
-          this.$refs.PublishModal.handleAdd(row.id)
+          this.$refs.PublishModal.handleAdd(row)
           break;
         default:
           break;

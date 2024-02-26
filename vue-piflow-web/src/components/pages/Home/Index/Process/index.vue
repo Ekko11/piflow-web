@@ -22,6 +22,7 @@
 </template>
 <script>
 import { getDataProductType } from "@/apis/dataProduct";
+import Cookies from "js-cookie";
 export default {
   data() {
     return {
@@ -34,7 +35,16 @@ export default {
   },
   methods: {
     handleEnter(id) {
-      this.$router.push(`/home/list?type=${id}`);
+      const link = `/home/list?type=${id}`
+      if(Cookies.get("setUser")){
+        this.$router.push(link);
+      }else{
+        this.$router.push({
+          path:'/login',
+          query: { redirect: link} 
+        });
+      }
+      
     },
     async getList() {
       const formData = await getDataProductType();

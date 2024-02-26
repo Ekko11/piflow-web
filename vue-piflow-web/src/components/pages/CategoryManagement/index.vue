@@ -97,6 +97,7 @@ export default {
         description: "",
         name: "",
         parentId: "",
+        file:""
       },
       formData: {},
       parentNode: {},
@@ -130,15 +131,15 @@ export default {
   },
   methods: {
     async handleComfirm() {
-      console.log(this.formData);
       if (!this.formData.id) this.formData.level = this.parentNode.level + 1;
-      if (this.parentNode.level === 0) this.formData.parentId = 0;
+      if (this.parentNode.level === 0) this.formData.parentId = null;
       const res = await saveDataProduct(this.formData);
       if (res.data.code == 200) {
         this.$Modal.success({
           title: this.$t("tip.title"),
           content: this.$t("tip.update_success_content"),
         });
+        this.handleGetData()
       }else{
          this.$Modal.error({
           title: this.$t("tip.title"),

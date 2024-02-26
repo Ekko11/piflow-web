@@ -7,6 +7,9 @@
       </div>
     </div>
     <ul class="right">
+      <li class="homeBtn"  style="font-size:16px" @click="handleToHome">
+        <Icon type="ios-aperture"  style="margin-right:5px;font-size:20px"/>门户
+     </li>
       <li>
         <Dropdown trigger="click" style="margin-left: 20px">
           <div class="author">
@@ -19,18 +22,16 @@
           </DropdownMenu>
         </Dropdown>
       </li>
-      <li>
+      <li style="margin-left: 5px">
         <Dropdown trigger="click">
-          <Icon type="md-globe" size="22" />
+          <Icon type="md-globe" size="20" />
           <DropdownMenu slot="list">
             <DropdownItem @click.native="handleLanguageSwitch('zh')">简体中文</DropdownItem>
             <DropdownItem @click.native="handleLanguageSwitch('en')">English</DropdownItem>
           </DropdownMenu>
         </Dropdown>
       </li>
-      <li class="homeBtn"  style="font-size:16px" @click="handleToHome">
-         <Icon type="ios-aperture"  style="margin-right:5px"/>门户
-      </li>
+
     </ul>
   </header>
 </template>
@@ -106,13 +107,13 @@ header {
     align-items: center;
     margin-right: 20px;
     > li {
-      margin: 0 20px;
       text-align: center;
       cursor: pointer;
     }
     .author {
       display: flex;
       align-items: center;
+      height: 27px;
       span {
         margin-left: 8px;
       }

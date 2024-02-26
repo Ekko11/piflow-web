@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 // 获取已发布流水线
-export function getflowPublishList (params) {
+export function getflowPublishList (data) {
     return axios({
-        method:'get',
+        method:'post',
         url:'/flowPublish/getListByPage',
-        params
+        data
     })
 }
 
@@ -17,3 +17,23 @@ export function deleteFlowPublish (id) {
         url:`/flowPublish/delete?id=${id}`,
     })
 }
+
+
+// 根据产品分类Id获取已发布流水线
+export function getflowPublishListByProductTypeId (data) {
+    return axios({
+        method:'post',
+        url:'/flowPublish/getFlowPublishingListPageByProductTypeId',
+        data
+    })
+}
+
+// 根据产发布Id获取已发布流水线
+export function getPublishingById (id) {
+    return axios({
+        method:'get',
+        url:`/flowPublish/getPublishingById?id=${id}`,
+    })
+}
+
+

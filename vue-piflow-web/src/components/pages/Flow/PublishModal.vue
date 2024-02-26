@@ -4,7 +4,7 @@
     :title="formData.id ? '编辑' : '发布'"
     :ok-text="$t('modal.ok_text')"
     :cancel-text="$t('modal.cancel_text')"
-    width='600'
+    width="600"
   >
     <div class="modal-warp">
       <Form
@@ -14,7 +14,10 @@
         :label-width="120"
       >
         <FormItem label="发布名称：" prop="name">
-          <Input v-model="formData.name" placeholder="Enter your name"></Input>
+          <Input
+            v-model="formData.name"
+            placeholder="Enter publish name"
+          ></Input>
         </FormItem>
         <FormItem label="分类：" prop="name">
           <treeselect
@@ -24,6 +27,12 @@
             :options="treeData"
             style="width: 350px; height: 32px"
           />
+        </FormItem>
+        <FormItem label="描述：" prop="description">
+          <Input
+            v-model="formData.description"
+            placeholder="Enter publish description"
+          ></Input>
         </FormItem>
         <h4>选择发布组件</h4>
         <div v-for="(item, index) in stops" label="" class="stop" :key="index">
@@ -53,9 +62,9 @@
                   style="width: 200px"
                 />
               </div>
-               <div class="item">
+              <div class="item">
                 <label>发布类型：</label>
-                <Radio-group  v-model="child.state">
+                <Radio-group v-model="child.type">
                   <Radio :label="0">输入</Radio>
                   <Radio :label="1">其他</Radio>
                   <Radio :label="2">输出</Radio>
@@ -89,8 +98,16 @@
 </template>
 
 <script>
-import { getDataProductType,getStopsInfoByFlowId,publishingStops } from "@/apis/dataProduct";
-import { findTree } from '@/utils/tree';
+import {
+  getDataProductType,
+  getStopsInfoByFlowId,
+  publishingStops,
+} from "@/apis/dataProduct";
+
+import { getPublishingById } from "@/apis/flowPublish";
+import { uploadFile } from "@/apis/file";
+
+import { findTree } from "@/utils/tree";
 
 export default {
   data() {
@@ -99,8 +116,8 @@ export default {
       open: false,
       currentUpload: 0,
       stops: [],
-      treeData:[],
-      fileList:[],
+      treeData: [],
+      fileList: [],
       ruleValidate: {
         name: [
           {
@@ -116,125 +133,181 @@ export default {
     this.getTreeData();
   },
   methods: {
-  async getTreeData() {
+    // 获取数据产品分类
+    async getTreeData() {
       const formData = await getDataProductType();
       const data = JSON.parse(formData.getAll("data")[0]);
       this.treeData = data;
     },
-    async handleAdd(id) {
-      this.formData.flowId = id
-      this.open = true;
-      const  res = await getStopsInfoByFlowId(id)
-      console.log(res)
-      this.stops =res.data.data.map(v=>{
+    // 获取流水线组件列表
+    async handleGetFlowStops(id) {
+      const res = await getStopsInfoByFlowId(id);
+      this.stops = res.data.data.map((v) => {
         return {
-          stopId:v.id,
-          stopName:v.name,
-          stopPublishingPropertyVos:v.properties.map(item=>({
-            propertyId:item.id,
-            stopPublishingPropertyName:item.name,
-            fileName:item.fileName,
-            name:item.name,
-            state:item.state
-          }))
-        }
-      })
+          stopId: v.id,
+          stopName: v.name,
+          checked: false,
+          stopPublishingPropertyVos: v.properties.map((item) => ({
+            propertyId: item.id,
+            checked: false,
+            stopPublishingPropertyName: item.name,
+            fileName: item.fileName,
+            name: item.name,
+            type: item.type,
+          })),
+        };
+      });
     },
-    handleEdit() {
+    async handleAdd(row) {
+      this.$event.emit("loading", true);
+      this.reSet();
+      this.formData.flowId = row.id;
+      this.formData.description = row.description;
       this.open = true;
+      await this.handleGetFlowStops(row.id);
+      this.$event.emit("loading", false);
     },
-    // 编辑或者更新
-    async handleSaveUpdateData() {
-      const productNode = findTree(this.treeData,this.formData.productTypeId)
-      this.formData.productTypeName = productNode.name
-      this.formData.productTypeDescription = productNode.description
 
-      let errMsg = '';
-      // 筛选选中项
+    async handleEdit(row) {
+      this.reSet();
+      this.open = true;
+      this.$event.emit("loading", true);
+      await this.handleGetFlowStops(row.flowId);
+      const res = await getPublishingById(row.id);
+      this.$event.emit("loading", false);
+      const publishInfo = res.data.data;
+      this.formData.flowId = row.flowId;
+      this.formData.id = publishInfo.id;
+      this.formData.name = publishInfo.name;
+      this.formData.productTypeId = publishInfo.productTypeId;
+      this.formData.description = publishInfo.description;
+      const publishStops = publishInfo.stops;
+      if (publishStops.length) {
+        publishStops.forEach((item) => {
+          let index = this.stops.findIndex((v) => v.stopId === item.stopId);
+          this.stops[index].checked = true;
+          item.stopPublishingPropertyVos.forEach((child) => {
+            let idx = this.stops[index].stopPublishingPropertyVos.findIndex(
+              (v) => v.propertyId === child.propertyId
+            );
+            this.stops[index].stopPublishingPropertyVos[idx].checked = true;
+            this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
+            this.stops[index].stopPublishingPropertyVos[idx].fileName =
+              child.fileName;
+            this.stops[index].stopPublishingPropertyVos[idx].publishingId =
+              child.publishingId;
+            this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
+          });
+        });
+      }
+      console.log(this.stops);
+    },
+    // 保存（编辑或者更新）
+    async handleSaveUpdateData() {
+      this.$event.emit("loading", true);
+      // 获取分类信息
+      const productNode = findTree(this.treeData, this.formData.productTypeId);
+      this.formData.productTypeName = productNode.name;
+      this.formData.productTypeDescription = productNode.description;
+
+      let errMsg = "";
+      // 筛选stops中的选中项
       const filteredArray = this.stops
         .filter((item) => item.checked)
         .map((item) => ({
           ...item,
-          stopPublishingPropertyVos: item.stopPublishingPropertyVos.filter((prop) => {
-            if (prop.checked && !prop.fileName){
-              errMsg = `请确保组件 ${item.stopPublishingPropertyName} 的参数 ${prop.stopPublishingPropertyName} 的文件不为空`
-            };
-            return prop.checked;
-          }),
+          stopPublishingPropertyVos: item.stopPublishingPropertyVos.filter(
+            (prop) => {
+              if (prop.checked && !prop.fileName) {
+                errMsg = `请确保组件 ${item.stopName} 的参数 ${prop.stopPublishingPropertyName} 的文件不为空`;
+              }
+              return prop.checked;
+            }
+          ),
         }));
-        if(errMsg){
-          this.$Message.error({
-                  content: errMsg,
-                  duration: 3,
-          });
-          return 
-        }
-        this.formData.stops = filteredArray
-      console.log(this.formData,filteredArray);
-      const formData = new FormData()
-      this.fileList.forEach(v => {
-        formData.append('file',v)
-      });
-        formData.append('flowPublishingVo',JSON.stringify(this.formData))
-      // const data= this.objectToFormData(filteredArray)
-
-      // const formData = new FormData();
-      // formData.append("stops", this.stops);
-      const res = await publishingStops(formData);
-      console.log(res)
-      // console.log(this.formData, this.stops);
-    },
-    // 将对象递归转换为formData
-    objectToFormData(obj, form, namespace) {
-      var fd = form || new FormData();
-      var formKey;
-      if (obj instanceof Array) {
-        for (var item of obj) {
-          if (typeof item === "object" && !(item instanceof File)) {
-            this.objectToFormData(item, fd, namespace + "[]");
-          } else {
-            // 若是数组则在关键字后面加上[]
-            fd.append(namespace + "[]", item);
-          }
-        }
-      } else {
-        for (var property in obj) {
-          if (obj.hasOwnProperty(property) && obj[property]) {
-            if (namespace) {
-              // 若是对象，则这样
-              formKey = namespace + "[" + property + "]";
-            } else {
-              formKey = property;
-            }
-            if (
-              typeof obj[property] === "object" &&
-              !(obj[property] instanceof File)
-            ) {
-              // 此处将formKey递归下去很重要，因为数据结构会出现嵌套的情况
-              this.objectToFormData(obj[property], fd, formKey);
-            } else {
-              // if it's a string or a File object
-              fd.append(formKey, obj[property]);
-            }
-          }
-        }
+      // 选中项空文件提示
+        if (errMsg) {
+        this.$Message.error({
+          content: errMsg,
+          duration: 3,
+        });
+        this.$event.emit("loading", false);
+        return;
       }
-      return fd;
+      this.formData.stops = filteredArray;
+      // 发布
+      const res = await publishingStops(this.formData);
+      //新增需要上传文件
+      if (this.fileList.length) {
+        const returnPropsList = res.data.data;
+        if (res.data.code == 200 && returnPropsList.length) {
+          let promiseList = [];
+          // 多次上传文件
+          this.fileList.forEach((item) => {
+            const res = uploadFile({
+              associateType: 4,
+              associateId: returnPropsList.find((v) => v.propertyId === item.id)
+                .id,
+              file: item.file,
+            });
+            promiseList.push(res);
+          });
+          // 判断多次上传文件是否成功
+          Promise.all(promiseList).then((res) => {
+            let errPromise = res.filter((v) => v.data.code !== 200);
+            this.$event.emit("loading", false);
+            if (!errPromise.length) {
+              this.$Message.success({
+                content: this.$t("tip.success"),
+                duration: 3,
+              });
+              this.open = false;
+              this.reSet();
+            } else {
+              this.$Message.error({
+                content: this.$t("tip.fault_content"),
+                duration: 3,
+              });
+              this.open = false;
+            }
+            console.log(res);
+          });
+        } else {
+          this.$event.emit("loading", false);
+          this.$Message.error({
+            content: this.$t("tip.fault_content"),
+            duration: 3,
+          });
+          this.open = false;
+        }
+      } else {  //编辑不需要上传文件
+        this.$event.emit("loading", false);
+        this.open = false;
+        this.$Message.success({
+          content: this.$t("tip.success"),
+          duration: 3,
+        });
+      }
+    },
+    reSet() {
+      this.formData = {};
+      this.fileList = [];
     },
     // 标记选择上传的节点
     handleClickUpload(index, idx) {
       this.currentProps = this.stops[index].stopPublishingPropertyVos[idx];
+      console.log(this.currentProps);
     },
     handleBeforeUpload(e) {
-      if(this.fileList.findIndex(v=>v.name === e.name) !== -1){
+      if (this.fileList.findIndex((v) => v.name === e.name) !== -1) {
         this.$Message.error({
-                  content: '文件名重复，请修改文件名后再上传',
-                  duration: 3,
-          });
-          return false
+          content: "文件名重复，请修改文件名后再上传",
+          duration: 3,
+        });
+        return false;
       }
       this.currentProps.fileName = e.name;
-      this.fileList.push(e)
+      this.fileList.push({ id: this.currentProps.propertyId, file: e });
       return false;
     },
     normalizer(node) {

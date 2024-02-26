@@ -45,18 +45,19 @@ export function publishingStops (data) {
         method:'post',
         url:'/flowPublish/publishingStops',
         data,
-        headers:{
-            'Content-Type':'multipart/form-data'
-        },
+        // headers:{
+        //     'Content-Type':'multipart/form-data'
+        // },
     })
 }
 
+
 // 获取数据产品列表
-export function getDataProductList (params) {
+export function getDataProductList (data) {
     return axios({
-        method:'get',
+        method:'post',
         url:'/paramsProduct/getByPage',
-        params
+        data
     })
 }
 

@@ -54,6 +54,7 @@ module.exports = {
     tip: {
         title: "πFlow系统提示",
         existed: "用户名重复！",
+        success: "操作成功！",
         fault_content: "后台程序运行发生未知错误！",
         update_success_content: "更新成功！",
         update_fail_content: "更新失败或admin信息不能修改！",
