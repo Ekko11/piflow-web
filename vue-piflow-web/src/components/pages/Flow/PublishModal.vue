@@ -245,7 +245,7 @@ export default {
           // 多次上传文件
           this.fileList.forEach((item) => {
             const res = uploadFile({
-              associateType: 4,
+              associateType: 3,
               associateId: returnPropsList.find((v) => v.propertyId === item.id)
                 .id,
               file: item.file,

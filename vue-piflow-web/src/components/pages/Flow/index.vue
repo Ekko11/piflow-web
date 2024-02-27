@@ -181,7 +181,7 @@ export default {
           content: 'Save Template',
           icon: 'md-checkbox-outline'
         },{
-          content: 'Save Template',
+          content: 'Publish Flow',
           icon: 'ios-paper-plane'
         }
       ],

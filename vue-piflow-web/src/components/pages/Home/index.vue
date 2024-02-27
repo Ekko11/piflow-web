@@ -1,40 +1,84 @@
 <template>
-    <div>
-     <div class="head">
-        <div  class="head-l" @click="handleBack">生态台站监测数据产品生产系统</div>
-        <div class="head-m"></div>
-        <div class="head-r">
-            <!-- <div>
-                <img src="@/assets/img/home/user.png" alt="">
-                <span>登录</span>
-            </div> -->
-            <div>
-                <img src="@/assets/img/home/setting.png" alt="">
-                <span @click="handleEnter">后台管理</span>
-            </div>
+  <div>
+    <div class="head">
+      <div class="head-l" @click="handleBack">生态台站监测数据产品生产系统</div>
+      <div class="head-m"></div>
+      <div class="head-r" >
+        <div v-if="!user.username" @click="handleLogin">
+          <img src="@/assets/img/home/user.png" alt="" />
+          <span >登录</span>
         </div>
-     </div>
-    <router-view></router-view>        
+        <div v-else>
+          <Icon type="md-person" style="font-size: 20px; margin-right: 5px" />
+          <span>{{ user.username ? user.username : "游客" }}</span>
+          <Icon
+            type="md-log-out"
+            style="font-size: 20px; margin-left: 3px"
+            @click="handleLogout"
+          />
+        </div>
+        <div  @click="handleEnter"> 
+          <img src="@/assets/img/home/setting.png" alt="" />
+          <span>后台管理</span>
+        </div>
+      </div>
     </div>
+    <router-view></router-view>
+  </div>
 </template>
 <script>
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 export default {
-    name:'home',
-    methods:{
-        handleEnter(){
-            let state = Cookies.get('state'); //获取缓存看是否登录过
-            if (state == 'jwtok') { 
-                this.$router.push('/')
-            }else{
-                this.$router.push('/login')
-            }
-        },
-        handleBack(){
-            this.$router.push('/home')
-        }
+  name: "home",
+  data() {
+    return {
+      user: {},
+    };
+  },
+  created() {
+    let state = Cookies.get("state"); //获取缓存看是否登录过
+    if (state == "jwtok") {
+      this.user = { username: Cookies.get("usre") };
     }
-}
+  },
+  methods: {
+    handleLogout() {
+      this.$Modal.confirm({
+        title: this.$t("tip.title"),
+        okText: this.$t("modal.confirm"),
+        cancelText: this.$t("modal.cancel_text"),
+        content: `确定要退出登录吗？`,
+        onOk: () => {
+          window.sessionStorage.removeItem("menuName");
+          Cookies.remove("state");
+          Cookies.remove("token");
+          Cookies.remove("user");
+          Cookies.remove("setUser");
+          this.$store.commit("setToken", "");
+          this.$store.commit("setUser", {});
+          this.user = {};
+        },
+      });
+    },
+    handleLogin() {
+      this.$router.push({
+        path:"/login",
+        query: { redirect: this.$route.fullPath} 
+      });
+    },
+    handleEnter() {
+      let state = Cookies.get("state"); //获取缓存看是否登录过
+      if (state == "jwtok") {
+        this.$router.push("/");
+      } else {
+        this.$router.push("/login");
+      }
+    },
+    handleBack() {
+      this.$router.push("/home");
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

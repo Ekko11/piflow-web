@@ -3,7 +3,7 @@
     <div v-for="(item, index) in list" :key="index">
       <div class="process_title">
         <img src="@/assets/img/home/title.png" alt="" />
-        <h4>{{ item.name }}</h4>
+        <h4>{{ item.name }}生产流水线</h4>
       </div>
       <div class="process_list">
         <div
@@ -13,7 +13,7 @@
         >
           <img :src="imgList[0]" alt="" />
           <div>
-            <p>{{ child.name }}</p>
+            <p>{{ child.name }}生产流水线</p>
           </div>
         </div>
       </div>
