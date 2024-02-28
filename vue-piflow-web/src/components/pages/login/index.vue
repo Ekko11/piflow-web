@@ -7,7 +7,7 @@
         <h1>{{title }}</h1>
       </div>
     </div>
-      <div class="homeBtn" @click="handleToHome"><Icon type="md-globe" />门户</div>
+      <div class="homeBtn" @click="handleToHome"><Icon type="ios-aperture" />门户</div>
     </div>
 
     <i class="map"></i>

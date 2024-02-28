@@ -64,16 +64,14 @@
         const res = await setDataProductPreference(data)
      },
       async handleGetData() {
-        const formData = await getDataProductType();
-        const fileList = formData.getAll("file");
-        const data = JSON.parse(formData.getAll("data")[0]);
+        const res = await getDataProductType();
         this.treeData = [
           {
             name: "数据产品分类",
             id: 0,
             expand: true,
             level:0,
-            children: data,
+            children: res.data.data,
             ischecked: true,
           },
         ];

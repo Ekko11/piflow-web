@@ -1,22 +1,13 @@
 import axios from 'axios';
 import { formDataFormat } from '@/utils/formDataFormat'
+
 // 查询数据产品分类
 export function getDataProductType () {
-    return  fetch("/piflow-web/dataProductType/get")
-      .then(function (response) {
-        if (response.ok) {
-          return response.formData();
-        } else {
-          throw new Error("Request failed.");
-        }
-      })
+    return axios({
+        method:'get',
+        url:'/dataProductType/get',
+    })
 }
-// export function getDataProductType () {
-//     return axios({
-//         method:'get',
-//         url:'/dataProductType/get',
-//     })
-// }
 // 数据产品编辑或新增
 export function saveDataProduct (data) {
     return axios({

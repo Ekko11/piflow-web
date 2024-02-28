@@ -47,10 +47,8 @@ export default {
       
     },
     async getList() {
-      const formData = await getDataProductType();
-      const fileList = formData.getAll("file");
-      const list = JSON.parse(formData.getAll("data")[0]);
-      this.list = list
+      const res = await getDataProductType();
+      this.list = res.data.data
     },
 
   },

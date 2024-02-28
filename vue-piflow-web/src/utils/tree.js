@@ -58,3 +58,54 @@ export const findTree = (data, value, key = 'id') => {
       }
     }
   }
+
+
+  // 遍历
+  const traverse = function (arr) {
+    const res = []
+    arr.forEach(item => {
+      item.$_SELF_MARK = item.$_MARK = method(item)
+      item.$_NOT_SELF_MARK = !item.$_SELF_MARK
+
+      if (item.children) {
+        item.children = traverse(item.children)
+        item.$_MARK = item.$_MARK || item.children.some(child => child.$_MARK)
+      }
+
+      if (item.$_MARK) res.push(item)
+    })
+    return res
+  }
+
+
+  /**
+   * @method findTreeStructure
+   * @description 查询树结构
+   * @param {Array} data 数据
+   * @param {Function} match 匹配方法
+   * @param {Boolean} deep 是否深拷贝
+   * @returns {Array}
+ */
+
+  export const findTreeStructure = (data, match, deep) => {
+    const d = deep ? JSON.parse(JSON.stringify(data)) : data
+    const result = traverse(d)
+    return result
+  
+    function traverse (data) {
+      const res = []
+      data.forEach((item, index) => {
+        item._$isMatched = match(item)
+        item._$isSelfMatched = item._$isMatched
+        item._$index = index
+  
+        if (Array.isArray(item.children)) {
+          item.children = traverse(item.children)
+          item._$isMatched = item._$isMatched || item.children.some((child) => child._$isMatched)
+        }
+  
+        if (item._$isMatched) res.push(item)
+      })
+      return res
+    }
+  }

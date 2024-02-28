@@ -50,14 +50,14 @@ export default {
   },
   methods: {
     async handleGetData() {
-      const formData = await getDataProductType();
-      const fileList = formData.getAll("file");
-      this.treeData = JSON.parse(formData.getAll("data")[0]);
+      const res = await getDataProductType();
+      this.treeData = res.data.data;
     },
     handleSearch(val) {
       console.log(val);
     },
     handleChangeSelectNode(list, node) {
+      node.expand = !node.expand
       console.log(node);
     },
     renderContent(h, { root, node, data }) {
@@ -77,4 +77,5 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
 </style>

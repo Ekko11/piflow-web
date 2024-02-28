@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="head">
-      <div class="head-l" @click="handleBack">生态台站监测数据产品生产系统</div>
+      <div class="head-l" @click="handleBack">生态站监测数据产品生产系统</div>
       <div class="head-m"></div>
       <div class="head-r" >
         <div v-if="!user.username" @click="handleLogin">

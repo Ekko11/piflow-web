@@ -37,3 +37,12 @@ export function getPublishingById (id) {
 }
 
 
+// 运行流水线
+export function runPublishFlow (data) {
+    return axios({
+        method:'post',
+        url:'/flowPublish/run',
+        data
+    })
+}
+

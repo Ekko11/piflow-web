@@ -8,24 +8,59 @@
     <div class="contain" v-if="publishInfo.stops">
       <div class="config">
         <div class="config_l">
-          <template v-for="item in publishInfo.stops">
-            <div
-              v-for="child in item.stopPublishingPropertyVos"
-              :key="child.id"
-            >
-              <div class="label">
-                {{ child.name }} <Icon type="md-cloud-download"  @click="handleDownload(child.id)"/>
-              </div>
-              <div>
-                <Upload action="/null" :before-upload="handleBeforeUpload">
-                  <Button class="uploadBtn" icon="md-cloud-upload"
-                    >Upload files</Button
-                  >
-                </Upload>
-                <p v-if="child.file">{{ child.fileName }}</p>
+          <!-- 输入 -->
+          <p>文件输入</p>
+          <div class="wrap">
+            <div>
+              <div v-for="child in fileInput" :key="child.id">
+                <div class="label">
+                  {{ child.name }}
+                </div>
+                <div>
+                  <p @click="handleDownload(child.fileId)" class="fileExample">
+                    <span>{{ child.fileName }}</span>
+                    <Icon type="md-cloud-download" />
+                  </p>
+                  <div>
+                    <Upload action="/null" :before-upload="handleBeforeUpload">
+                      <Button class="uploadBtn" icon="md-cloud-upload"
+                        >Upload files</Button
+                      >
+                    </Upload>
+                    <p v-if="child.customFile">{{ child.customValue }}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </template>
+          </div>
+
+          <div class="wrap">
+            <p>普通输入</p>
+            <div>
+              <div v-for="child in textInput" :key="child.id">
+                <div class="label">
+                  {{ child.name }}
+                </div>
+                <div>
+                  <Input v-model="child.customValue"></Input>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wrap">
+            <p>输出</p>
+            <div>
+              <div v-for="child in output" :key="child.id">
+                <div class="label">
+                  {{ child.name }}
+                </div>
+                <div>
+                  <Input v-model="child.customValue"></Input>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="config_r">
           <img src="@/assets/img/home/p1.png" alt="" />
@@ -33,7 +68,7 @@
       </div>
 
       <div>
-        <Button class="run" @click="handleRun(row)">运行</Button>
+        <Button class="run" @click="handleRun()">运行</Button>
       </div>
       <div class="progress">
         <Progress :percent="25" :stroke-width="12" status="active" />
@@ -41,7 +76,12 @@
 
       <div class="history">
         <div class="history_btn">
-          <Button @click="historyIsShow = !historyIsShow">历史记录 <Icon :type="historyIsShow ?'md-arrow-dropup':'md-arrow-dropdown'" /> </Button>
+          <Button @click="historyIsShow = !historyIsShow"
+            >历史记录
+            <Icon
+              :type="historyIsShow ? 'md-arrow-dropup' : 'md-arrow-dropdown'"
+            />
+          </Button>
         </div>
         <div v-show="historyIsShow" class="history_list">
           <Table :columns="columns" :data="data">
@@ -70,7 +110,7 @@
 </template>
   
   <script>
-import { getPublishingById } from "@/apis/flowPublish";
+import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
 import { downloadFile } from "@/apis/file";
 
 export default {
@@ -79,8 +119,12 @@ export default {
       page: 1,
       limit: 5,
       total: 30,
-      historyIsShow:false,
-      publishInfo:{},
+      historyIsShow: false,
+      publishInfo: {},
+      fileInput: [],
+      textInput: [],
+      output: [],
+
       columns: [
         {
           title: "名称",
@@ -133,16 +177,37 @@ export default {
       ],
     };
   },
-  created(){
-    this.handleGetStopsById()
+  created() {
+    this.handleGetStopsById();
   },
   methods: {
-    async handleGetStopsById(){
-      const res = await getPublishingById(this.$route.query.id);
-      this.publishInfo = res.data.data
+    async handleRun() {
+      const res = await runPublishFlow(this.publishInfo);
+      console.log(res);
     },
-  async handleDownload(id){
-      const  res = await downloadFile(id)
+    async handleGetStopsById() {
+      const res = await getPublishingById(this.$route.query.id);
+      this.publishInfo = res.data.data;
+
+      this.publishInfo.stops.forEach((item) => {
+        item.stopPublishingPropertyVos.forEach((v) => {
+          if (v.type === 0) {
+            this.fileInput.push(v);
+          } else if (v.type === 1) {
+            this.textInput.push(v);
+          } else {
+            this.output.push(v);
+          }
+        });
+      });
+    },
+    async handleDownload(id) {
+      console.log(id)
+      const res = await downloadFile(id);
+    },
+    handleBeforeUpload(e) {
+      this.currentProps.fileName = e.name;
+      this.fileList.push({ id: this.currentProps.propertyId, file: e });
     },
     handleEnter(row) {
       console.log(row);
@@ -165,38 +230,69 @@ export default {
   
   <style lang="scss" scoped>
 @import "../../index.scss";
-.contain {
+::v-deep .contain {
   background: #f7f9fa;
-  padding: 48px 100px;
+  padding: 48px 40px;
   margin-top: 32px;
   .config {
     display: flex;
     justify-content: space-between;
     &_l {
-      display: flex;
-      flex-wrap: wrap;
-      flex-grow: 1;
-      margin-right: 16px;
-      justify-content: space-between;
-      > div {
-        width: 48%;
-        height: 50px;
+      margin-right: 20px;
+      .wrap {
+        border: 1px dashed #006fee;
+        background: #e6f1fe;
+        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        .fileExample {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: #005bc4;
+          cursor: pointer;
+          font-size: 14px;
+          span {
+            max-width: 80%;
+            display: inline-block;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+          }
+        }
+        > p {
+          font-size: 20px;
+          font-weight: 400;
+        }
+        > div {
+          display: flex;
+          flex-wrap: wrap;
+          margin-bottom: 20px;
+          > div {
+            &:nth-child(2n + 1) {
+              margin-right: 4%;
+            }
+            width: 48%;
+          }
+        }
       }
       .label {
-        font-size: 14px;
+        font-size: 16px;
         color: #18181b;
         margin-bottom: 16px;
         i {
           font-size: 18px;
-          color: #005bc4;
           cursor: pointer;
           margin-left: 5px;
         }
       }
       .uploadBtn {
-        background: #e6f1fe;
+        background: #a7cbf6;
         border: none;
         color: #005bc4;
+      }
+      .ivu-input {
+        border-radius: 6px;
       }
     }
     &_r {
@@ -246,7 +342,7 @@ export default {
               position: absolute;
               right: 0;
               top: 0;
-              color: #D4D4D8;
+              color: #d4d4d8;
             }
           }
           &:first-child {
@@ -276,8 +372,8 @@ export default {
     padding: 0 12px;
     margin-right: 8px;
     border-radius: 8px;
-    background: #E6F1FE;
-    color: #005BC4;
+    background: #e6f1fe;
+    color: #005bc4;
     border: none;
   }
 }

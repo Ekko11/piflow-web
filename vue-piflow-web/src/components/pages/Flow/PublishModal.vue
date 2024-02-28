@@ -49,7 +49,7 @@
               <div class="item">
                 <label>参数名称：</label>
                 <Checkbox style="width: 200px" v-model="child.checked">{{
-                  child.stopPublishingPropertyName
+                  child.propertyName
                 }}</Checkbox>
               </div>
               <div class="item">
@@ -65,12 +65,24 @@
               <div class="item">
                 <label>发布类型：</label>
                 <Radio-group v-model="child.type">
-                  <Radio :label="0">输入</Radio>
-                  <Radio :label="1">其他</Radio>
+                  <!-- <Radio :label="0">文件</Radio>
+                  <Radio :label="1">普通</Radio> -->
+                  <Radio :label="1">输入</Radio>
                   <Radio :label="2">输出</Radio>
                 </Radio-group>
               </div>
-              <div class="item" @click="handleClickUpload(index, idx)">
+              <div class="item" v-if="child.type === 1">
+                <label>发布类型：</label>
+                <Radio-group v-model="child.type1">
+                  <Radio :label="0">文件</Radio>
+                  <Radio :label="1">普通</Radio>
+                </Radio-group>
+              </div>
+              <div
+                class="item"
+                v-if="child.type1 === 0"
+                @click="handleClickUpload(index, idx)"
+              >
                 <label>上传文件：</label>
                 <div>
                   <Upload action="/aaa" :before-upload="handleBeforeUpload">
@@ -80,6 +92,16 @@
                   </Upload>
                   <p>{{ child.fileName }}</p>
                 </div>
+              </div>
+              <div class="item" v-if="child.type1 === 1">
+                <label>自定义值：</label>
+                <Input
+                  disabled
+                  v-model="child.customValue"
+                  show-word-limit
+                  :placeholder="$t('modal.placeholder')"
+                  style="width: 200px"
+                />
               </div>
             </div>
           </div>
@@ -135,9 +157,8 @@ export default {
   methods: {
     // 获取数据产品分类
     async getTreeData() {
-      const formData = await getDataProductType();
-      const data = JSON.parse(formData.getAll("data")[0]);
-      this.treeData = data;
+      const res = await getDataProductType();
+      this.treeData = res.data.data;
     },
     // 获取流水线组件列表
     async handleGetFlowStops(id) {
@@ -146,14 +167,20 @@ export default {
         return {
           stopId: v.id,
           stopName: v.name,
+          stopBundle: v.bundel,
           checked: false,
           stopPublishingPropertyVos: v.properties.map((item) => ({
             propertyId: item.id,
             checked: false,
-            stopPublishingPropertyName: item.name,
+            propertyName: item.name,
             fileName: item.fileName,
             name: item.name,
             type: item.type,
+            allowableValues: item.allowableValues,
+            customValue: item.customValue,
+            description: item.description,
+            propertySort: item.propertySort,
+            example: item.example,
           })),
         };
       });
@@ -207,6 +234,7 @@ export default {
       this.$event.emit("loading", true);
       // 获取分类信息
       const productNode = findTree(this.treeData, this.formData.productTypeId);
+      this.formData.productTypeId = Number(this.formData.productTypeId)
       this.formData.productTypeName = productNode.name;
       this.formData.productTypeDescription = productNode.description;
 
@@ -218,15 +246,23 @@ export default {
           ...item,
           stopPublishingPropertyVos: item.stopPublishingPropertyVos.filter(
             (prop) => {
-              if (prop.checked && !prop.fileName) {
-                errMsg = `请确保组件 ${item.stopName} 的参数 ${prop.stopPublishingPropertyName} 的文件不为空`;
+              if (prop.checked) {
+                if (prop.type === 1) {
+                  //输出类型
+                  if (prop.type === 0 && !prop.fileName) {
+                    //文件
+                    errMsg = `请确保组件 ${item.stopName} 的参数 ${prop.propertyName} 的文件不为空`;
+                  }
+                  prop.type = prop.type1;
+                  delete prop.type1
+                }
               }
               return prop.checked;
             }
           ),
         }));
       // 选中项空文件提示
-        if (errMsg) {
+      if (errMsg) {
         this.$Message.error({
           content: errMsg,
           duration: 3,
@@ -244,13 +280,17 @@ export default {
           let promiseList = [];
           // 多次上传文件
           this.fileList.forEach((item) => {
-            const res = uploadFile({
-              associateType: 3,
-              associateId: returnPropsList.find((v) => v.propertyId === item.id)
-                .id,
-              file: item.file,
-            });
-            promiseList.push(res);
+            const resObj = returnPropsList.find(
+              (v) => v.propertyId === item.id
+            );
+            if (resObj) {
+              const res = uploadFile({
+                associateType: 3,
+                associateId: resObj.id,
+                file: item.file,
+              });
+              promiseList.push(res);
+            }
           });
           // 判断多次上传文件是否成功
           Promise.all(promiseList).then((res) => {
@@ -280,7 +320,8 @@ export default {
           });
           this.open = false;
         }
-      } else {  //编辑不需要上传文件
+      } else {
+        //编辑不需要上传文件
         this.$event.emit("loading", false);
         this.open = false;
         this.$Message.success({

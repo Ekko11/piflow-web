@@ -161,9 +161,8 @@ export default {
       this.formData = { id, parentId, level, name, description, file };
     },
     async handleGetData() {
-      const formData = await getDataProductType();
-      const fileList = formData.getAll("file");
-      const data = JSON.parse(formData.getAll("data")[0]);
+      const res = await getDataProductType();
+      const data = res.data.data
       this.treeData = [
         {
           name: "数据产品分类",

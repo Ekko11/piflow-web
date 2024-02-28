@@ -159,11 +159,22 @@
                 margin-bottom: 16px;
                 margin-top: 16px;
             }
-            .ivu-tree ul li .ivu-tree-title{
-                overflow: hidden;
-                text-overflow: ellipsis;
-                word-break: break-all;
-                width: 100%;
+            .ivu-tree {
+                >ul>li{
+                    >span{
+                        line-height: 40px;
+                    }
+                }
+                li{
+                    line-height: 28px;
+                    font-size: 16px;
+                    .ivu-tree-title{
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        word-break: break-all;
+                        width: 100%;
+                    }
+                }
             }
         }
         &_r{

@@ -35,7 +35,7 @@ module.exports = {
         datasource:'数据源配置',
         visualconfig:'可视化配置',
         operationManagement:'操作管理',
-        categoryManagement:'分级分类管理',
+        categoryManagement:'数据产品分类管理',
         flowManagement: "流水线管理",
         publishManagement: "发布管理",
         dataProductManagement: "数据产品管理",

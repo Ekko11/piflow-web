@@ -1,6 +1,16 @@
 <template>
   <div class="content">
-    <h4 class="content_title">· {{ currentNode.name }} ·</h4>
+    <div class="parentList">
+      <p v-for="(item,index) in parentList" :key="item.id" @click="handleChangeNode(item.id)">
+        <span class="name"> {{ item.name }}</span>
+        <span class="legend" v-if="index !== parentList.length -1"><Icon type="ios-arrow-forward" /></span>
+      </p>
+    </div>
+    <h4 class="content_title">
+      <span>
+        {{ currentNode.name }}
+      </span>
+    </h4>
     <div class="desc">
       {{ currentNode.description }}
     </div>
@@ -44,7 +54,7 @@
 </template>
 
 <script>
-import { findTree } from "@/utils/tree";
+import { findTree,findTreeStructure } from "@/utils/tree";
 import { getDataProductType } from "@/apis/dataProduct";
 import { getflowPublishListByProductTypeId } from "@/apis/flowPublish";
 export default {
@@ -83,10 +93,8 @@ export default {
   },
   methods: {
     async getList() {
-        const formData = await getDataProductType();
-      const fileList = formData.getAll("file");
-      const list = JSON.parse(formData.getAll("data")[0]);
-      this.list = list;
+      const res = await getDataProductType();
+      this.list = res.data.data;
       this.handleSetCurrentNode(this.$route.query.type)
     },
     handleChangeNode(id){
@@ -95,8 +103,20 @@ export default {
 
     },
     handleSetCurrentNode(id){
-      const node = findTree(this.list, id);
+      //获取当前节点
+      const node = findTree(this.list, id);  
       this.currentNode = node;
+      //获取当前节点及直系父节点
+      let nodeList = findTreeStructure(this.list,(node)=>node.id === id,true) 
+      const parentList = []
+      let child = nodeList[0]
+      while (child) {
+        parentList.push(child)
+        child = Array.isArray(child.children) ? child.children[0] : undefined
+      }
+      parentList.pop()
+      this.parentList = parentList
+
       this.getTableData()
     },
     async getTableData(){
@@ -193,5 +213,18 @@ export default {
   display: flex;
   justify-content: flex-end;
   margin-top: 32px;
+}
+.parentList{
+  display: flex;
+  padding-top: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  .name{
+    color: #3974AA;
+    cursor: pointer;
+  }
+  .legend{
+    margin:0 4px;
+  }
 }
 </style>
