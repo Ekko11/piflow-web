@@ -306,6 +306,7 @@ export default {
       this.formData.name = publishInfo.name;
       this.formData.productTypeId = publishInfo.productTypeId;
       this.formData.description = publishInfo.description;
+      this.formData.version = publishInfo.version;
       const publishStops = publishInfo.stops;
       if (publishStops.length) {
         publishStops.forEach((item) => {
@@ -316,6 +317,7 @@ export default {
               (v) => v.propertyId === child.propertyId
             );
             this.stops[index].stopPublishingPropertyVos[idx].checked = true;
+            this.stops[index].stopPublishingPropertyVos[idx].id = child.id;
             this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
             this.stops[index].stopPublishingPropertyVos[idx].fileId = child.fileId;
             this.stops[index].stopPublishingPropertyVos[idx].fileName = child.fileName;

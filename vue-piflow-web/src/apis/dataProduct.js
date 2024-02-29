@@ -120,3 +120,14 @@ export function setDataProductPreference (data) {
 }
 
 
+
+
+// 获取所有数据产品
+export function getDataProductByPage (data) {
+    return axios({
+        method:'post',
+        url:`/dataProduct/getByPage`,
+        data
+    })
+}
+

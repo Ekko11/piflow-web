@@ -64,6 +64,7 @@ export default {
       limit: 10,
       total: 0,
       tableData:[],
+      parentList:[],
       currentNode: {},
       imgList: [require("@/assets/img/home/p2.png")],
       columns: [

@@ -225,7 +225,7 @@
 <script>
 import {
   saveDataProduct,
-  getDataProductList,
+  getDataProductByPage,
   downProductFile,
   deleteDataProduct,
   permissionForPublishing,
@@ -387,9 +387,8 @@ export default {
       if (this.param) {
         data.keyword = this.param;
       }
-      const res = await getDataProductList(data);
+      const res = await getDataProductByPage(data);
       console.log(res);
-      this.tableData = [{ name: 123, id: 999 }];
       // this.$axios({
       //     method:'POST',
       //     url:'/visual/getDatabaseList',

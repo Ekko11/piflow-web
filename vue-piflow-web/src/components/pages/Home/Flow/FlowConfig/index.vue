@@ -17,7 +17,10 @@
                   {{ child.name }}
                 </div>
                 <div>
-                  <p @click="handleDownload(child.fileId)" class="fileExample">
+                  <p
+                    @click="handleDownload(child.fileId, child.fileName)"
+                    class="fileExample"
+                  >
                     <span>{{ child.fileName }}</span>
                     <Icon type="md-cloud-download" />
                   </p>
@@ -84,12 +87,12 @@
           </Button>
         </div>
         <div v-show="historyIsShow" class="history_list">
-          <Table :columns="columns" :data="data">
+          <Table :columns="columns" :data="historyData">
             <template slot-scope="{ row }" slot="action">
               <div class="btn">
                 <Button @click="handleEnter(row)">日志查看</Button>
                 <Button @click="handShowInstructions(row)">数据产品下载</Button>
-                <Button @click="handShowInstructions(row)">数据产品发布</Button>
+                <Button @click="handDataPublish(row)">数据产品发布</Button>
               </div>
             </template>
           </Table>
@@ -105,15 +108,21 @@
           </div>
         </div>
       </div>
+
+      <PublishModal ref="PublishModalRef"/>
     </div>
   </div>
 </template>
   
   <script>
 import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
-import { downloadFile } from "@/apis/file";
-
+import { getProcessPageByPublishingId } from "@/apis/process";
+import { downloadFile, download } from "@/apis/file";
+import PublishModal from '@/components/pages/DataProductManagement/Publish/PublishModal'
 export default {
+  components:{
+    PublishModal
+  },
   data() {
     return {
       page: 1,
@@ -131,16 +140,15 @@ export default {
           key: "name",
         },
         {
-          title: "运行人",
-          key: "age",
-        },
-        {
           title: "运行时间",
-          key: "address",
+          key: "startTime",
         },
         {
           title: "运行状态",
-          key: "address",
+          key: "state.text",
+          render: (h, params) => {
+            return h("span", [params.row.state.text]);
+          },
         },
         {
           title: "操作",
@@ -149,45 +157,31 @@ export default {
           align: "center",
         },
       ],
-      data: [
-        {
-          name: "John Brown",
-          age: 18,
-          address: "New York No. 1 Lake Park",
-          date: "2016-10-03",
-        },
-        {
-          name: "Jim Green",
-          age: 24,
-          address: "London No. 1 Lake Park",
-          date: "2016-10-01",
-        },
-        {
-          name: "Joe Black",
-          age: 30,
-          address: "Sydney No. 1 Lake Park",
-          date: "2016-10-02",
-        },
-        {
-          name: "Jon Snow",
-          age: 26,
-          address: "Ottawa No. 2 Lake Park",
-          date: "2016-10-04",
-        },
-      ],
+      historyData: [],
     };
   },
   created() {
     this.handleGetStopsById();
   },
   methods: {
+    handDataPublish(row){
+      this.$refs.PublishModalRef.handleAdd(row)
+    },
     async handleRun() {
       const res = await runPublishFlow(this.publishInfo);
       console.log(res);
     },
     async handleGetStopsById() {
       const res = await getPublishingById(this.$route.query.id);
+      delete res.data.data.crtDttm;
+      delete res.data.data.crtDttmString;
+      delete res.data.data.crtUser;
+      delete res.data.data.lastUpdateDttm;
+      delete res.data.data.lastUpdateDttmString;
+      delete res.data.data.lastUpdateUser;
+      delete res.data.data.enableFlag;
       this.publishInfo = res.data.data;
+      this.getHistoryList();
 
       this.publishInfo.stops.forEach((item) => {
         item.stopPublishingPropertyVos.forEach((v) => {
@@ -201,9 +195,8 @@ export default {
         });
       });
     },
-    async handleDownload(id) {
-      console.log(id)
-      const res = await downloadFile(id);
+    async handleDownload(id, fileName) {
+      download(downloadFile, id, fileName);
     },
     handleBeforeUpload(e) {
       this.currentProps.fileName = e.name;
@@ -214,6 +207,18 @@ export default {
     },
     handShowInstructions(row) {
       console.log(row);
+    },
+
+    async getHistoryList() {
+      const data = {
+        limit: this.limit,
+        page: this.page,
+        publishingId: this.publishInfo.id,
+      };
+      const res = await getProcessPageByPublishingId(data);
+      console.log(res);
+      this.historyData = res.data.data;
+      this.total = res.data.count;
     },
     onPageChange(pageNo) {
       this.page = pageNo;
