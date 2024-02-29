@@ -1,54 +1,117 @@
 <template>
 
-    
   <Modal
-    v-model="open"
-    :title="formData.id ? '编辑' : '发布'"
-    :ok-text="$t('modal.ok_text')"
-    :cancel-text="$t('modal.cancel_text')"
-    width="600"
-    @on-ok="handleSaveUpdateData"
-  >
-    <div class="modal-warp">
-      <Form
-        ref="formValidate"
-        :model="formData"
-        :rules="ruleValidate"
-        :label-width="120"
-      >
-        <FormItem label="发布名称：" prop="name">
-          <Input
-            v-model="formData.name"
-            placeholder="Enter publish name"
-          ></Input>
-        </FormItem>
-        <FormItem label="分类：" prop="name">
-          <treeselect
-            v-model="formData.productTypeId"
-            :placeholder="$t('modal.placeholder_select')"
-            :normalizer="normalizer"
-            :options="treeData"
-            style="width: 100%; height: 32px"
-          />
-        </FormItem>
-        <FormItem label="描述：" prop="description">
-          <Input
-            v-model="formData.description"
-            placeholder="Enter publish description"
-          ></Input>
-        </FormItem>
-
-      </Form>
+  v-model="open"
+  title="编辑"
+  :ok-text="$t('modal.ok_text')"
+  :cancel-text="$t('modal.cancel_text')"
+  @on-ok="handleComfirm"
+>
+  <div class="modal-warp">
+    <div class="item">
+      <label>名称：</label>
+      <Input
+        v-model="formData.name"
+        show-word-limit
+        maxlength="100"
+        :placeholder="$t('modal.placeholder')"
+        style="width: 350px"
+      />
     </div>
-    </Modal>
+    <div class="item">
+      <label class="self">分类：</label>
+      <treeselect
+        v-model="formData.productTypeId"
+        :placeholder="$t('modal.placeholder_select')"
+        :normalizer="normalizer"
+        :options="treeData"
+        style="width: 350px"
+      />
+    </div>
+    <div class="item">
+      <label>权限：</label>
+      <Select v-model="formData.permission"  style="width: 350px">
+        <Option :value="0">公开</Option>
+        <Option :value="1">授权</Option>
+      </Select>
+    </div>
+    <div class="item">
+      <label>简介：</label>
+      <Input
+        v-model="formData.description"
+        type="textarea"
+        :rows="4"
+        :placeholder="$t('modal.placeholder')"
+        style="width: 350px"
+      />
+    </div>
+    <div class="item">
+      <label>关键词：</label>
+      <Input
+        v-model="formData.keyword"
+        show-word-limit
+        maxlength="100"
+        :placeholder="$t('modal.placeholder')"
+        style="width: 350px"
+      />
+    </div>
+
+    <div class="item">
+      <label>发布者姓名：</label>
+      <Input
+        v-model="formData.sdPublisher"
+        show-word-limit
+        maxlength="100"
+        :placeholder="$t('modal.placeholder')"
+        style="width: 350px"
+      />
+    </div>
+
+    <div class="item">
+      <label>发布者邮箱：</label>
+      <Input
+        v-model="formData.email"
+        show-word-limit
+        maxlength="100"
+        :placeholder="$t('modal.placeholder')"
+        style="width: 350px"
+      />
+    </div>
+
+    <div class="item">
+      <label class="self">封面：</label>
+      <Upload
+        action="/null"
+        :before-upload="handleFileBefore"
+        :show-upload-list="false"
+        style="width: 350px"
+        class="upload"
+      >
+        <div>
+          <img
+            v-if="this.file"
+            style="width: 100px; height: 40px"
+            :src="this.file"
+            alt=""
+          />
+          <Icon
+            v-else
+            type="ios-cloud-upload"
+            size="52"
+            style="color: #3399ff"
+          ></Icon>
+          <p>Click or drag files here to upload</p>
+        </div>
+      </Upload>
+    </div>
+  </div>
+</Modal>
 </template>
 
 <script>
 import {
-  getDataProductType,
+  getDataProductType,saveDataProduct
 } from "@/apis/dataProduct";
-import { uploadFile } from "@/apis/file";
-import { findTree } from "@/utils/tree";
 
 export default {
   data() {
@@ -56,6 +119,7 @@ export default {
       formData: {},
       open: false,
       treeData: [],
+      file:'',
       ruleValidate: {
         name: [
           {
@@ -78,21 +142,49 @@ export default {
     },
 
     async handleAdd(row) {
+      this.formData = {
+        name:row.flowPublishingVo.name,
+        description:row.flowPublishingVo.description,
+        productTypeId:row.flowPublishingVo.productTypeId,
+        version:row.flowPublishingVo.version,
+        state:3,
+        id:row.appId
+      }
       this.open = true;
     },
 
     async handleEdit(row) {
-      this.formData = {}
+
       this.open = true;
 
     },
-    // 保存（编辑或者更新）
-    async handleSaveUpdateData() {
-
+    // 保存
+    async handleComfirm() {
+      console.log(this.formData)
+      this.$emit('loading',true)
+      const res = await saveDataProduct(this.formData);
+      if(res.data.code === 200){
+        this.$Message.success({
+              content: res.data.errorMsg,
+              duration: 3
+        });
+      }else{
+        this.$Message.error({
+              content: res.data.errorMsg,
+              duration: 3
+        });
+      }
+      this.$emit('loading',false)
     },
 
-    handleBeforeUpload(e) {
-      this.file = e
+    // 手动上传
+    handleFileBefore(file) {
+      this.formData.file = file;
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        this.file = reader.result;
+      };
       return false;
     },
     normalizer(node) {
@@ -108,6 +200,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "./index.scss";
+
 
 </style>
 

@@ -1,80 +1,9 @@
 <template>
   <div class="content">
-    <h4 class="content_title">· {{ publishInfo.name }} ·</h4>
-    <div class="desc" v-if="publishInfo.description">
-      {{ publishInfo.description }}
-    </div>
-
-    <div class="contain" v-if="publishInfo.stops">
-      <div class="config">
-        <div class="config_l">
-          <!-- 输入 -->
-          <p>文件输入</p>
-          <div class="wrap">
-            <div>
-              <div v-for="child in fileInput" :key="child.id">
-                <div class="label">
-                  {{ child.name }}
-                </div>
-                <div>
-                  <p
-                    @click="handleDownload(child.fileId, child.fileName)"
-                    class="fileExample"
-                  >
-                    <span>{{ child.fileName }}</span>
-                    <Icon type="md-cloud-download" />
-                  </p>
-                  <div>
-                    <Upload action="/null" :before-upload="handleBeforeUpload">
-                      <Button class="uploadBtn" icon="md-cloud-upload"
-                        >Upload files</Button
-                      >
-                    </Upload>
-                    <p v-if="child.customFile">{{ child.customValue }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="wrap">
-            <p>普通输入</p>
-            <div>
-              <div v-for="child in textInput" :key="child.id">
-                <div class="label">
-                  {{ child.name }}
-                </div>
-                <div>
-                  <Input v-model="child.customValue"></Input>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="wrap">
-            <p>输出</p>
-            <div>
-              <div v-for="child in output" :key="child.id">
-                <div class="label">
-                  {{ child.name }}
-                </div>
-                <div>
-                  <Input v-model="child.customValue"></Input>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="config_r">
-          <img src="@/assets/img/home/p1.png" alt="" />
-        </div>
-      </div>
-
+      <p class="return" @click="$router.go(-1)"><Icon type="ios-arrow-back" />返回</p>
+      <Flow mode="edit" :flowInfo="publishInfo"/>
       <div>
         <Button class="run" @click="handleRun()">运行</Button>
-      </div>
-      <div class="progress">
-        <Progress :percent="25" :stroke-width="12" status="active" />
       </div>
 
       <div class="history">
@@ -90,6 +19,7 @@
           <Table :columns="columns" :data="historyData">
             <template slot-scope="{ row }" slot="action">
               <div class="btn">
+                <Button @click="handDataPublish(row)">查看</Button>
                 <Button @click="handleEnter(row)">日志查看</Button>
                 <Button @click="handShowInstructions(row)">数据产品下载</Button>
                 <Button @click="handDataPublish(row)">数据产品发布</Button>
@@ -110,7 +40,6 @@
       </div>
 
       <PublishModal ref="PublishModalRef"/>
-    </div>
   </div>
 </template>
   
@@ -119,15 +48,16 @@ import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
 import { getProcessPageByPublishingId } from "@/apis/process";
 import { downloadFile, download } from "@/apis/file";
 import PublishModal from '@/components/pages/DataProductManagement/Publish/PublishModal'
+import Flow from '../components/flow'
 export default {
   components:{
-    PublishModal
+    PublishModal,Flow
   },
   data() {
     return {
       page: 1,
       limit: 5,
-      total: 30,
+      total: 0,
       historyIsShow: false,
       publishInfo: {},
       fileInput: [],
@@ -153,7 +83,7 @@ export default {
         {
           title: "操作",
           slot: "action",
-          width: 340,
+          width:400,
           align: "center",
         },
       ],
@@ -168,40 +98,25 @@ export default {
       this.$refs.PublishModalRef.handleAdd(row)
     },
     async handleRun() {
-      const res = await runPublishFlow(this.publishInfo);
-      console.log(res);
+      // this.$event.emit("loading", true);
+      // const res = await runPublishFlow(this.publishInfo);
+      // this.$event.emit("loading", false);
+      if(res.data.code === 200){
+        this.$router.push(`/home/flowProcess&id=${id}`)
+      }else{
+        this.$Message.errorMsg({
+          content: dataMap.errorMsg,
+          duration: 3
+        });
+      }
     },
+    // 根据流水线id 获取组件发布信息
     async handleGetStopsById() {
       const res = await getPublishingById(this.$route.query.id);
-      delete res.data.data.crtDttm;
-      delete res.data.data.crtDttmString;
-      delete res.data.data.crtUser;
-      delete res.data.data.lastUpdateDttm;
-      delete res.data.data.lastUpdateDttmString;
-      delete res.data.data.lastUpdateUser;
-      delete res.data.data.enableFlag;
       this.publishInfo = res.data.data;
       this.getHistoryList();
+    },
 
-      this.publishInfo.stops.forEach((item) => {
-        item.stopPublishingPropertyVos.forEach((v) => {
-          if (v.type === 0) {
-            this.fileInput.push(v);
-          } else if (v.type === 1) {
-            this.textInput.push(v);
-          } else {
-            this.output.push(v);
-          }
-        });
-      });
-    },
-    async handleDownload(id, fileName) {
-      download(downloadFile, id, fileName);
-    },
-    handleBeforeUpload(e) {
-      this.currentProps.fileName = e.name;
-      this.fileList.push({ id: this.currentProps.propertyId, file: e });
-    },
     handleEnter(row) {
       console.log(row);
     },
@@ -211,7 +126,7 @@ export default {
 
     async getHistoryList() {
       const data = {
-        limit: this.limit,
+        limit: 10,
         page: this.page,
         publishingId: this.publishInfo.id,
       };

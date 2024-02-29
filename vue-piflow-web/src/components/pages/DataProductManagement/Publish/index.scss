@@ -57,3 +57,20 @@ section {
       }
     }
   }
+
+
+  .item {
+    display: flex;
+    label {
+      margin-top: 5px;
+    }
+  }
+  .upload {
+    background: #fff;
+    border: 1px dashed #dcdee2;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    width: 350px;
+    padding: 20px 0;
+  }

@@ -1,5 +1,16 @@
 import axios from 'axios';
 
+
+// 流水线发布  编辑/新增
+export function publishingStops (data) {
+    return axios({
+        method:'post',
+        url:'/flowPublish/publishingStops',
+        data,
+    })
+}
+
+
 // 获取已发布流水线
 export function getflowPublishList (data) {
     return axios({

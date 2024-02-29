@@ -8,3 +8,14 @@ export function getProcessPageByPublishingId (data) {
         data
     })
 }
+
+
+// 根据流水线运行状态
+export function getAppInfo (params) {
+    return axios({
+        method:'get',
+        url:`/process/getAppInfo`,
+        params
+    })
+}
+

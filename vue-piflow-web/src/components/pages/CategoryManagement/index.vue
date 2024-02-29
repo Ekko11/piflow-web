@@ -85,7 +85,7 @@
   </section>
 </template>
 <script>
-import { getDataProductType, saveDataProduct } from "@/apis/dataProduct";
+import { getDataProductType, saveDataProductType ,deleteDataProductType} from "@/apis/dataProduct";
 import { findTree } from "@/utils/tree";
 
 export default {
@@ -133,7 +133,7 @@ export default {
     async handleComfirm() {
       if (!this.formData.id) this.formData.level = this.parentNode.level + 1;
       if (this.parentNode.level === 0) this.formData.parentId = null;
-      const res = await saveDataProduct(this.formData);
+      const res = await saveDataProductType(this.formData);
       if (res.data.code == 200) {
         this.$Modal.success({
           title: this.$t("tip.title"),
@@ -148,6 +148,31 @@ export default {
         
       }
       console.log(res);
+    },
+
+    handleDelete(row){
+      this.$Modal.confirm({
+        title: this.$t("tip.title"),
+        okText: this.$t("modal.confirm"),
+        cancelText: this.$t("modal.cancel_text"),
+        content: `${this.$t("modal.delete_content")} ${row.name}?`,
+        onOk: async() => {
+          const res = await deleteDataProductType(row.id)
+          if (res.data.code === 200) {
+                this.$Modal.success({
+                  title: this.$t("tip.title"),
+                  content:
+                    `${row.name} ` + this.$t("tip.delete_success_content")
+                });
+                this.handleGetData();
+              } else {
+                this.$Message.error({
+                  content: this.$t("tip.delete_fail_content"),
+                  duration: 3
+                });
+              }
+        }
+      })
     },
 
     handleAddChild(node) {
@@ -175,7 +200,6 @@ export default {
       ];
       this.handleChangeSelectNode(null, this.treeData[0]);
       this.parentNode = this.treeData[0];
-      console.log(formData);
     },
     handleChangeSelectNode(list, node) {
       this.parentNode = node;

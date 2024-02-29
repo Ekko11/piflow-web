@@ -37,7 +37,7 @@
   </div>
 </template>
 <script>
-import { getDataProductType, saveDataProduct } from "@/apis/dataProduct";
+import { getDataProductType } from "@/apis/dataProduct";
 export default {
   data() {
     return {

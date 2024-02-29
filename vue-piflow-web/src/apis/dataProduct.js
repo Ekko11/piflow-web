@@ -8,8 +8,8 @@ export function getDataProductType () {
         url:'/dataProductType/get',
     })
 }
-// 数据产品编辑或新增
-export function saveDataProduct (data) {
+// 数据产品分类编辑或新增
+export function saveDataProductType (data) {
     return axios({
         method:'post',
         url:'/dataProductType/save',
@@ -17,6 +17,25 @@ export function saveDataProduct (data) {
         headers:{
             'Content-Type':'multipart/form-data'
         },
+    })
+}
+
+// 获取数据产品分类  偏好设置
+export function deleteDataProductType (id) {
+    return axios({
+        method:'post',
+        url:`/dataProductType/delete?id=${id}`,
+    })
+}
+
+
+
+// 获取数据产品分类  偏好设置
+export function setDataProductPreference (data) {
+    return axios({
+        method:'post',
+        url:'/dataProductType/preference',
+        data
     })
 }
 
@@ -30,18 +49,6 @@ export function getStopsInfoByFlowId (id) {
 }
 
 
-// 流水线发布  编辑/新增
-export function publishingStops (data) {
-    return axios({
-        method:'post',
-        url:'/flowPublish/publishingStops',
-        data,
-        // headers:{
-        //     'Content-Type':'multipart/form-data'
-        // },
-    })
-}
-
 
 // 获取数据产品列表
 export function getDataProductList (data) {
@@ -53,14 +60,6 @@ export function getDataProductList (data) {
 }
 
 
-// 获取数据产品列表
-export function downProductFile (id) {
-    return axios({
-        method:'get',
-        url:`file/getFileById?id=${id}`,
-        responseType:'blob'
-    })
-}
 
 // 数据产品 管理员审核
 export function permissionForPublishing (data) {
@@ -107,20 +106,17 @@ export function permissionForUse (data) {
     })
 }
 
-
-
-
-// 获取数据产品分类  偏好设置
-export function setDataProductPreference (data) {
+// 数据产品发布
+export function saveDataProduct (data) {
     return axios({
         method:'post',
-        url:'/dataProductType/preference',
-        data
+        url:'/dataProduct/save',
+        data:formDataFormat(data),
+        headers:{
+            'Content-Type':'multipart/form-data'
+        },
     })
 }
-
-
-
 
 // 获取所有数据产品
 export function getDataProductByPage (data) {

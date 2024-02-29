@@ -51,115 +51,7 @@
       />
     </div>
 
-    <!-- 编辑 -->
-    <Modal
-      v-model="isOpen"
-      title="编辑"
-      :ok-text="$t('modal.ok_text')"
-      :cancel-text="$t('modal.cancel_text')"
-      @on-ok="handleComfirm"
-    >
-      <div class="modal-warp">
-        <div class="item">
-          <label>名称：</label>
-          <Input
-            v-model="formData.name"
-            show-word-limit
-            maxlength="100"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
-        </div>
-        <div class="item">
-          <label class="self">分类：</label>
-          <treeselect
-            v-model="formData.parentId"
-            :placeholder="$t('modal.placeholder_select')"
-            :normalizer="normalizer"
-            :options="treeData"
-            style="width: 350px"
-          />
-        </div>
-        <div class="item">
-          <label>权限：</label>
-          <RadioGroup v-model="formData.permission">
-            <Radio value="0">公开</Radio>
-            <Radio value="1">授权</Radio>
-          </RadioGroup>
-        </div>
-        <div class="item">
-          <label>简介：</label>
-          <Input
-            v-model="formData.description"
-            type="textarea"
-            :rows="4"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
-        </div>
-        <div class="item">
-          <label>关键词：</label>
-          <Input
-            v-model="formData.keyword"
-            show-word-limit
-            maxlength="100"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
-        </div>
 
-        <div class="item">
-          <label>发布者姓名：</label>
-          <Input
-            v-model="formData.sdPublisher"
-            show-word-limit
-            maxlength="100"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
-        </div>
-
-        <div class="item">
-          <label>发布者邮箱：</label>
-          <Input
-            v-model="formData.email"
-            show-word-limit
-            maxlength="100"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
-        </div>
-
-        <div class="item">
-          <label class="self">封面：</label>
-          <Upload
-            action="/null"
-            :on-success="handleFileSuccess"
-            :on-error="handleFileError"
-            :before-upload="handleFileBefore"
-            :show-upload-list="false"
-            style="width: 350px"
-            class="upload"
-          >
-            <div>
-              <img
-                v-if="formData.file || formData.fileName"
-                style="width: 100px; height: 40px"
-                :src="formData.fileName"
-                alt=""
-              />
-              <Icon
-                v-else
-                type="ios-cloud-upload"
-                size="52"
-                style="color: #3399ff"
-              ></Icon>
-              <p>Click or drag files here to upload</p>
-            </div>
-          </Upload>
-        </div>
-      </div>
-    </Modal>
 
     <!-- 审核 -->
     <Modal
@@ -224,20 +116,18 @@
 
 <script>
 import {
-  saveDataProduct,
   getDataProductByPage,
-  downProductFile,
   deleteDataProduct,
   permissionForPublishing,
   delistDataProduct,
 } from "@/apis/dataProduct";
+import { downloadFile, download } from "@/apis/file";
 import Cookies from "js-cookie";
 export default {
   name: "VisualizationDataBase",
   components: {},
   data() {
     return {
-      isOpen: false,
       applyIsOpen: false,
       delistIsOpen: false,
       page: 1,
@@ -245,9 +135,7 @@ export default {
       total: 0,
       user: "USER",
       tableData: [],
-      treeData: [],
       param: "",
-      formData: {},
       // 审核
       formApplyInfo: {
         id: "",
@@ -267,7 +155,6 @@ export default {
         {
           title: "标题",
           key: "name",
-          sortable: true,
         },
         {
           title: "描述",
@@ -305,8 +192,7 @@ export default {
     },
     // 下载
     async handleDown(row) {
-      const res = await downProductFile(row.id);
-      console.log(res);
+      download(downloadFile, row.id);
     },
     // 审核
     handleOpenApply(row) {
@@ -328,36 +214,9 @@ export default {
     },
 
     handleEdit(row) {
-      const {
-        id,
-        name,
-        description,
-        permission,
-        keyword,
-        sdPublisher,
-        email,
-        file,
-      } = row;
-      this.formData = {
-        id,
-        name,
-        description,
-        permission,
-        keyword,
-        sdPublisher,
-        email,
-        file,
-      };
-      this.isOpen = true;
+      this.$refs.PublishModalRef.handleEdit(row)
     },
-    async handleComfirm() {
-      const formData = new FormData();
-      for (const key in this.formData) {
-        formData.append(key, this.formData[key]);
-      }
-      const rss = await saveDataProduct(formData);
-      console.log(res);
-    },
+
 
     handleDelete(row) {
       this.$Modal.confirm({
@@ -388,42 +247,11 @@ export default {
         data.keyword = this.param;
       }
       const res = await getDataProductByPage(data);
-      console.log(res);
-      // this.$axios({
-      //     method:'POST',
-      //     url:'/visual/getDatabaseList',
-      //     data
-      // }).then(res=>{
-      //       if (res.data.code === 200) {
-      //         this.tableData = res.data.data;
-      //         this.total = res.data.totalCount;
-      //       } else {
-      //         this.$Message.error({
-      //           content: this.$t("tip.request_fail_content"),
-      //           duration: 3
-      //         });
-      //       }
-      //     }).catch(error => {
-      //       console.log(error);
-      //       this.$Message.error({
-      //         content: this.$t("tip.fault_content"),
-      //         duration: 3
-      //       });
-      //     });
+      this.tableData = res.data.data
+      this.total = res.data.count
     },
 
-    // 手动上传
-    handleFileSuccess(response, file, fileList) {},
-    handleFileError(error, file, fileList) {},
-    handleFileBefore(file) {
-      this.formData.file = file;
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        this.formData.fileName = reader.result;
-      };
-      return false;
-    },
+
     onPageChange(pageNo) {
       this.page = pageNo;
       this.getTableData();
@@ -433,34 +261,12 @@ export default {
       this.limit = pageSize;
       this.getTableData();
     },
-    normalizer(node) {
-      return {
-        id: node.id,
-        label: node.name,
-        children:
-          node.children && node.children.length ? node.children : undefined,
-      };
-    },
   },
 };
 </script>
 <style lang="scss" scoped>
 @import "./index.scss";
-.item {
-  display: flex;
-  label {
-    margin-top: 5px;
-  }
-}
-.upload {
-  background: #fff;
-  border: 1px dashed #dcdee2;
-  border-radius: 4px;
-  text-align: center;
-  cursor: pointer;
-  width: 350px;
-  padding: 20px 0;
-}
+
 .btn button {
   margin-right: 3px;
 }

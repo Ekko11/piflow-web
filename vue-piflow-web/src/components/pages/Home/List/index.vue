@@ -1,11 +1,12 @@
 <template>
   <div class="content">
-    <div class="parentList">
-      <p v-for="(item,index) in parentList" :key="item.id" @click="handleChangeNode(item.id)">
+    <div class="parentList" v-if="parentList.length" >
+      <p v-for="(item,index) in parentList" :key="item.id"  class="return"  @click="handleChangeNode(item.id)">
         <span class="name"> {{ item.name }}</span>
         <span class="legend" v-if="index !== parentList.length -1"><Icon type="ios-arrow-forward" /></span>
       </p>
     </div>
+    <p v-else class="return" @click="$router.push('/home')"><Icon type="ios-arrow-back" />返回</p>
     <h4 class="content_title">
       <span>
         {{ currentNode.name }}
@@ -217,9 +218,6 @@ export default {
 }
 .parentList{
   display: flex;
-  padding-top: 10px;
-  font-size: 16px;
-  font-weight: 500;
   .name{
     color: #3974AA;
     cursor: pointer;

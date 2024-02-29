@@ -200,10 +200,9 @@
 import {
   getDataProductType,
   getStopsInfoByFlowId,
-  publishingStops,
 } from "@/apis/dataProduct";
 
-import { getPublishingById } from "@/apis/flowPublish";
+import { getPublishingById,publishingStops } from "@/apis/flowPublish";
 import { uploadFile } from "@/apis/file";
 
 import { findTree } from "@/utils/tree";

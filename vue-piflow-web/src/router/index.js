@@ -68,6 +68,11 @@ export default new Router({
           path: 'flowConfig',
           name: 'flowConfig',
           component: () => import('../components/pages/Home/Flow/FlowConfig'),
+        },
+        {
+          path: 'flowProcess',
+          name: 'flowProcess',
+          component: () => import('../components/pages/Home/Flow/FlowProcess'),
         }
       ],
     },
