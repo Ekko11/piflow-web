@@ -125,8 +125,8 @@ export default {
         {
           btnName: this.$t("sidebar.operatingHistory"),
           icoName: "md-list-box",
-          router: "/",
-          name: "home",
+          router: "/flowHistory",
+          name: "flowHistory",
         },
         {
           btnName: this.$t("sidebar.preferenceSettings"),

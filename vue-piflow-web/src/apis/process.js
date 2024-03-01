@@ -19,3 +19,24 @@ export function getAppInfo (params) {
     })
 }
 
+
+// 根据流水线运行状态
+export function getByProcessId (id) {
+    return axios({
+        method:'get',
+        url:`/process/getByProcessId?processId=${id}`,
+    })
+}
+
+
+
+
+// 获取运行历史列表
+export function getProcessHistoryPageOfSelf (data) {
+    return axios({
+        method:'post',
+        url:`/process/getProcessHistoryPageOfSelf`,
+        data
+    })
+}
+

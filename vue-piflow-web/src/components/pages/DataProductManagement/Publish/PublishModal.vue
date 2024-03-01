@@ -154,7 +154,8 @@ export default {
     },
 
     async handleEdit(row) {
-
+      const { id,name,productTypeId,keyword,description,permission,sdPublisher,email,state,version} = row
+      this.formData = { id,name,productTypeId,keyword,description,permission,sdPublisher,email,state,version}
       this.open = true;
 
     },

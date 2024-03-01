@@ -1,12 +1,12 @@
 <template>
   <div class="content">
-    <div class="parentList" v-if="parentList.length" >
+    <!-- <div class="parentList" v-if="parentList.length" >
       <p v-for="(item,index) in parentList" :key="item.id"  class="return"  @click="handleChangeNode(item.id)">
         <span class="name"> {{ item.name }}</span>
         <span class="legend" v-if="index !== parentList.length -1"><Icon type="ios-arrow-forward" /></span>
       </p>
-    </div>
-    <p v-else class="return" @click="$router.push('/home')"><Icon type="ios-arrow-back" />返回</p>
+    </div> -->
+    <p  class="return" @click="$router.push('/home')"><Icon type="ios-arrow-back" />返回</p>
     <h4 class="content_title">
       <span>
         {{ currentNode.name }}
@@ -16,7 +16,7 @@
       {{ currentNode.description }}
     </div>
 
-    <div v-if="currentNode.children && currentNode.children.length" class="process flow_process" >
+    <!-- <div v-if="currentNode.children && currentNode.children.length" class="process flow_process" >
       <div class="process_list">
         <div
           v-for="(child, idx) in currentNode.children"
@@ -29,7 +29,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="list">
       <Table :columns="columns" :data="tableData">

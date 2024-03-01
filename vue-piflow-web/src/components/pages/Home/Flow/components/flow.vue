@@ -10,8 +10,8 @@
         <div class="config_l">
           <!-- 输入 -->
           <div class="wrap" v-if="fileInput.length">
-          <p>文件输入</p>
-          <div>
+            <p>文件输入</p>
+            <div>
               <div v-for="child in fileInput" :key="child.id">
                 <div class="label">
                   {{ child.name }}
@@ -24,8 +24,12 @@
                     <span>{{ child.fileName }}</span>
                     <Icon type="md-cloud-download" />
                   </p>
-                  <div>
-                    <Upload :disabled="mode !== 'edit'" action="/null" :before-upload="handleBeforeUpload">
+                  <div @click="handleUpload(child)">
+                    <Upload
+                      :disabled="mode !== 'edit'"
+                      action="/null"
+                      :before-upload="handleBeforeUpload"
+                    >
                       <Button class="uploadBtn" icon="md-cloud-upload"
                         >Upload files</Button
                       >
@@ -37,7 +41,7 @@
             </div>
           </div>
 
-          <div class="wrap"  v-if="textInput.length">
+          <div class="wrap" v-if="textInput.length">
             <p>普通输入</p>
             <div>
               <div v-for="child in textInput" :key="child.id">
@@ -45,13 +49,16 @@
                   {{ child.name }}
                 </div>
                 <div>
-                  <Input :disabled="mode !== 'edit'" v-model="child.customValue"></Input>
+                  <Input
+                    :disabled="mode !== 'edit'"
+                    v-model="child.customValue"
+                  ></Input>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="wrap"  v-if="output.length">
+          <div class="wrap" v-if="output.length">
             <p>输出</p>
             <div>
               <div v-for="child in output" :key="child.id">
@@ -59,7 +66,10 @@
                   {{ child.name }}
                 </div>
                 <div>
-                  <Input :disabled="mode !== 'edit'" v-model="child.customValue"></Input>
+                  <Input
+                    :disabled="mode !== 'edit'"
+                    v-model="child.customValue"
+                  ></Input>
                 </div>
               </div>
             </div>
@@ -70,8 +80,6 @@
           <img src="@/assets/img/home/p1.png" alt="" />
         </div>
       </div>
-
-
     </div>
   </div>
 </template>
@@ -79,7 +87,7 @@
     <script>
 import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
 import { getProcessPageByPublishingId } from "@/apis/process";
-import { downloadFile, download } from "@/apis/file";
+import { downloadFile, download, uploadFile } from "@/apis/file";
 export default {
   props: {
     mode: String,
@@ -88,10 +96,11 @@ export default {
   watch: {
     flowInfo: {
       handler(val) {
-        if(val.id)  this.init(val)
+        if (val.id && JSON.stringify(val) !== JSON.stringify(this.publishInfo))
+          this.init(val);
       },
-      deep:true,
-      immediate:true
+      deep: true,
+      immediate: true,
     },
   },
   data() {
@@ -104,7 +113,10 @@ export default {
   },
 
   methods: {
-    init(val){
+    init(val) {
+      this.fileInput = [];
+      this.textInput = [];
+      this.output = [];
       delete val.crtDttm;
       delete val.crtDttmString;
       delete val.crtUser;
@@ -132,14 +144,26 @@ export default {
 
     async handleGetStopsById() {
       const res = await getPublishingById(this.$route.query.id);
-
     },
     async handleDownload(id, fileName) {
       download(downloadFile, id, fileName);
     },
+    handleUpload(child) {
+      this.currentPropos = child;
+    },
+    async realUpload(e) {
+      const res = await uploadFile({
+        file: e,
+        associateType: 4,
+        associateId: this.currentPropos.id,
+      });
+      this.currentPropos.customValue = res.data.data.filePath;
+    },
     handleBeforeUpload(e) {
-      this.currentProps.fileName = e.name;
-      this.fileList.push({ id: this.currentProps.propertyId, file: e });
+      this.realUpload(e);
+      return false;
+      // this.currentProps.fileName = e.name;
+      // this.fileList.push({ id: this.currentProps.propertyId, file: e });
     },
   },
 };
@@ -161,7 +185,7 @@ export default {
         border: 1px dashed #006fee;
         background: #e6f1fe;
         margin-bottom: 20px;
-        padding:0 20px 20px;
+        padding: 0 20px 20px;
         border-radius: 8px;
         .fileExample {
           display: flex;
@@ -231,7 +255,6 @@ export default {
     margin: 40px 0;
   }
 }
-
 
 .btn {
   button {

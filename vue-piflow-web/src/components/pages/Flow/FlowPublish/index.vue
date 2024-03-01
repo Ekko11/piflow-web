@@ -102,6 +102,7 @@ export default {
     },
   },
   methods: {
+
     handleEdit(row) {
       this.$refs.PublishModal.handleEdit(row);
     },

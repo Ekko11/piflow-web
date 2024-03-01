@@ -320,8 +320,8 @@ export default {
             this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
             this.stops[index].stopPublishingPropertyVos[idx].fileId = child.fileId;
             this.stops[index].stopPublishingPropertyVos[idx].fileName = child.fileName;
-            this.stops[index].stopPublishingPropertyVos[idx].publishingId =
-              child.publishingId;
+            this.stops[index].stopPublishingPropertyVos[idx].version = child.version;
+            this.stops[index].stopPublishingPropertyVos[idx].publishingId = child.publishingId;
             this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
             this.stops[index].stopPublishingPropertyVos[idx].cascaderType = child.type === 2 ?[child.type]:[1,child.type];
           });

@@ -28,12 +28,12 @@ export default {
         {
           img: require("@/assets/img/home/process.png"),
           name: "数据处理",
-          route: "/",
+          route: "/home",
         },
         {
           img: require("@/assets/img/home/product.png"),
           name: "数据产品",
-          route: "/product",
+          route: "/home/product",
         },
         {
           img: require("@/assets/img/home/visualization.png"),
@@ -43,7 +43,7 @@ export default {
         {
           img: require("@/assets/img/home/intro.png"),
           name: "系统简介",
-          route: "/intro",
+          route: "/home/intro",
         },
       ],
     };
@@ -70,7 +70,7 @@ export default {
   },
   methods:{
     handleEnter(link){
-        this.$router.push('/home'+link)
+        this.$router.push(link)
     }
   },
 };

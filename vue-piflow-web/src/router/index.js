@@ -100,6 +100,11 @@ export default new Router({
               component: () => import('../components/pages/CategoryManagement/Preference')
             },
             {
+              path: '/flowHistory',
+              name: 'flowHistory',
+              component: () => import('../components/pages/CategoryManagement/FlowHistory')
+            },
+            {
               path: '/producePublishManagement',
               name: 'producePublishManagement',
               component: () => import('../components/pages/DataProductManagement/Publish')

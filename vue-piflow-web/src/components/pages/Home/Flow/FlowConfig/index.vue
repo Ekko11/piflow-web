@@ -1,13 +1,11 @@
 <template>
   <div class="content">
       <p class="return" @click="$router.go(-1)"><Icon type="ios-arrow-back" />返回</p>
-      <Flow mode="edit" :flowInfo="publishInfo"/>
-      <div>
-        <Button class="run" @click="handleRun()">运行</Button>
-      </div>
-
+      <Flow mode="edit" ref="flow" :flowInfo="publishInfo"/>
       <div class="history">
         <div class="history_btn">
+        <Button class="run" @click="handleRun()">运行</Button>
+
           <Button @click="historyIsShow = !historyIsShow"
             >历史记录
             <Icon
@@ -21,7 +19,7 @@
               <div class="btn">
                 <Button @click="handDataPublish(row)">查看</Button>
                 <Button @click="handleEnter(row)">日志查看</Button>
-                <Button @click="handShowInstructions(row)">数据产品下载</Button>
+                <Button @click="handleDownDataProduct(row)">数据产品下载</Button>
                 <Button @click="handDataPublish(row)">数据产品发布</Button>
               </div>
             </template>
@@ -94,18 +92,21 @@ export default {
     this.handleGetStopsById();
   },
   methods: {
+    handleDownDataProduct(row){
+       download(downloadFile, row.file.id);
+    },
     handDataPublish(row){
       this.$refs.PublishModalRef.handleAdd(row)
     },
     async handleRun() {
-      // this.$event.emit("loading", true);
-      // const res = await runPublishFlow(this.publishInfo);
-      // this.$event.emit("loading", false);
+      this.$event.emit("loading", true);
+      const res = await runPublishFlow(this.publishInfo);
+      this.$event.emit("loading", false);
       if(res.data.code === 200){
-        this.$router.push(`/home/flowProcess&id=${id}`)
+        this.$router.push(`/home/flowProcess?processId=${res.data.data.processId}`)
       }else{
-        this.$Message.errorMsg({
-          content: dataMap.errorMsg,
+        this.$Message.error({
+          content: res.data.errorMsg,
           duration: 3
         });
       }
@@ -225,8 +226,7 @@ export default {
     }
   }
   .run {
-    background: #006fee;
-    color: #fff;
+
   }
   .progress {
     margin: 40px 0;
@@ -235,13 +235,18 @@ export default {
 ::v-deep .history {
   &_btn {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin-bottom: 12px;
     button {
       background: #f2eafa;
       border: none;
       color: #6020a0;
+      &.run{
+        background: #006fee;
+        color: #fff;
+      }
     }
+
   }
   &_list {
     padding: 20px;

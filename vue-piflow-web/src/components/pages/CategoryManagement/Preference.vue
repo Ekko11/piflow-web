@@ -58,7 +58,7 @@
     methods: {
      async handleSet(row){
         const data = {
-            id:row.id,
+            id:Number(row.id),
             preference: row.preference === 2?1:2
         }
         const res = await setDataProductPreference(data)

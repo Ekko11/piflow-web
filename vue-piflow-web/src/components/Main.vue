@@ -4,13 +4,7 @@
     <Header :width="width"></Header>
     <router-view></router-view>
     <Footer />
-    <transition name="show">
-      <div class="fullScreen" v-if="loading">
-        <div style="margin-top: 15%;">
-          <p><img src="../assets/img/loading.gif" /></p>
-        </div>
-      </div>
-    </transition>
+
   </div>
 </template>
 <script>
@@ -24,15 +18,10 @@ export default {
   },
   data() {
     return {
-      loading: false,
       width: "250px"
     };
   },
-  created() {
-    this.$event.on("loading", val => {
-      this.loading = val;
-    });
-  }
+
 };
 </script>
 

@@ -35,15 +35,10 @@ function downloadByBlob(file, fileName = "下载文件") {
 }
 
 function getFileNameByHeaders(headers, defaultFileName) {
-  if (
-    headers["content-disposition"] &&
-    headers["content-disposition"].includes("UTF-8")
-  ) {
-    return decodeURI(
-      headers["content-disposition"].split(";")[1].split("UTF-8''")[1]
-    );
-  } else {
-    return defaultFileName;
+  try{
+    return  headers["content-disposition"].split(";")[1].split("=")[1].replaceAll("\"",'')
+  }catch(err){
+    return defaultFileName
   }
 }
 
@@ -61,6 +56,7 @@ export const download = async (request, params, fileName) => {
       const file = res.data;
       const blob = new Blob([file]);
       fileName = getFileNameByHeaders(res.headers, fileName);
+      console.log(fileName)
       downloadByBlob(blob, fileName);
     }
   } catch (error) {

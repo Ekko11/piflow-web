@@ -23,14 +23,14 @@
           <Button @click="handleDown(row)">下载</Button>
           <Button
             v-if="user !== 'ADMIN'"
-            :disabled="row.status === '审核中'"
+            :disabled="row.status !== 3"
             @click="handleEdit(row)"
             >发布</Button
           >
           <Button v-if="user === 'ADMIN'" @click="handleOpenDelist(row)"
             >下架</Button
           >
-          <Button v-if="user === 'ADMIN'" @click="handleOpenApply(row)"
+          <Button v-if="user === 'ADMIN' && row.status === 4" @click="handleOpenApply(row)"
             >审核</Button
           >
           <Button @click="handleDelete(row)">删除</Button>
@@ -111,6 +111,7 @@
         </Form>
       </div>
     </Modal>
+    <PublishModal ref="PublishModalRef"/>
   </section>
 </template>
 
@@ -123,9 +124,12 @@ import {
 } from "@/apis/dataProduct";
 import { downloadFile, download } from "@/apis/file";
 import Cookies from "js-cookie";
+import PublishModal from "./PublishModal.vue";
+
+
 export default {
   name: "VisualizationDataBase",
-  components: {},
+  components: {PublishModal},
   data() {
     return {
       applyIsOpen: false,
@@ -136,6 +140,7 @@ export default {
       user: "USER",
       tableData: [],
       param: "",
+      state:{ 0:"已删除", 1:"生成中", 2:"生成失败", 3:"待发布", 4:"待审核", 5:"已发布", 6:"拒绝发布", 7:"已下架"},
       // 审核
       formApplyInfo: {
         id: "",
@@ -159,6 +164,13 @@ export default {
         {
           title: "描述",
           key: "description",
+        },
+        {
+          title: "状态",
+          key: "state",
+          render:(h,params)=> {
+            return h('span',this.state[params.row.state])
+          },
         },
         {
           title: this.$t("database.action"),
@@ -192,7 +204,7 @@ export default {
     },
     // 下载
     async handleDown(row) {
-      download(downloadFile, row.id);
+      download(downloadFile, row.file.id);
     },
     // 审核
     handleOpenApply(row) {
