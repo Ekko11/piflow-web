@@ -55,10 +55,9 @@ export default {
         const data = res.data.processVo;
         this.startTime = data.startTime;
         this.endTime = data.endTime;
-        // this.processIng = data.processStopVoList.filter(
-        //   (v) => v.state === "STARTED"
-        // );
-        // console.log(this.processIng);
+        this.processIng = data.processStopVoList.filter(
+          (v) => v.state === "STARTED"
+        );
 
         if (
           res.data.state !== "COMPLETED" &&
