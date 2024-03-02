@@ -101,6 +101,8 @@ module.exports = {
     // disableHostCheck: true,
     // open: true,
     // host: "localhost",
+    host: '0.0.0.0',
+    public: `${require('ip').address()}:8081`,
     proxy: {
       '/piflow-web': {
         target: 'http://10.0.82.209:6001/',
