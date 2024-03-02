@@ -18,7 +18,10 @@
           <Table :data="tableData" :columns="columns">
             <template slot-scope="{ row }" slot="action">
               <div class="btn">
-                <Icon @click="handleSet(row)" :type="row.preference === 1?'ios-heart':'ios-heart-outline'" />
+
+                <Icon v-if="!row.state" @click="handleSet(row,1)" type='ios-heart-outline' />
+                <Icon v-else-if="row.state === 1" style="color: red;"  @click="handleSet(row,2)" type="ios-heart" />
+                <Icon v-else @click="handleSet(row,1)"   type="ios-heart"  />
               </div>
             </template>
           </Table>
@@ -57,12 +60,15 @@
     },
     methods: {
      async handleSet(row){
+      console.log(row.state === 2)
         const data = {
             id:Number(row.id),
-            preference: row.preference === 2?1:2
+            preference: row.state === 1?2:1
         }
+        this.$set(row,'state',data.preference)
         const res = await setDataProductPreference(data)
-     },
+        // this.handleGetData()
+     }, 
       async handleGetData() {
         const res = await getDataProductType();
         this.treeData = [

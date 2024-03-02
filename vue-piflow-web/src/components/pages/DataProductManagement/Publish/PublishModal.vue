@@ -146,9 +146,10 @@ export default {
         name:row.flowPublishingVo.name,
         description:row.flowPublishingVo.description,
         productTypeId:row.flowPublishingVo.productTypeId,
-        version:row.flowPublishingVo.version,
+        productTypeName:row.flowPublishingVo.productTypeName,
+        version:row.dataProductList[0].version,
         state:3,
-        id:row.appId
+        id:row.dataProductList[0].id
       }
       this.open = true;
     },
@@ -162,8 +163,9 @@ export default {
     // 保存
     async handleComfirm() {
       console.log(this.formData)
-      this.$emit('loading',true)
+      this.$event.emit("loading", true);
       const res = await saveDataProduct(this.formData);
+      this.$event.emit("loading", false);
       if(res.data.code === 200){
         this.$Message.success({
               content: res.data.errorMsg,

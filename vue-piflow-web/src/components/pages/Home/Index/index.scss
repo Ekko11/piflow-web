@@ -178,7 +178,8 @@
             }
         }
         &_r{
-            >div{
+            flex-grow: 1;
+            .product_item{
                 display: flex;
                 box-shadow: 4px 4px 8px 0px #3974AA1F;
                 border-radius: 16px;
@@ -199,6 +200,7 @@
                 }
                 >div{
                     position: relative;
+                    flex-grow: 1;
                 }
 
             }

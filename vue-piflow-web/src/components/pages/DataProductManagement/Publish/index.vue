@@ -124,7 +124,7 @@ import {
 } from "@/apis/dataProduct";
 import { downloadFile, download } from "@/apis/file";
 import Cookies from "js-cookie";
-import PublishModal from "./PublishModal.vue";
+import PublishModal from "./PublishModal";
 
 
 export default {

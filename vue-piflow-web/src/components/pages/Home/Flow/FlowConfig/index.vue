@@ -1,43 +1,43 @@
 <template>
   <div class="content">
-      <p class="return" @click="$router.go(-1)"><Icon type="ios-arrow-back" />返回</p>
-      <Flow mode="edit" ref="flow" :flowInfo="publishInfo"/>
-      <div class="history">
-        <div class="history_btn">
+    <p class="return" @click="handleBack"><Icon type="ios-arrow-back" />返回</p>
+    <Flow mode="edit" ref="flow" :flowInfo="publishInfo" />
+    <div class="history">
+      <div class="history_btn">
         <Button class="run" @click="handleRun()">运行</Button>
 
-          <Button @click="historyIsShow = !historyIsShow"
-            >历史记录
-            <Icon
-              :type="historyIsShow ? 'md-arrow-dropup' : 'md-arrow-dropdown'"
-            />
-          </Button>
-        </div>
-        <div v-show="historyIsShow" class="history_list">
-          <Table :columns="columns" :data="historyData">
-            <template slot-scope="{ row }" slot="action">
-              <div class="btn">
-                <Button @click="handDataPublish(row)">查看</Button>
-                <Button @click="handleEnter(row)">日志查看</Button>
-                <Button @click="handleDownDataProduct(row)">数据产品下载</Button>
-                <Button @click="handDataPublish(row)">数据产品发布</Button>
-              </div>
-            </template>
-          </Table>
-          <div class="page">
-            <Page
-              show-elevator
-              size="small"
-              :total="total"
-              show-sizer
-              @on-change="onPageChange"
-              @on-page-size-change="onPageSizeChange"
-            />
-          </div>
+        <Button @click="historyIsShow = !historyIsShow"
+          >历史记录
+          <Icon
+            :type="historyIsShow ? 'md-arrow-dropup' : 'md-arrow-dropdown'"
+          />
+        </Button>
+      </div>
+      <div v-show="historyIsShow" class="history_list">
+        <Table :columns="columns" :data="historyData">
+          <template slot-scope="{ row }" slot="action">
+            <div class="btn">
+              <Button @click="handleEnter(row)">查看</Button>
+              <Button @click="handleShowLog(row)">日志查看</Button>
+              <Button @click="handleDownDataProduct(row)">数据产品下载</Button>
+              <Button v-if="row.dataProductList && row.dataProductList.length" @click="handDataPublish(row)">数据产品发布</Button>
+            </div>
+          </template>
+        </Table>
+        <div class="page">
+          <Page
+            show-elevator
+            size="small"
+            :total="total"
+            show-sizer
+            @on-change="onPageChange"
+            @on-page-size-change="onPageSizeChange"
+          />
         </div>
       </div>
+    </div>
 
-      <PublishModal ref="PublishModalRef"/>
+    <PublishModal ref="PublishModalRef" />
   </div>
 </template>
   
@@ -45,11 +45,13 @@
 import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
 import { getProcessPageByPublishingId } from "@/apis/process";
 import { downloadFile, download } from "@/apis/file";
-import PublishModal from '@/components/pages/DataProductManagement/Publish/PublishModal'
-import Flow from '../components/flow'
+import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
+import Flow from "../components/flow";
+import axios from "axios";
 export default {
-  components:{
-    PublishModal,Flow
+  components: {
+    PublishModal,
+    Flow,
   },
   data() {
     return {
@@ -81,7 +83,7 @@ export default {
         {
           title: "操作",
           slot: "action",
-          width:400,
+          width: 400,
           align: "center",
         },
       ],
@@ -92,22 +94,27 @@ export default {
     this.handleGetStopsById();
   },
   methods: {
-    handleDownDataProduct(row){
-       download(downloadFile, row.file.id);
+    handleBack() {
+      this.$router.push(`/home/list?type=${this.$route.query.type}`);
     },
-    handDataPublish(row){
-      this.$refs.PublishModalRef.handleAdd(row)
+    handleDownDataProduct(row) {
+      download(downloadFile, row.file.id);
+    },
+    handDataPublish(row) {
+      this.$refs.PublishModalRef.handleAdd(row);
     },
     async handleRun() {
       this.$event.emit("loading", true);
       const res = await runPublishFlow(this.publishInfo);
       this.$event.emit("loading", false);
-      if(res.data.code === 200){
-        this.$router.push(`/home/flowProcess?processId=${res.data.data.processId}`)
-      }else{
+      if (res.data.code === 200) {
+        this.$router.push(
+          `/home/flowProcess?processId=${res.data.data.processId}`
+        );
+      } else {
         this.$Message.error({
           content: res.data.errorMsg,
-          duration: 3
+          duration: 3,
         });
       }
     },
@@ -119,7 +126,9 @@ export default {
     },
 
     handleEnter(row) {
-      console.log(row);
+      this.$router.push(
+          `/home/flowProcess?processId=${row.id}`
+        );
     },
     handShowInstructions(row) {
       console.log(row);
@@ -226,7 +235,6 @@ export default {
     }
   }
   .run {
-
   }
   .progress {
     margin: 40px 0;
@@ -236,17 +244,16 @@ export default {
   &_btn {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin: 12px 0;
     button {
       background: #f2eafa;
       border: none;
       color: #6020a0;
-      &.run{
+      &.run {
         background: #006fee;
         color: #fff;
       }
     }
-
   }
   &_list {
     padding: 20px;

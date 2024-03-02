@@ -19,12 +19,12 @@
         ></Tree>
       </div>
       <div class="contain_r">
-        <div v-for="item in 12" :key="item">
+        <div v-for="item in tableData" :key="item.id" class="product_item">
           <img src="@/assets/img/home/p1.png" alt="" />
           <div>
-            <h4>2007-2009年中国农业大学石羊河实验站玉米通量与生长观测数据集</h4>
+            <h4>{{item.name}}</h4>
             <div class="contain_r-desc">
-              本数据集为中国农业大学石羊河实验站玉米地通量观测数据，包含能量平衡分量；耗水量；风速；气温；相对湿度；饱和水汽压差；土壤含水量；叶面积指数；冠高等指标，时间分辨率为日尺度，数据范围为2007-2009年玉米生长季（4/5月至9月）。本数据集为中国农业大学石羊河实验站玉米地通量观测数据，包含能量平衡分量；耗水量；风速；气温；相对湿度；饱和水汽压差；土壤含水量；叶面积指数；冠高等指标，时……
+                {{ item.description }}
             </div>
             <div class="contain_r-btn">
               <Button>在线下载</Button>
@@ -32,17 +32,34 @@
             </div>
           </div>
         </div>
+            <!-- paging -->
+        <div class="page">
+          <Page
+            :prev-text="$t('page.prev_text')"
+            :next-text="$t('page.next_text')"
+            show-elevator
+            :show-total="true"
+            :total="total"
+            show-sizer
+            @on-change="onPageChange"
+            @on-page-size-change="onPageSizeChange"
+          />
+        </div>
+
       </div>
     </div>
   </div>
 </template>
 <script>
-import { getDataProductType } from "@/apis/dataProduct";
+import { getDataProductType,getDataProductByPage } from "@/apis/dataProduct";
 export default {
   data() {
     return {
         treeData: [],
-        
+        tableData:[],
+        total:0,
+        page:1,
+        limit:10
     };
   },
   created(){
@@ -52,13 +69,34 @@ export default {
     async handleGetData() {
       const res = await getDataProductType();
       this.treeData = res.data.data;
+      this.handleChangeSelectNode(null,this.treeData[0])
     },
     handleSearch(val) {
       console.log(val);
     },
     handleChangeSelectNode(list, node) {
-      node.expand = !node.expand
-      console.log(node);
+      this.$set(node,'expand',!node.expand)
+      this.currentNode = node
+      this.getTableData()
+    },
+    async getTableData(){
+      const res = await getDataProductByPage({
+        page:this.page,
+        limit:this.limit,
+        productTypeId:Number(this.currentNode.id)
+      })
+      this.tableData = res.data.data
+      this.total = res.data.count
+      console.log(res)
+    },
+    onPageChange(pageNo) {
+      this.page = pageNo;
+      this.getTableData();
+    },
+
+    onPageSizeChange(pageSize) {
+      this.limit = pageSize;
+      this.getTableData();
     },
     renderContent(h, { root, node, data }) {
       return h(
@@ -77,5 +115,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+.page{
+  display: flex;
+  justify-content: flex-end;
+}
 </style>

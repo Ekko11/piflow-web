@@ -13,15 +13,28 @@
         style="width: 300px"
       />
     </div>
-    <Table :data="tableData" :columns="columns">
+    <Table border :data="tableData" :columns="columns">
       <template slot-scope="{ row }" slot="action">
         <div class="btn">
-          <Button @click="handleEdit(row)">编辑</Button>
-          <Button @click="handleAddChild(row)">新增</Button>
-          <Button @click="handleDelete(row)">删除</Button>
+          <Button @click="handleEnter(row)">查看</Button>
+          <Button @click="handleShowLog(row)">日志查看</Button>
+          <Button @click="handleDownDataProduct(row)">数据产品下载</Button>
+          <Button v-if="row.dataProductList && row.dataProductList.length" @click="handDataPublish(row)">数据产品发布</Button>
         </div>
       </template>
     </Table>
+    <div class="page">
+      <Page
+        :prev-text="$t('page.prev_text')"
+        :next-text="$t('page.next_text')"
+        show-elevator
+        :show-total="true"
+        :total="total"
+        show-sizer
+        @on-change="onPageChange"
+        @on-page-size-change="onPageSizeChange"
+      />
+    </div>
   </section>
 </template>
 <script>
@@ -44,14 +57,21 @@ export default {
           title: "名称",
           key: "name",
         },
-        // {
-        //   title: "描述",
-        //   key: "description",
-        // },
+        {
+          title: "运行时间",
+          key: "startTime",
+        },
+        {
+          title: "运行状态",
+          key: "state.text",
+          render: (h, params) => {
+            return h("span", [params.row.state.text]);
+          },
+        },
         {
           title: "操作",
           slot: "action",
-          width: 300,
+          width: 430,
           align: "center",
         },
       ],
@@ -65,9 +85,24 @@ export default {
       const res = await getProcessHistoryPageOfSelf({
         limit: this.limit,
         page: this.page,
-        keyword: this.keyword,
       });
+      this.tableData = res.data.data
+      this.total = res.data.count
       console.log(res);
+    },
+    handleEnter(row) {
+      this.$router.push(
+          `/home/flowProcess?processId=${row.id}`
+        );
+    },
+    onPageChange(pageNo) {
+      this.page = pageNo;
+      this.getTableData();
+    },
+
+    onPageSizeChange(pageSize) {
+      this.limit = pageSize;
+      this.getTableData();
     },
   },
 };
@@ -75,47 +110,7 @@ export default {
 
 <style lang="scss" scoped>
 @import "./index.scss";
-::v-deep .contain {
-  display: flex;
-  padding: 20px;
-  height: 100%;
-  &_l {
-    width: 308px;
-    height: 100%;
-    margin-right: 24px;
-    flex-shrink: 0;
-    box-shadow: 4px 4px 8px 0px #3974aa1f;
-    border-radius: 8px;
-    padding: 0 32px;
-    h4 {
-      font-size: 16px;
-      margin-bottom: 16px;
-      margin-top: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      .button {
-        font-size: 14px;
-        font-weight: 400;
-        border: 1px solid #eee;
-        padding: 3px 6px;
-        cursor: pointer;
-      }
-    }
-    .ivu-tree ul li .ivu-tree-title {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      word-break: break-all;
-      width: 100%;
-    }
-  }
-  &_r {
-    flex-grow: 1;
-    .btn {
-      button {
-        margin-right: 5px;
-      }
-    }
-  }
+.btn button {
+  margin-right: 3px;
 }
 </style>

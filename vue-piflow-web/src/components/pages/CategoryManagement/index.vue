@@ -72,12 +72,32 @@
           />
         </div>
         <div class="item">
-          <label>上传文件：</label>
+          <label>上传封面：</label>
           <div>
-            <Upload action="/aaa" :before-upload="handleBeforeUpload">
-              <Button icon="ios-cloud-upload-outline">Upload files</Button>
+            <Upload
+              action="/null"
+              :before-upload="handleBeforeUpload"
+              :show-upload-list="false"
+              style="width: 350px"
+              accept=".jpg, .jpeg, .png"
+              class="upload"
+            >
+              <div>
+                <img
+                  v-if="this.file"
+                  style="width: 100px; height: 40px"
+                  :src="this.file"
+                  alt=""
+                />
+                <Icon
+                  v-else
+                  type="ios-cloud-upload"
+                  size="52"
+                  style="color: #3399ff"
+                ></Icon>
+                <p>Click or drag files here to upload</p>
+              </div>
             </Upload>
-            <p v-if="formData.file">{{ formData.file.name }}</p>
           </div>
         </div>
       </div>
@@ -85,19 +105,23 @@
   </section>
 </template>
 <script>
-import { getDataProductType, saveDataProductType ,deleteDataProductType} from "@/apis/dataProduct";
+import {
+  getDataProductType,
+  saveDataProductType,
+  deleteDataProductType,
+} from "@/apis/dataProduct";
 import { findTree } from "@/utils/tree";
-
+import {downloadFile} from '@/apis/file'
 export default {
   data() {
     return {
       isOpen: false,
-
+      file:null,
       InitFormData: {
         description: "",
         name: "",
         parentId: "",
-        file:""
+        file: "",
       },
       formData: {},
       parentNode: {},
@@ -131,63 +155,68 @@ export default {
   },
   methods: {
     async handleComfirm() {
+      this.$event.emit("loading", true);
       if (!this.formData.id) this.formData.level = this.parentNode.level + 1;
-      if (this.parentNode.level === 0) this.formData.parentId = null;
+      this.formData.associateType = 0;
       const res = await saveDataProductType(this.formData);
+      this.$event.emit("loading", false);
       if (res.data.code == 200) {
         this.$Modal.success({
           title: this.$t("tip.title"),
           content: this.$t("tip.update_success_content"),
         });
-        this.handleGetData()
-      }else{
-         this.$Modal.error({
+        this.handleGetData();
+      } else {
+        this.$Modal.error({
           title: this.$t("tip.title"),
-          content: this.$t("tip.update_fail_content")
+          content: this.$t("tip.update_fail_content"),
         });
-        
       }
       console.log(res);
     },
 
-    handleDelete(row){
+    handleDelete(row) {
       this.$Modal.confirm({
         title: this.$t("tip.title"),
         okText: this.$t("modal.confirm"),
         cancelText: this.$t("modal.cancel_text"),
         content: `${this.$t("modal.delete_content")} ${row.name}?`,
-        onOk: async() => {
-          const res = await deleteDataProductType(row.id)
+        onOk: async () => {
+          const res = await deleteDataProductType(row.id);
           if (res.data.code === 200) {
-                this.$Modal.success({
-                  title: this.$t("tip.title"),
-                  content:
-                    `${row.name} ` + this.$t("tip.delete_success_content")
-                });
-                this.handleGetData();
-              } else {
-                this.$Message.error({
-                  content: this.$t("tip.delete_fail_content"),
-                  duration: 3
-                });
-              }
-        }
-      })
+            this.$Modal.success({
+              title: this.$t("tip.title"),
+              content: `${row.name} ` + this.$t("tip.delete_success_content"),
+            });
+            this.handleGetData();
+          } else {
+            this.$Message.error({
+              content: this.$t("tip.delete_fail_content"),
+              duration: 3,
+            });
+          }
+        },
+      });
     },
 
     handleAddChild(node) {
       this.isOpen = true;
+      this.formData.file = null;
       this.formData = { ...this.InitFormData };
       this.formData.parentId = node ? node.id : "";
     },
-    handleEdit(row) {
+    async handleEdit(row) {
       this.isOpen = true;
-      const { id, parentId, level, name, description, file } = row;
-      this.formData = { id, parentId, level, name, description, file };
+      const { id, parentId, level, name, description} = row;
+      this.formData = { id, parentId, level, name, description};
+      if(row.fileId){
+        const res =await downloadFile(row.fileId)
+        this.renderImg(res.data)
+      }
     },
     async handleGetData() {
       const res = await getDataProductType();
-      const data = res.data.data
+      const data = res.data.data;
       this.treeData = [
         {
           name: "数据产品分类",
@@ -211,7 +240,16 @@ export default {
     },
     handleBeforeUpload(e) {
       this.formData.file = e;
+      this.renderImg(e)
       return false;
+    },
+    renderImg(file){
+      console.log(file)
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        this.file = reader.result;
+      };
     },
     renderContent(h, { root, node, data }) {
       return h(
@@ -281,5 +319,15 @@ export default {
       }
     }
   }
+}
+
+.upload {
+  background: #fff;
+  border: 1px dashed #dcdee2;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  width: 350px;
+  padding: 20px 0;
 }
 </style>

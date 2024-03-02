@@ -58,6 +58,7 @@
 import { findTree,findTreeStructure } from "@/utils/tree";
 import { getDataProductType } from "@/apis/dataProduct";
 import { getflowPublishListByProductTypeId } from "@/apis/flowPublish";
+import Cookies from "js-cookie";
 export default {
   data() {
     return {
@@ -132,7 +133,15 @@ export default {
       this.total = res.data.count
     },
     handleEnter(row) {
-      this.$router.push(`/home/flowConfig?id=${row.id}`);
+      const link = `/home/flowConfig?id=${row.id}&type=${this.$route.query.type}`
+      if(Cookies.get("setUser")){
+        this.$router.push(link);
+      }else{
+        this.$router.push({
+          path:'/login',
+          query: { redirect: link} 
+        });
+      }
     },
     handShowInstructions(row) {
       console.log(row);

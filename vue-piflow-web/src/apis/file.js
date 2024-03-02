@@ -1,7 +1,6 @@
 import axios from "axios";
 import iView from 'view-design';
 import { formDataFormat } from "@/utils/formDataFormat";
-
 // 上传文件
 export function uploadFile(data) {
   return axios({
@@ -23,18 +22,8 @@ export function downloadFile(id) {
   });
 }
 
-function downloadByBlob(file, fileName = "下载文件") {
-  const a = document.createElement("a");
-  a.style.display = "none";
-  a.href = URL.createObjectURL(file);
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  URL.revokeObjectURL(a.href);
-  document.body.removeChild(a);
-}
 
-function getFileNameByHeaders(headers, defaultFileName) {
+export function getFileNameByHeaders(headers, defaultFileName) {
   try{
     return  headers["content-disposition"].split(";")[1].split("=")[1].replaceAll("\"",'')
   }catch(err){
@@ -42,6 +31,7 @@ function getFileNameByHeaders(headers, defaultFileName) {
   }
 }
 
+// 封装的下载方法
 export const download = async (request, params, fileName) => {
   try {
     fileName = fileName || "download.txt";
@@ -66,3 +56,15 @@ export const download = async (request, params, fileName) => {
     });
   }
 };
+
+// 文件流下载
+export function downloadByBlob(file, fileName = "下载文件") {
+  const a = document.createElement("a");
+  a.style.display = "none";
+  a.href = URL.createObjectURL(file);
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  document.body.removeChild(a);
+}

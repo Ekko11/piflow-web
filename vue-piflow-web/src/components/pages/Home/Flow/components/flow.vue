@@ -81,13 +81,27 @@
         </div>
       </div>
     </div>
+
+
+    <div class="notice" v-if="noticeOpen">
+      <div class="close" @click="handleNoticeClose">
+        <Icon type="ios-close" />
+      </div>
+      <div class="logo">
+        <Icon type="ios-information-circle-outline" />
+      </div>
+      <div class="notice_content">
+        <div>正在下载中，请稍等</div>
+        <div v-if="progress">当前已下载：{{ progress }}% </div>
+      </div>
+
+    </div>
   </div>
 </template>
     
     <script>
-import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
-import { getProcessPageByPublishingId } from "@/apis/process";
-import { downloadFile, download, uploadFile } from "@/apis/file";
+import { getPublishingById } from "@/apis/flowPublish";
+import { getFileNameByHeaders,downloadByBlob, uploadFile } from "@/apis/file";
 export default {
   props: {
     mode: String,
@@ -109,6 +123,8 @@ export default {
       fileInput: [],
       textInput: [],
       output: [],
+      progress:0,
+      noticeOpen:false
     };
   },
 
@@ -145,8 +161,44 @@ export default {
     async handleGetStopsById() {
       const res = await getPublishingById(this.$route.query.id);
     },
-    async handleDownload(id, fileName) {
-      download(downloadFile, id, fileName);
+     handleDownload(id, fileName) {
+      this.noticeOpen = true
+      const _this = this
+      this.$axios({
+        method: "get",
+        url: `/file/getFileById?id=${id}`,
+        responseType: "blob",
+        onDownloadProgress(ProgressEvent) {
+          const load = ProgressEvent.loaded;
+          const total = 314572800;
+          const progress = Math.floor((load / total) * 100);
+          _this.progress = progress
+          if(progress === 100){
+            _this.noticeOpen =false
+          }
+        },
+      })
+        .then((res) => {
+          if (res.data.code) {
+            this.$Message.error({
+              content: '下载失败',
+              duration: 3,
+            });
+          } else {
+            this.noticeOpen = false
+            const file = res.data;
+            const blob = new Blob([file]);
+            fileName = getFileNameByHeaders(res.headers, fileName);
+            downloadByBlob(blob, fileName);
+          }
+        })
+        .catch((error) => {
+          this.$Message.error({
+            content: this.$t("tip.fault_content"),
+            duration: 3,
+          });
+        });
+      // download(downloadFile, id, fileName);
     },
     handleUpload(child) {
       this.currentPropos = child;
@@ -165,6 +217,9 @@ export default {
       // this.currentProps.fileName = e.name;
       // this.fileList.push({ id: this.currentProps.propertyId, file: e });
     },
+    handleNoticeClose(){
+      this.noticeOpen = false
+    }
   },
 };
 </script>
@@ -273,5 +328,40 @@ export default {
   display: flex;
   justify-content: flex-end;
   margin-top: 32px;
+}
+.notice{
+  position: fixed;
+  top: 85px;
+  right: 20px;
+  width: 335px;
+  position: fixed;
+  padding: 16px;
+  border-radius: 4px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.2);
+  background: #fff;
+  line-height: 1;
+  display: flex;
+  .close{
+    position: absolute;
+    right: 4px;
+    top: 0;
+    cursor: pointer;
+    font-size: 30px;
+  }
+  .logo{
+    i{
+      font-size: 36px;
+      color: #2d8cf0;
+      font-size: 36px;
+      color: #2d8cf0;
+      margin-right: 20px;
+    }
+  }
+  &_content{
+    div{
+      margin-bottom: 6px;
+    }
+  }
+
 }
 </style>

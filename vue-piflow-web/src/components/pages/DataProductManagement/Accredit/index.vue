@@ -10,7 +10,8 @@
     <Table border :columns="columns" :data="tableData">
       <template slot-scope="{ row }" slot="action">
         <div class="btn">
-          <Button  @click="handleVerify(row)">审核</Button>
+          <Button  v-if="row.state === 1" @click="handleVerify(row)">审核</Button>
+          <span>{{stateArr[row.state]}}</span>
         </div>
       </template>
     </Table>
@@ -66,17 +67,24 @@
 </template>
 
 <script>
-import {getPermissionByPage,permissionForUse} from '@/apis/dataProduct'
+import {getByPageForPermission,permissionForUse} from '@/apis/dataProduct'
 export default {
   name: "Accredit",
   components: {},
   data() {
+    
     return {
       applyIsOpen: false,
       page: 1,
       limit: 10,
       total: 0,
       tableData: [],
+      stateArr: {
+        0:'失效',
+        1:'待审核',
+        2:'审核通过',
+        3:'审核拒绝',
+      },
       // 审核
       formApplyInfo: {
         id: "",
@@ -90,21 +98,23 @@ export default {
       return [
         {
           title: "标题",
-          key: "name",
-          sortable: true,
-        },
-        {
-          title: "描述",
-          key: "description",
+          key: "productName",
         },
         {
           title: "申请者",
-          key: "description",
+          key: "userName",
         },
         {
           title: "申请理由",
-          key: "description",
+          key: "reason",
         },
+        // {
+        //   title:'状态',
+        //   key: "state",
+        //   render: (h, params) => {
+        //     return h('span', this.stateArr[params.row.state]);
+        //   },
+        // },
         {
           title: this.$t("database.action"),
           slot: "action",
@@ -122,9 +132,24 @@ export default {
     handleVerify(row){
       this.applyIsOpen = true
       this.formApplyInfo.id = row.id
+      this.formApplyInfo.state = row.state
+      this.formApplyInfo.opinion = row.opinion
     },
     async handleComfirm(){
+        this.$event.emit("loading", true);
         const res = await permissionForUse(this.formApplyInfo)
+        this.$event.emit("loading", false);
+        if(res.data.code === 200){
+            this.$Message.success({
+              content: '审核成功',
+              duration: 3
+            });
+        }else{
+          this.$Message.error({
+              content: res.data.errorMsg,
+              duration: 3
+            });
+        }
         this.applyIsOpen = false
     },
 
@@ -137,15 +162,15 @@ export default {
       if (this.param) {
         data.keyword = this.param;
       }
-      this.tableData = [{ name: 123 }];
-      // const res = await getPermissionByPage(data)
+      const res = await getByPageForPermission(data)
+      this.tableData = res.data.data;
+      this.total = res.data.count
       // this.$axios({
       //     method:'POST',
       //     url:'/visual/getDatabaseList',
       //     data
       // }).then(res=>{
       //       if (res.data.code === 200) {
-      //         this.tableData = res.data.data;
       //         this.total = res.data.totalCount;
       //       } else {
       //         this.$Message.error({

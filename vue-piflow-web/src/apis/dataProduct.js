@@ -35,7 +35,10 @@ export function setDataProductPreference (data) {
     return axios({
         method:'post',
         url:'/dataProductType/preference',
-        data
+        data:formDataFormat(data),
+        headers:{
+            'Content-Type':'multipart/form-data'
+        },
     })
 }
 
@@ -87,15 +90,16 @@ export function deleteDataProduct (id) {
     })
 }
 
-
-// 获取待审核数据产品列表
-export function getPermissionByPage (data) {
+// 获取待审核数据产品
+export function getByPageForPermission (data) {
     return axios({
         method:'post',
-        url:'/dataProduct/getPermissionByPage',
+        url:`/dataProduct/getByPageForPermission`,
         data
     })
 }
+
+
 
 // 数据产品使用 审核
 export function permissionForUse (data) {
@@ -126,4 +130,6 @@ export function getDataProductByPage (data) {
         data
     })
 }
+
+
 
