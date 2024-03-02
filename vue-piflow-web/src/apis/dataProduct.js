@@ -62,6 +62,15 @@ export function getDataProductList (data) {
     })
 }
 
+// 管理员数据产品列表
+export function getByPageForPublishing (data) {
+    return axios({
+        method:'post',
+        url:'/dataProduct/getByPageForPublishing',
+        data
+    })
+}
+
 
 
 // 数据产品 管理员审核

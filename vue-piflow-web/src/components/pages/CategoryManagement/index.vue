@@ -156,6 +156,7 @@ export default {
   },
   methods: {
     async handleComfirm() {
+      if(!this.formData.name || !this.formData.name.trim()) return
       this.$event.emit("loading", true);
       if (!this.formData.id) this.formData.level = this.parentNode.level + 1;
       this.formData.associateType = 0;
@@ -203,11 +204,13 @@ export default {
     handleAddChild(node) {
       this.isOpen = true;
       this.formData.file = null;
+      this.file = null;
       this.formData = { ...this.InitFormData };
       this.formData.parentId = node ? node.id : "";
     },
     async handleEdit(row) {
       this.isOpen = true;
+      this.file = null;
       const { id, parentId, level, name, description} = row;
       this.formData = { id, parentId, level, name, description};
       if(row.fileId){
