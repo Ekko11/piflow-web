@@ -143,10 +143,10 @@ export default {
 
     async handleAdd(row) {
       this.formData = {
-        name:row.flowPublishingVo.name,
-        description:row.flowPublishingVo.description,
-        productTypeId:row.flowPublishingVo.productTypeId,
-        productTypeName:row.flowPublishingVo.productTypeName,
+        name:row.flowPublishing.name,
+        description:row.flowPublishing.description,
+        productTypeId:row.flowPublishing.productTypeId,
+        productTypeName:row.flowPublishing.productTypeName,
         version:row.dataProductList[0].version,
         state:3,
         id:row.dataProductList[0].id

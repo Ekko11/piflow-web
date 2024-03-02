@@ -43,7 +43,7 @@ export default {
    async init() {
       const res = await getByProcessId(this.$route.query.processId)
       this.data =res.data.data
-      this.publishInfo = this.data.flowPublishingVo;
+      this.publishInfo = this.data.flowPublishing;
       this.processMonitoring(this.data.appId);
     },
     
