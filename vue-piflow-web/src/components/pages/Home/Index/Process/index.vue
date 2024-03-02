@@ -11,7 +11,7 @@
           :key="idx"
           @click="handleEnter(child.id)"
         >
-          <img :src="imgList[0]" alt="" />
+          <img :src=" fileMap[child.fileId] || imgList[0]" alt="" />
           <div>
             <p>{{ child.name }}生产流水线</p>
           </div>
@@ -22,10 +22,13 @@
 </template>
 <script>
 import { getDataProductType } from "@/apis/dataProduct";
+import { downloadFileByIds } from "@/apis/file";
+import JSZip from 'jszip'
 export default {
   data() {
     return {
       list: [],
+      fileMap:{},
       imgList: [require("@/assets/img/home/p2.png")],
     };
   },
@@ -39,7 +42,31 @@ export default {
     async getList() {
       const res = await getDataProductType();
       this.list = res.data.data
+      let fileMap = {}
+      res.data.data.forEach(item => {
+          item.children.forEach(v=>{
+            if(v.fileId){
+              fileMap[v.fileId] = v.fileName
+            }
+          })
+      });
+      this.fileMap = fileMap
+      this.getImg(Object.keys(fileMap).join(','))
     },
+    async getImg(ids){
+      const _this = this
+      const res = await downloadFileByIds(ids)
+      const zip = new JSZip()
+      zip.loadAsync(res.data).then((res) => {
+        for (const key in _this.fileMap) {
+          var base = res.file(res.files[_this.fileMap[key]].name).async("base64");
+          base.then(function (res) {
+            _this.fileMap[key] = 'data:image/png;base64,' + res
+           })
+
+        }
+      }) 
+    }
 
   },
 };

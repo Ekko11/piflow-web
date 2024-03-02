@@ -44,6 +44,7 @@
         <div class="item">
           <label>上级分类：</label>
           <treeselect
+            disabled
             v-model="formData.parentId"
             :placeholder="$t('modal.placeholder_select')"
             :normalizer="normalizer"

@@ -12,6 +12,16 @@ export function uploadFile(data) {
     },
   });
 }
+// 根据id下载文件
+export function downloadFileByIds(ids) {
+  return axios({
+    method: "get",
+    url: `/file/getFileListByIds?ids=${ids}`,
+    responseType: "blob",
+  });
+}
+
+
 
 // 根据id下载文件
 export function downloadFile(id) {

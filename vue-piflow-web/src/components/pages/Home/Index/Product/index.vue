@@ -20,11 +20,11 @@
       </div>
       <div class="contain_r">
         <div v-for="item in tableData" :key="item.id" class="product_item">
-          <img src="@/assets/img/home/p1.png" alt="" />
+          <img :src=" fileMap[item.coverFile.id] || '@/assets/img/home/p1.png'" alt="" />
           <div>
-            <h4>{{item.name}}</h4>
+            <h4>{{ item.name }}</h4>
             <div class="contain_r-desc">
-                {{ item.description }}
+              {{ item.description }}
             </div>
             <div class="contain_r-btn">
               <Button>在线下载</Button>
@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-            <!-- paging -->
+        <!-- paging -->
         <div class="page">
           <Page
             :prev-text="$t('page.prev_text')"
@@ -45,49 +45,76 @@
             @on-page-size-change="onPageSizeChange"
           />
         </div>
-
       </div>
     </div>
   </div>
 </template>
 <script>
-import { getDataProductType,getDataProductByPage } from "@/apis/dataProduct";
+import { getDataProductType, getDataProductByPage } from "@/apis/dataProduct";
+import { downloadFileByIds } from "@/apis/file";
+import JSZip from 'jszip'
 export default {
   data() {
     return {
-        treeData: [],
-        tableData:[],
-        total:0,
-        page:1,
-        limit:10
+      treeData: [],
+      tableData: [],
+      fileMap: {},
+      total: 0,
+      page: 1,
+      limit: 10,
     };
   },
-  created(){
-    this.handleGetData()
+  created() {
+    this.handleGetData();
   },
   methods: {
     async handleGetData() {
       const res = await getDataProductType();
       this.treeData = res.data.data;
-      this.handleChangeSelectNode(null,this.treeData[0])
+      this.handleChangeSelectNode(null, this.treeData[0]);
     },
     handleSearch(val) {
       console.log(val);
     },
     handleChangeSelectNode(list, node) {
-      this.$set(node,'expand',!node.expand)
-      this.currentNode = node
-      this.getTableData()
+      this.$set(node, "expand", !node.expand);
+      this.currentNode = node;
+      this.getTableData();
     },
-    async getTableData(){
+    async getTableData() {
       const res = await getDataProductByPage({
-        page:this.page,
-        limit:this.limit,
-        productTypeId:Number(this.currentNode.id)
-      })
-      this.tableData = res.data.data
-      this.total = res.data.count
-      console.log(res)
+        page: this.page,
+        limit: this.limit,
+        productTypeId: Number(this.currentNode.id),
+      });
+      this.tableData = res.data.data;
+      const ids = [];
+      res.data.data.forEach((item) => {
+        if (item.coverFile.id && !this.fileMap[item.coverFile.id]) {
+          ids.push(item.coverFile.id);
+          this.$set(this.fileMap, item.coverFile.id, item.coverFile.fileName);
+        }
+      });
+      this.total = res.data.count;
+      this.getImg(ids.join(","));
+    },
+    async getImg(ids) {
+      const _this = this;
+      const res = await downloadFileByIds(ids);
+      const zip = new JSZip();
+      zip.loadAsync(res.data).then((res) => {
+        for (const file in res.files) {
+          console.log(file,_this.fileMap)
+          var base = res.file(file).async("base64");
+          base.then(function (res) {
+            for (const fileId in _this.fileMap) {
+              if (file === _this.fileMap[fileId]) {
+                  _this.$set(_this.fileMap,fileId, "data:image/png;base64," + res);
+              }
+            }
+          });
+        }
+      });
     },
     onPageChange(pageNo) {
       this.page = pageNo;
@@ -115,7 +142,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.page{
+.page {
   display: flex;
   justify-content: flex-end;
 }
