@@ -38,7 +38,7 @@
       />
     </div>
 
-    <PublishModal ref="PublishModal" />
+    <PublishModal ref="PublishModal"/>
   </section>
 </template>
 
@@ -121,7 +121,7 @@ export default {
             this.getTableData();
           } else {
             this.$Message.error({
-              content: res.data.msg,
+              content: res.data.errorMsg,
               duration: 3,
             });
           }

@@ -19,15 +19,25 @@
     <Table border :columns="columns" :data="tableData">
       <template slot-scope="{ row }" slot="action">
         <div class="btn">
-          <Button  v-if="(userName === row.crtUser || role === 'ADMIN' ) && row.state === 3" @click="handleEdit(row)">发布</Button>
+          <Button
+            v-if="
+              (userName === row.crtUser || role === 'ADMIN') && row.state === 3
+            "
+            @click="handleEdit(row)"
+            >发布</Button
+          >
           <Button v-if="row.file" @click="handleDown(row)">下载</Button>
-          <Button v-if="role === 'ADMIN' && row.state === 5" @click="handleOpenDelist(row)"
+          <Button
+            v-if="role === 'ADMIN' && row.state === 5"
+            @click="handleOpenDelist(row)"
             >下架</Button
           >
-          <Button v-if="role === 'ADMIN' && row.state === 4" @click="handleOpenApply(row)"
+          <Button
+            v-if="role === 'ADMIN' && row.state === 4"
+            @click="handleOpenApply(row)"
             >审核</Button
           >
-          <Button @click="handleDelete(row)">删除</Button>
+          <Button v-if="userName === row.crtUser || role === 'ADMIN'"  @click="handleDelete(row)">删除</Button>
         </div>
       </template>
     </Table>
@@ -44,8 +54,6 @@
         @on-page-size-change="onPageSizeChange"
       />
     </div>
-
-
 
     <!-- 审核 -->
     <Modal
@@ -105,7 +113,7 @@
         </Form>
       </div>
     </Modal>
-    <PublishModal ref="PublishModalRef"/>
+    <PublishModal ref="PublishModalRef" @onSubmit="getTableData"/>
   </section>
 </template>
 
@@ -120,10 +128,9 @@ import { downloadFile, download } from "@/apis/file";
 import Cookies from "js-cookie";
 import PublishModal from "./PublishModal";
 
-
 export default {
   name: "VisualizationDataBase",
-  components: {PublishModal},
+  components: { PublishModal },
   data() {
     return {
       applyIsOpen: false,
@@ -134,7 +141,16 @@ export default {
       role: "USER",
       tableData: [],
       param: "",
-      state:{ 0:"已删除", 1:"生成中", 2:"生成失败", 3:"待发布", 4:"待审核", 5:"已发布", 6:"拒绝发布", 7:"已下架"},
+      state: {
+        0: "已删除",
+        1: "生成中",
+        2: "生成失败",
+        3: "待发布",
+        4: "待审核",
+        5: "已发布",
+        6: "拒绝发布",
+        7: "已下架",
+      },
       // 审核
       formApplyInfo: {
         id: "",
@@ -162,8 +178,8 @@ export default {
         {
           title: "状态",
           key: "state",
-          render:(h,params)=> {
-            return h('span',this.state[params.row.state])
+          render: (h, params) => {
+            return h("span", this.state[params.row.state]);
           },
         },
         {
@@ -194,15 +210,16 @@ export default {
     },
     async handleDelist() {
       const res = await delistDataProduct(this.formDelistData);
-      if(res.data.code === 200){
+      if (res.data.code === 200) {
         this.$Modal.success({
           title: this.$t("tip.title"),
-          content:'下架成功',
+          content: "下架成功",
         });
-      }else{
+        this.getTableData()
+      } else {
         this.$Modal.error({
           title: this.$t("tip.title"),
-          content:res.data.errorMsg,
+          content: res.data.errorMsg,
         });
       }
       this.applyIsOpen = false;
@@ -217,8 +234,22 @@ export default {
       this.formApplyInfo.id = row.id;
     },
     async handleResultApply() {
+      this.$event.emit("loading", true);
       const res = await permissionForPublishing(this.formApplyInfo);
-      this.applyIsOpen = false;
+      this.$event.emit("loading", false);
+      if (res.data.code === 200) {
+        this.applyIsOpen = false;
+        this.$Message.success({
+          content: res.data.errorMsg,
+          duration: 3,
+        });
+        this.getTableData();
+      } else {
+        this.$Message.error({
+          content: res.data.errorMsg,
+          duration: 3,
+        });
+      }
     },
     getRole() {
       let user = JSON.parse(Cookies.get("setUser"));
@@ -232,9 +263,8 @@ export default {
     },
 
     handleEdit(row) {
-      this.$refs.PublishModalRef.handleEdit(row)
+      this.$refs.PublishModalRef.handleEdit(row);
     },
-
 
     handleDelete(row) {
       this.$Modal.confirm({
@@ -252,7 +282,7 @@ export default {
             this.getTableData();
           } else {
             this.$Message.error({
-              content: res.data.msg,
+              content: res.data.errorMsg,
               duration: 3,
             });
           }
@@ -265,10 +295,9 @@ export default {
         data.keyword = this.param;
       }
       const res = await getByPageForPublishing(data);
-      this.tableData = res.data.data
-      this.total = res.data.count
+      this.tableData = res.data.data;
+      this.total = res.data.count;
     },
-
 
     onPageChange(pageNo) {
       this.page = pageNo;

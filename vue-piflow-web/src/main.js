@@ -102,7 +102,7 @@ axios.interceptors.response.use(response => {
   }
   return response;
 }, error => {
-  Vue.$event.emit("loading", true);
+  Vue.prototype.$event.emit("loading", false);
      iView.Message.error({
     content: error,
     duration: 3,

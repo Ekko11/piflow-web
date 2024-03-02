@@ -32,8 +32,9 @@
             </div>
           </div>
         </div>
+        
         <!-- paging -->
-        <div class="page">
+        <div class="page" v-if="total">
           <Page
             :prev-text="$t('page.prev_text')"
             :next-text="$t('page.next_text')"
@@ -96,7 +97,7 @@ export default {
         }
       });
       this.total = res.data.count;
-      this.getImg(ids.join(","));
+      ids.length &&this.getImg(ids.join(","));
     },
     async getImg(ids) {
       const _this = this;

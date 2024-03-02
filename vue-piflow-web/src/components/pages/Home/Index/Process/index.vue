@@ -1,6 +1,6 @@
 <template>
   <div class="process">
-    <div v-for="(item, index) in list" :key="index">
+    <div v-for="(item, index) in list" v-show="item.state !== 2" :key="index">
       <div class="process_title">
         <img src="@/assets/img/home/title.png" alt="" />
         <h4>{{ item.name }}生产流水线</h4>
@@ -8,6 +8,7 @@
       <div class="process_list">
         <div
           v-for="(child, idx) in item.children"
+          v-show="child.state !== 2"
           :key="idx"
           @click="handleEnter(child.id)"
         >

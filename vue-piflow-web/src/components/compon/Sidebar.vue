@@ -10,7 +10,7 @@
   >
     <div v-for="(item, i) in menulist" :key="i + 'q1'">
       <MenuItem
-        v-if="!item.children"
+        v-if="!item.children && !item.hide"
         :name="item.name"
         class="item-par"
         :to="item.router"
@@ -18,18 +18,22 @@
         <Icon :type="item.icoName" size="18" />
         <span>{{ item.btnName }}</span>
       </MenuItem>
-      <Submenu v-else :name="i + 'q1'">
+      <Submenu v-if="item.children && !item.hide" :name="i + 'q1'">
         <template slot="title">
           <Icon :type="item.icoName" size="18" />
           <span>{{ item.btnName }}</span>
         </template>
-        <MenuItem
-          v-for="(item, key) in item.children"
-          :key="key + 'w1'"
+        <div         
+         v-for="(item, key) in item.children" :key="key + 'w1'"
+      >
+          <MenuItem
           :to="item.router"
+          v-if="!item.hide"
           :name="item.name"
           >{{ item.btnName }}</MenuItem
         >
+        </div>
+
       </Submenu>
     </div>
   </Menu>
@@ -80,7 +84,7 @@ export default {
           btnName: this.$t("sidebar.flowManagement"),
           icoName: "md-analytics",
           router: "/",
-          name: "home",
+          name: "flowManagement",
           children: [
             {
               btnName: this.$t("sidebar.publishManagement"),
@@ -106,7 +110,7 @@ export default {
           btnName: this.$t("sidebar.dataProductManagement"),
           icoName: "ios-apps",
           router: "/",
-          name: "home",
+          name: "dataProductManagement",
           children: [
             {
               btnName: this.$t("sidebar.publishManagement"),
@@ -137,6 +141,7 @@ export default {
         {
           btnName: this.$t("sidebar.operationManagement"),
           icoName: "ios-people",
+          name:'operationManagement',
           children: [
             {
               btnName: this.$t("sidebar.stopHub"),
@@ -228,19 +233,19 @@ export default {
             {
               btnName: this.$t("sidebar.database"),
               name: "VisualizationDataBase",
-              router: '/visualization/database',
+              router: "/visualization/database",
             },
             {
               btnName: this.$t("sidebar.datasource"),
               name: "VisualizationDataSource",
-              router: '/visualization/datasource',
+              router: "/visualization/datasource",
             },
             {
               btnName: this.$t("sidebar.visualconfig"),
               name: "VisualizationVisualConfig",
-              router: '/visualization/visualconfig',
+              router: "/visualization/visualconfig",
             },
-          ]
+          ],
         },
         // {
         //   btnName: this.$t("sidebar.example"),
@@ -328,17 +333,28 @@ export default {
     });
 
     let isRole = JSON.parse(Cookies.get("setUser"));
+    let hideList = [];
     if (!!isRole && isRole[0].role.stringValue !== "ADMIN") {
-      this.menulist.forEach((item, index, arr) => {
-        if (!!item.children) {
-          item.children.forEach((items, inx, arrs) => {
-            if (items.name === "user" || items.name === "stopsComponent") {
-              arrs.splice(inx, 1);
-            }
-          });
-        }
-      });
+      hideList = ["categoryManagement","flowManagement","operationManagement",];
+    } else {
+      hideList = ["flowHistory", "preference","produceAccreditManagement",];
     }
+    console.log(hideList);
+    this.menulist.forEach((item, index, arr) => {
+      if (hideList.includes(item.name)) {
+        this.$set(item, "hide", true);
+      }
+      if (item.children) {
+        item.children.forEach((child) => {
+          if (hideList.includes(child.name)) {
+            console.log(child.name)
+            this.$set(child, "hide", true);
+          }
+        });
+      }
+    });
+
+    console.log(JSON.parse(JSON.stringify(this.menulist)));
   },
   mounted() {
     let menuName = window.sessionStorage.getItem("menuName");

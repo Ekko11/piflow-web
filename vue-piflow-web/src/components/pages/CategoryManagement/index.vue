@@ -12,7 +12,7 @@
       <div class="contain_r">
         <div class="navbar">
           <div class="left">
-            <span>{{ parentNode.name }}</span>
+            <span v-if="parentNode">{{ parentNode.name }}</span>
           </div>
           <div class="right">
             <span class="button-warp" @click="handleAddChild(parentNode)">
@@ -35,73 +35,77 @@
     <!-- add / update -->
     <Modal
       v-model="isOpen"
+      footer-hide
       :title="formData.id ? '编辑' : '新增'"
-      :ok-text="$t('modal.ok_text')"
-      :cancel-text="$t('modal.cancel_text')"
-      @on-ok="handleComfirm"
     >
       <div class="modal-warp">
-        <div class="item">
-          <label>上级分类：</label>
-          <treeselect
-            disabled
-            v-model="formData.parentId"
-            :placeholder="$t('modal.placeholder_select')"
-            :normalizer="normalizer"
-            :options="treeData"
-            style="width: 350px"
+        <Form
+        ref="formValidate"
+        :model="formData"
+        :rules="ruleValidate"
+        :label-width="120"
+      >
+
+      <FormItem label="上级分类：" prop="parentId">
+        <treeselect
+          v-model="formData.parentId"
+          :placeholder="$t('modal.placeholder_select')"
+          :normalizer="normalizer"
+          :options="treeData"
+          :flat="true"
+          style="width: 100%; height: 32px"
+        />
+      </FormItem>
+      <FormItem label="发布名称：" prop="name">
+        <Input
+          v-model="formData.name"
+          placeholder="Enter publish name"
+        ></Input>
+      </FormItem>
+      <FormItem label="描述：" prop="description">
+        <Input
+          v-model="formData.description"
+          placeholder="Enter publish description"
+        ></Input>
+      </FormItem>
+      <FormItem label="描述：" prop="description">
+        <Upload
+        action="/null"
+        :before-upload="handleBeforeUpload"
+        :show-upload-list="false"
+        style="width: 350px"
+        accept=".jpg, .jpeg, .png"
+        class="upload"
+      >
+        <div>
+          <img
+            v-if="this.file"
+            style="width: 100px; height: 40px"
+            :src="this.file"
+            alt=""
           />
+          <Icon
+            v-else
+            type="ios-cloud-upload"
+            size="52"
+            style="color: #3399ff"
+          ></Icon>
+          <p>Click or drag files here to upload</p>
         </div>
-        <div class="item">
-          <label>名称：</label>
-          <Input
-            v-model="formData.name"
-            show-word-limit
-            maxlength="100"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
-        </div>
-        <div class="item">
-          <label class="self">描述：</label>
-          <Input
-            v-model="formData.description"
-            type="textarea"
-            :rows="4"
-            :placeholder="$t('modal.placeholder')"
-            style="width: 350px"
-          />
-        </div>
-        <div class="item">
-          <label>上传封面：</label>
-          <div>
-            <Upload
-              action="/null"
-              :before-upload="handleBeforeUpload"
-              :show-upload-list="false"
-              style="width: 350px"
-              accept=".jpg, .jpeg, .png"
-              class="upload"
-            >
-              <div>
-                <img
-                  v-if="this.file"
-                  style="width: 100px; height: 40px"
-                  :src="this.file"
-                  alt=""
-                />
-                <Icon
-                  v-else
-                  type="ios-cloud-upload"
-                  size="52"
-                  style="color: #3399ff"
-                ></Icon>
-                <p>Click or drag files here to upload</p>
-              </div>
-            </Upload>
-          </div>
-        </div>
+      </Upload>
+      </FormItem>
+    </Form>
+ 
       </div>
+      <div class="footer">
+        <Button @click="isOpen = false" class="custom-btn-default">{{
+          $t("modal.cancel_text")
+        }}</Button>
+        <Button @click="handleComfirm" class="custom-btn-primary">{{
+          $t("modal.confirm")
+        }}</Button>
+      </div>
+
     </Modal>
   </section>
 </template>
@@ -111,7 +115,7 @@ import {
   saveDataProductType,
   deleteDataProductType,
 } from "@/apis/dataProduct";
-import { findTree } from "@/utils/tree";
+import { findTreeStructure,findTree } from "@/utils/tree";
 import {downloadFile} from '@/apis/file'
 export default {
   data() {
@@ -125,9 +129,18 @@ export default {
         file: "",
       },
       formData: {},
-      parentNode: {},
+      parentNode: null,
       treeData: [],
       tableData: [],
+      ruleValidate: {
+        name: [
+          {
+            required: true,
+            message: "The name cannot be empty",
+            trigger: "blur",
+          },
+        ],
+      },
       columns: [
         {
           title: "名称",
@@ -163,15 +176,16 @@ export default {
       const res = await saveDataProductType(this.formData);
       this.$event.emit("loading", false);
       if (res.data.code == 200) {
+        this.isOpen = false
         this.$Modal.success({
           title: this.$t("tip.title"),
-          content: this.$t("tip.update_success_content"),
+          content: res.data.errorMsg,
         });
         this.handleGetData();
       } else {
         this.$Modal.error({
           title: this.$t("tip.title"),
-          content: this.$t("tip.update_fail_content"),
+          content: res.data.errorMsg,
         });
       }
       console.log(res);
@@ -231,10 +245,31 @@ export default {
           ischecked: true,
         },
       ];
-      this.handleChangeSelectNode(null, this.treeData[0]);
-      this.parentNode = this.treeData[0];
+      if(this.parentNode){
+        this.handleSetExpand(this.parentNode)
+      }else{
+          this.handleChangeSelectNode(null,this.treeData[0])
+      }
+    },
+    handleSetExpand(node){
+      let nodeList = findTreeStructure(this.treeData,(v)=>v.id === node.id,true) 
+      const parentList = []
+      let child = nodeList[0]
+      while (child) {
+        parentList.push(child)
+        child = Array.isArray(child.children) ? child.children[0] : undefined
+      }
+      parentList.forEach((item,index)=>{
+        const treeItem =  findTree(this.treeData,item.id)
+        treeItem.expand = true
+        if(index === parentList.length -1){
+          this.handleChangeSelectNode(null,treeItem)
+        }
+      })
     },
     handleChangeSelectNode(list, node) {
+      console.log(node)
+      this.$set(node, "expand", true);
       this.parentNode = node;
       this.tableData = node.children?.map((v) => {
         const obj = { ...v };
@@ -248,7 +283,6 @@ export default {
       return false;
     },
     renderImg(file){
-      console.log(file)
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
@@ -293,6 +327,7 @@ export default {
     box-shadow: 4px 4px 8px 0px #3974aa1f;
     border-radius: 8px;
     padding: 0 32px;
+    padding-left: 10px;
     h4 {
       font-size: 16px;
       margin-bottom: 16px;
@@ -309,10 +344,13 @@ export default {
       }
     }
     .ivu-tree ul li .ivu-tree-title {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      word-break: break-all;
       width: 100%;
+      span{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-all;
+        width: 100%;
+      }
     }
   }
   &_r {
@@ -333,5 +371,16 @@ export default {
   cursor: pointer;
   width: 350px;
   padding: 20px 0;
+}
+.footer {
+  height: 40px;
+  padding-left: 20px;
+  border-top: 1px solid #dedede;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  button {
+    margin-right: 10px;
+  }
 }
 </style>

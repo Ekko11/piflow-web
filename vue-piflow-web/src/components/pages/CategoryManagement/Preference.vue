@@ -19,9 +19,8 @@
             <template slot-scope="{ row }" slot="action">
               <div class="btn">
 
-                <Icon v-if="!row.state" @click="handleSet(row,1)" type='ios-heart-outline' />
-                <Icon v-else-if="row.state === 1" style="color: red;"  @click="handleSet(row,2)" type="ios-heart" />
-                <Icon v-else @click="handleSet(row,1)"   type="ios-heart"  />
+                <Icon v-if="row.state !== 2" style="color: red;"  @click="handleSet(row,2)" type="ios-heart" />
+                <Icon v-else @click="handleSet(row,0)"   type="ios-heart-outline"  />
               </div>
             </template>
           </Table>
@@ -59,11 +58,10 @@
       this.handleGetData();
     },
     methods: {
-     async handleSet(row){
-      console.log(row.state === 2)
+     async handleSet(row,type){
         const data = {
             id:Number(row.id),
-            preference: row.state === 1?2:1
+            preference: type
         }
         this.$set(row,'state',data.preference)
         const res = await setDataProductPreference(data)

@@ -14,14 +14,14 @@
       />
     </div>
     <Table border :data="tableData" :columns="columns">
-      <template slot-scope="{ row }" slot="action">
-        <div class="btn">
-          <Button @click="handleEnter(row)">查看</Button>
-          <Button @click="handleShowLog(row)">日志查看</Button>
+      <!-- <template slot-scope="{ row }" slot="action">
+        <div class="btn"> -->
+          <!-- <Button @click="handleEnter(row)">查看</Button> -->
+          <!-- <Button @click="handleShowLog(row)">日志查看</Button>
           <Button @click="handleDownDataProduct(row)">数据产品下载</Button>
-          <Button v-if="row.dataProductList && row.dataProductList.length" @click="handDataPublish(row)">数据产品发布</Button>
-        </div>
-      </template>
+          <Button v-if="row.dataProductList && row.dataProductList.length" @click="handDataPublish(row)">数据产品发布</Button> -->
+        <!-- </div>
+      </template> -->
     </Table>
     <div class="page">
       <Page
@@ -38,7 +38,6 @@
   </section>
 </template>
 <script>
-import { getDataProductType } from "@/apis/dataProduct";
 import { getProcessHistoryPageOfSelf } from "@/apis/process";
 
 export default {
@@ -68,12 +67,12 @@ export default {
             return h("span", [params.row.state.text]);
           },
         },
-        {
-          title: "操作",
-          slot: "action",
-          width: 430,
-          align: "center",
-        },
+        // {
+        //   title: "操作",
+        //   slot: "action",
+        //   width: 430,
+        //   align: "center",
+        // },
       ],
     };
   },

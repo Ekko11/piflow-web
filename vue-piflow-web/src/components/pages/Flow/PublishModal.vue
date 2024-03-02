@@ -34,6 +34,7 @@
             :placeholder="$t('modal.placeholder_select')"
             :normalizer="normalizer"
             :options="treeData"
+            :flat="true"
             style="width: 100%; height: 32px"
           />
         </FormItem>
@@ -43,12 +44,49 @@
             placeholder="Enter publish description"
           ></Input>
         </FormItem>
+
+        <FormItem label="封面：" prop="coverFile">
+          <Upload
+            action="/null"
+            :before-upload="handleBeforeCoverFileUpload"
+            :show-upload-list="false"
+            style="width: 350px"
+            class="upload"
+          >
+            <div>
+              <img
+                v-if="this.coverFileImg"
+                style="width: 100px; height: 40px"
+                :src="this.coverFileImg"
+                alt=""
+              />
+              <Icon
+                v-else
+                type="ios-cloud-upload"
+                size="52"
+                style="color: #3399ff"
+              ></Icon>
+              <p>Click or drag files here to upload</p>
+            </div>
+          </Upload>
+        </FormItem>
+
+        <FormItem label="说明书：" prop="coverFile">
+          <Upload
+            action="/aaa"
+            :before-upload="handleBeforeSpecificationUpload"
+          >
+            <Button icon="ios-cloud-upload-outline">Upload files</Button>
+          </Upload>
+          <p v-if="specification">{{ specification.name }}</p>
+        </FormItem>
+
         <h4>选择发布组件</h4>
 
         <Collapse simple>
           <Panel :name="item.id" v-for="(item, index) in stops" :key="index">
-            <span
-              ><Checkbox v-model="item.checked"></Checkbox>
+            <span>
+              <input type="checkbox" class="checkbox" @click.stop="item.checked = !item.checked" :checked="item.checked">
               {{ item.stopName }}</span
             >
 
@@ -59,8 +97,8 @@
                   v-for="(child, idx) in item.stopPublishingPropertyVos"
                   :key="idx"
                 >
-                  <span
-                    ><Checkbox v-model="child.checked"></Checkbox>
+                  <span>
+                  <input type="checkbox" class="checkbox" @click.stop="child.checked = !child.checked" :checked="child.checked">
                     {{ child.propertyName }}</span
                   >
                   <div slot="content">
@@ -76,7 +114,10 @@
                     </div>
                     <div class="item">
                       <label>发布类型：</label>
-                      <Cascader :data="cascaderData" trigger="hover" v-model="child.cascaderType"
+                      <Cascader
+                        :data="cascaderData"
+                        trigger="hover"
+                        v-model="child.cascaderType"
                       ></Cascader>
                     </div>
                     <div
@@ -97,7 +138,7 @@
                         <p>{{ child.fileName }}</p>
                       </div>
                     </div>
-                    <div class="item"  v-if="child.cascaderType[1] === 1">
+                    <div class="item" v-if="child.cascaderType[1] === 1">
                       <label>自定义值：</label>
                       <Input
                         disabled
@@ -112,76 +153,6 @@
             </div>
           </Panel>
         </Collapse>
-
-        <!-- <div v-for="(item, index) in stops" label="" class="stop" :key="index">
-          <div class="stop_checked">
-            <p>{{ item.stopName }}</p>
-            <label><Checkbox v-model="item.checked"></Checkbox></label>
-          </div>
-          <div class="stop_props">
-            <div
-              v-for="(child, idx) in item.stopPublishingPropertyVos"
-              :key="idx"
-              class="stop_props-item"
-            >
-              <div class="item">
-                <label>参数名称：</label>
-                <Checkbox style="width: 200px" v-model="child.checked">{{
-                  child.propertyName
-                }}</Checkbox>
-              </div>
-              <div class="item">
-                <label>发布名称：</label>
-                <Input
-                  v-model="child.name"
-                  show-word-limit
-                  maxlength="100"
-                  :placeholder="$t('modal.placeholder')"
-                  style="width: 200px"
-                />
-              </div>
-              <div class="item">
-                <label>发布类型：</label>
-                <Radio-group v-model="child.type">
-                  <Radio :label="1">输入</Radio>
-                  <Radio :label="2">输出</Radio>
-                </Radio-group>
-              </div>
-              <div class="item" v-if="child.type === 1">
-                <label>发布类型：</label>
-                <Radio-group v-model="child.type1">
-                  <Radio :label="0">文件</Radio>
-                  <Radio :label="1">普通</Radio>
-                </Radio-group>
-              </div>
-              <div
-                class="item"
-                v-if="child.type1 === 0"
-                @click="handleClickUpload(index, idx)"
-              >
-                <label>上传文件：</label>
-                <div>
-                  <Upload action="/aaa" :before-upload="handleBeforeUpload">
-                    <Button icon="ios-cloud-upload-outline"
-                      >Upload files</Button
-                    >
-                  </Upload>
-                  <p>{{ child.fileName }}</p>
-                </div>
-              </div>
-              <div class="item" v-if="child.type1 === 1">
-                <label>自定义值：</label>
-                <Input
-                  disabled
-                  v-model="child.customValue"
-                  show-word-limit
-                  :placeholder="$t('modal.placeholder')"
-                  style="width: 200px"
-                />
-              </div>
-            </div>
-          </div>
-        </div> -->
       </Form>
     </div>
     <div class="footer">
@@ -197,12 +168,9 @@
 </template>
 
 <script>
-import {
-  getDataProductType,
-  getStopsInfoByFlowId,
-} from "@/apis/dataProduct";
+import { getDataProductType, getStopsInfoByFlowId } from "@/apis/dataProduct";
 
-import { getPublishingById,publishingStops } from "@/apis/flowPublish";
+import { getPublishingById, publishingStops } from "@/apis/flowPublish";
 import { uploadFile } from "@/apis/file";
 
 import { findTree } from "@/utils/tree";
@@ -213,6 +181,9 @@ export default {
       formData: {},
       open: false,
       currentUpload: 0,
+      coverFile: null,
+      coverFileImg: null,
+      specification: null,
       stops: [],
       treeData: [],
       fileList: [],
@@ -244,6 +215,13 @@ export default {
             trigger: "blur",
           },
         ],
+        coverFile: [
+          {
+            required: true,
+            message: "The coverFile cannot be empty",
+            trigger: "blur",
+          },
+        ],
       },
     };
   },
@@ -272,7 +250,7 @@ export default {
             fileName: item.fileName,
             name: item.name,
             type: item.type,
-            cascaderType:[],
+            cascaderType: [],
             allowableValues: item.allowableValues,
             customValue: item.customValue,
             description: item.description,
@@ -318,12 +296,17 @@ export default {
             this.stops[index].stopPublishingPropertyVos[idx].checked = true;
             this.stops[index].stopPublishingPropertyVos[idx].id = child.id;
             this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
-            this.stops[index].stopPublishingPropertyVos[idx].fileId = child.fileId;
-            this.stops[index].stopPublishingPropertyVos[idx].fileName = child.fileName;
-            this.stops[index].stopPublishingPropertyVos[idx].version = child.version;
-            this.stops[index].stopPublishingPropertyVos[idx].publishingId = child.publishingId;
+            this.stops[index].stopPublishingPropertyVos[idx].fileId =
+              child.fileId;
+            this.stops[index].stopPublishingPropertyVos[idx].fileName =
+              child.fileName;
+            this.stops[index].stopPublishingPropertyVos[idx].version =
+              child.version;
+            this.stops[index].stopPublishingPropertyVos[idx].publishingId =
+              child.publishingId;
             this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
-            this.stops[index].stopPublishingPropertyVos[idx].cascaderType = child.type === 2 ?[child.type]:[1,child.type];
+            this.stops[index].stopPublishingPropertyVos[idx].cascaderType =
+              child.type === 2 ? [child.type] : [1, child.type];
           });
         });
       }
@@ -331,6 +314,14 @@ export default {
     },
     // 保存（编辑或者更新）
     async handleSaveUpdateData() {
+      if(!this.formData.productTypeId || !this.formData.name){
+        this.$refs.formValidate.validate((valid) => {})
+        this.$Message.error({
+          content: '请按要求填写表单',
+          duration: 3,
+        });
+        return 
+      }
       this.$event.emit("loading", true);
       // 获取分类信息
       const productNode = findTree(this.treeData, this.formData.productTypeId);
@@ -347,15 +338,14 @@ export default {
           stopPublishingPropertyVos: item.stopPublishingPropertyVos.filter(
             (prop) => {
               if (prop.checked) {
-                  //输入类型
-                if (prop.cascaderType.length === 2  ) {
-                  console.log(prop)
+                //输入类型
+                if (prop.cascaderType.length === 2) {
                   if (prop.cascaderType[1] === 0 && !prop.fileName) {
                     //文件
                     errMsg = `请确保组件 ${item.stopName} 的参数 ${prop.propertyName} 的文件不为空`;
                   }
                   prop.type = prop.cascaderType[1];
-                }else{
+                } else {
                   prop.type = prop.cascaderType[0];
                 }
               }
@@ -375,17 +365,21 @@ export default {
       this.formData.stops = filteredArray;
       // 发布
       const res = await publishingStops(this.formData);
-      //新增需要上传文件
-      if (this.fileList.length) {
+      if(res.data.code === 200){
+      //需要上传文件
+      let promiseList = [];
+      if (this.fileList.length || this.coverFile || this.specification) {
         const returnPropsList = res.data.data;
-        if (res.data.code == 200 && returnPropsList.length) {
-          let promiseList = [];
+        if (returnPropsList.length &&
+          this.fileList.length
+        ) {
           // 多次上传文件
           this.fileList.forEach((item) => {
             const resObj = returnPropsList.find(
               (v) => v.propertyId === item.id
             );
             if (resObj) {
+              // 组件stop上传文件
               const res = uploadFile({
                 associateType: 3,
                 associateId: resObj.id,
@@ -393,26 +387,6 @@ export default {
               });
               promiseList.push(res);
             }
-          });
-          // 判断多次上传文件是否成功
-          Promise.all(promiseList).then((res) => {
-            let errPromise = res.filter((v) => v.data.code !== 200);
-            this.$event.emit("loading", false);
-            if (!errPromise.length) {
-              this.$Message.success({
-                content: this.$t("tip.success"),
-                duration: 3,
-              });
-              this.open = false;
-              this.reSet();
-            } else {
-              this.$Message.error({
-                content: this.$t("tip.fault_content"),
-                duration: 3,
-              });
-              this.open = false;
-            }
-            console.log(res);
           });
         } else {
           this.$event.emit("loading", false);
@@ -422,6 +396,46 @@ export default {
           });
           this.open = false;
         }
+
+        // 上传封面文件
+        if (this.coverFile) {
+          const coverFileRes = uploadFile({
+            associateType: 5,
+            associateId: this.formData.flowId,
+            file: this.coverFile,
+          });
+          promiseList.push(coverFileRes);
+        }
+        // 上传说明书
+        if (this.specification) {
+          const specificationRes = uploadFile({
+            associateType: 6,
+            associateId: this.formData.flowId,
+            file: this.specification,
+          });
+          promiseList.push(specificationRes);
+        }
+
+        // 判断多次上传文件是否成功
+        Promise.all(promiseList).then((res) => {
+          let errPromise = res.filter((v) => v.data.code !== 200);
+          this.$event.emit("loading", false);
+          if (!errPromise.length) {
+            this.$Message.success({
+              content: this.$t("tip.success"),
+              duration: 3,
+            });
+            this.open = false;
+            this.reSet();
+          } else {
+            this.$Message.error({
+              content: this.$t("tip.fault_content"),
+              duration: 3,
+            });
+            this.open = false;
+          }
+          console.log(res);
+        });
       } else {
         //编辑不需要上传文件
         this.$event.emit("loading", false);
@@ -431,32 +445,52 @@ export default {
           duration: 3,
         });
       }
+      }
+
     },
     reSet() {
-      this.formData = {};
+      this.formData = {
+        name:null,
+        productTypeId:null,
+        description:null,
+      };
+      this.$refs.formValidate.resetFields();
       this.fileList = [];
+      this.coverFile = null;
+      this.coverFileImg = null;
+      this.specification = null;
     },
     // 标记选择上传的节点
     handleClickUpload(index, idx) {
       this.currentProps = this.stops[index].stopPublishingPropertyVos[idx];
-      console.log(this.currentProps);
+    },
+    handleBeforeCoverFileUpload(e) {
+      this.coverFile = e;
+      const reader = new FileReader();
+      reader.readAsDataURL(e);
+      reader.onload = () => {
+        this.coverFileImg = reader.result;
+      };
+      return false;
+    },
+    handleBeforeSpecificationUpload(e) {
+      this.specification = e;
+      return false;
     },
     handleBeforeUpload(e) {
-      if (this.fileList.findIndex((v) => v.name === e.name) !== -1) {
-        this.$Message.error({
-          content: "文件名重复，请修改文件名后再上传",
-          duration: 3,
-        });
-        return false;
-      }
       this.currentProps.fileName = e.name;
       this.fileList.push({ id: this.currentProps.propertyId, file: e });
       return false;
+    },
+    handleCheckboxClick(item){
+      console.log(this.stops)
+      this.$set(item,'checked',!item.checked)
     },
     normalizer(node) {
       return {
         id: node.id,
         label: node.name,
+        isDisabled: node.parentId == 0,
         children:
           node.children && node.children.length ? node.children : undefined,
       };
@@ -488,35 +522,11 @@ export default {
     margin: 0 10px 5px;
   }
 }
-.stop {
-  border: 1px solid #eee;
-  margin-bottom: 5px;
-  display: flex;
-  &_checked {
-    width: 160px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    border-right: 1px solid #eee;
-    padding: 0 10px;
-    p {
-      word-break: break-all;
-    }
-  }
-  &_props {
-    flex-grow: 1;
-    &-item {
-      padding-left: 10px;
-      border-bottom: 1px solid #eee;
-      &:last-child {
-        border: none;
-      }
-    }
-  }
+.checkbox{
+  position: relative;
+  top: 1px;
 }
+
 h4 {
   margin-bottom: 5px;
 }
@@ -547,6 +557,16 @@ h4 {
       margin-right: 10px;
     }
   }
+}
+
+.upload {
+  background: #fff;
+  border: 1px dashed #dcdee2;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  width: 350px;
+  padding: 20px 0;
 }
 </style>
 

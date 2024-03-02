@@ -25,6 +25,7 @@
         :placeholder="$t('modal.placeholder_select')"
         :normalizer="normalizer"
         :options="treeData"
+        :flat="true"
         style="width: 350px"
       />
     </div>
@@ -171,6 +172,7 @@ export default {
               content: res.data.errorMsg,
               duration: 3
         });
+        this.$emit('onSubmit')
       }else{
         this.$Message.error({
               content: res.data.errorMsg,
@@ -194,6 +196,7 @@ export default {
       return {
         id: node.id,
         label: node.name,
+        isDisabled: node.parentId == 0,
         children:
           node.children && node.children.length ? node.children : undefined,
       };
