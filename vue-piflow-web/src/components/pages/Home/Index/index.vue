@@ -9,7 +9,7 @@
           @click="handleEnter(item.route)"
         >
           <img :src="item.img" alt="" />
-          <p>-{{ item.name }}-</p>
+          <p>-  <span>{{ item.name }}</span> -</p>
         </div>
       </div>
     </div>

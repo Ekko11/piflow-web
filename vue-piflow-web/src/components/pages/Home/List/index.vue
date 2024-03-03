@@ -82,6 +82,10 @@ export default {
           key: "description",
         },
         {
+          title: "所属类型",
+          key: "productTypeName",
+        },
+        {
           title: "创建时间",
           key: "crtDttm",
         },
@@ -145,7 +149,7 @@ export default {
         this.$event.emit("loading", false);
         let link;
         if (res.data.data.length && res.data.data[0].state.text === "STARTED") {  //如果正在运行，直接进入运行界面
-          link = `/home/flowProcess?processId=${res.data.data.processId}`;
+          link = `/home/flowProcess?processId=${res.data.data[0].id}`;
         } else {
           link = `/home/flowConfig?id=${row.id}&type=${this.$route.query.type}`;
         }

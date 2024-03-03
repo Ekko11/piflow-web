@@ -20,7 +20,7 @@ export function saveDataProductType (data) {
     })
 }
 
-// 获取数据产品分类  偏好设置
+// 删除数据产品分类
 export function deleteDataProductType (id) {
     return axios({
         method:'post',
@@ -70,7 +70,14 @@ export function getByPageForPublishing (data) {
         data
     })
 }
-
+// 管理员数据产品列表
+export function applyPermission (data) {
+    return axios({
+        method:'post',
+        url:'/dataProduct/applyPermission',
+        data
+    })
+}
 
 
 // 数据产品 管理员审核

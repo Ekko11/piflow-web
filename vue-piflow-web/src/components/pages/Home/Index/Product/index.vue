@@ -29,6 +29,7 @@
             </div>
             <div class="contain_r-btn">
               <Button v-if="(role === 'ADMIN' || userName === item.crtUser) || item.permission === 0" @click="handleDown(item)">在线下载</Button>
+              <Button v-else @click="handleApply(item)">在线申请</Button>
               <!-- <Button>查看</Button> -->
             </div>
           </div>
@@ -49,10 +50,45 @@
         </div>
       </div>
     </div>
+<!-- 申请 -->
+    <Modal
+    v-model="isOpen"
+    width="520px"
+    title="申请"
+    footer-hide
+    class="custom-modal"
+  >
+    <div style="width: 100%; height: 100%">
+      <Form
+        class="formApplyInfo"
+        :model="formApplyInfo"
+        :rules="ruleValidate"
+        ref="formValidate"
+        :label-width="100"
+      >
+        <Form-item label="理由" prop="reason">
+          <Input
+          v-model="formApplyInfo.reason"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入"
+          ></Input>
+        </Form-item>
+      </Form>
+    </div>
+    <div class="footer">
+      <Button @click="isOpen = false" class="custom-btn-default">{{
+        $t("modal.cancel_text")
+      }}</Button>
+      <Button @click="handleConfirmApply" class="custom-btn-primary">{{
+        $t("modal.confirm")
+      }}</Button>
+    </div>
+  </Modal>
   </div>
 </template>
 <script>
-import { getDataProductType, getDataProductByPage } from "@/apis/dataProduct";
+import { getDataProductType, getDataProductByPage,applyPermission } from "@/apis/dataProduct";
 import { downloadFileByIds,downloadFile,download } from "@/apis/file";
 import Cookies from "js-cookie";
 import JSZip from 'jszip'
@@ -67,7 +103,20 @@ export default {
       limit: 10,
       keyword:'',
       role:'USER',
-      userName:''
+      userName:'',
+      formApplyInfo:{
+        reason:''
+      },
+      ruleValidate:{
+        reason: [
+          {
+            required: true,
+            message: "The reason cannot be empty",
+            trigger: "blur",
+          },
+        ],
+      },
+      isOpen:false,
     };
   },
   created() {
@@ -75,6 +124,28 @@ export default {
     this.handleGetRole()
   },
   methods: {
+    handleConfirmApply(){
+      this.$refs.formValidate.validate(async (valid) => {
+        if(valid){
+          const res = await applyPermission(this.formApplyInfo)
+          if(res.data.code === 200){
+            this.$Message.success({
+              content: '申请成功',
+              duration: 3,
+            });
+            this.isOpen  = false
+          }
+        }
+      })
+    },
+    handleApply(row){
+      this.$refs.formValidate.resetFields();
+      this.formApplyInfo  = {
+        reason:'',
+        productId:row.id
+      }
+      this.isOpen =true
+    },
     handleGetRole(){
       let user = JSON.parse(Cookies.get("setUser"));
       this.userName = Cookies.get("usre");
@@ -170,5 +241,17 @@ export default {
 .page {
   display: flex;
   justify-content: flex-end;
+}
+.footer {
+  height: 40px;
+  padding-left: 20px;
+  border-top: 1px solid #dedede;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 10px;
+  button {
+    margin-right: 10px;
+  }
 }
 </style>

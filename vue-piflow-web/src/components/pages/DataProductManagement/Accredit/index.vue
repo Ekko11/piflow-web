@@ -11,7 +11,7 @@
       <template slot-scope="{ row }" slot="action">
         <div class="btn">
           <Button  v-if="row.state === 1" @click="handleVerify(row)">审核</Button>
-          <span>{{stateArr[row.state]}}</span>
+          <span v-else>{{stateArr[row.state]}}</span>
         </div>
       </template>
     </Table>
