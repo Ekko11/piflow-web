@@ -41,6 +41,8 @@
         <FormItem label="描述：" prop="description">
           <Input
             v-model="formData.description"
+            type="textarea"
+            :rows="3"
             placeholder="Enter publish description"
           ></Input>
         </FormItem>
@@ -57,7 +59,7 @@
             <div>
               <img
                 v-if="this.coverFileImg"
-                style="width: 100px;"
+                style="width: 100px"
                 :src="this.coverFileImg"
                 alt=""
               />
@@ -80,28 +82,34 @@
           >
             <Button icon="ios-cloud-upload-outline">Upload files</Button>
           </Upload>
-          <p v-if="instructionFile">{{ instructionFile.name}}</p>
-          <p v-if="!instructionFile && formData.instructionFileName">{{ formData.instructionFileName }}</p>
+          <p v-if="instructionFile">{{ instructionFile.name }}</p>
+          <p v-if="!instructionFile && formData.instructionFileName">
+            {{ formData.instructionFileName }}
+          </p>
         </FormItem>
 
         <h4>选择发布组件</h4>
 
-        <Collapse simple>
+        <Collapse simple accordion>
           <Panel :name="item.id" v-for="(item, index) in stops" :key="index">
             <span>
-              <input type="checkbox" class="checkbox" @click.stop="item.checked = !item.checked" :checked="item.checked">
-              {{ item.stopName }}</span
+              <Icon v-if="item.checked" style="color: #2F7AE1;font-size: 16px;" type="md-checkbox-outline" /> {{ item.stopName }}</span
             >
 
             <div slot="content">
-              <Collapse simple>
+              <Collapse simple accordion>
                 <Panel
                   :name="child.id"
                   v-for="(child, idx) in item.stopPublishingPropertyVos"
                   :key="idx"
                 >
                   <span>
-                  <input type="checkbox" class="checkbox" @click.stop="child.checked = !child.checked" :checked="child.checked">
+                    <input
+                      type="checkbox"
+                      class="checkbox"
+                      @click="handleCheckboxClick($event, child,item)"
+                      :checked="child.checked"
+                    />
                     {{ child.propertyName }}</span
                   >
                   <div slot="content">
@@ -112,7 +120,17 @@
                         show-word-limit
                         maxlength="100"
                         :placeholder="$t('modal.placeholder')"
-                        style="width: 200px"
+                        style="width: 300px"
+                      />
+                    </div>
+                    <div class="item">
+                      <label>发布描述：</label>
+                      <Input
+                        v-model="child.description1"
+                        type="textarea"
+                        :rows="3"
+                        :placeholder="child.description"
+                        style="width: 300px"
                       />
                     </div>
                     <div class="item">
@@ -120,6 +138,7 @@
                       <Cascader
                         :data="cascaderData"
                         trigger="hover"
+                        style="width: 300px"
                         v-model="child.cascaderType"
                       ></Cascader>
                     </div>
@@ -147,7 +166,7 @@
                         disabled
                         v-model="child.customValue"
                         :placeholder="$t('modal.placeholder')"
-                        style="width: 200px"
+                        style="width: 300px"
                       />
                     </div>
                   </div>
@@ -159,14 +178,15 @@
       </Form>
     </div>
     <div class="footer">
-      <Button @click="open = false" class="custom-btn-default">{{
-        $t("modal.cancel_text")
-      }}</Button>
       <Button @click="handleSaveUpdateData" class="custom-btn-primary">{{
         $t("modal.confirm")
       }}</Button>
+      <Button @click="open = false" class="custom-btn-default">{{
+        $t("modal.cancel_text")
+      }}</Button>
     </div>
     <!-- </Modal> -->
+    <DragableTable  ref="DragableTableRef" @stopChange="handlePublish"/>
   </Drawer>
 </template>
 
@@ -174,11 +194,14 @@
 import { getDataProductType, getStopsInfoByFlowId } from "@/apis/dataProduct";
 
 import { getPublishingById, publishingStops } from "@/apis/flowPublish";
-import { uploadFile,downloadFile  } from "@/apis/file";
+import { uploadFile, downloadFile } from "@/apis/file";
 
 import { findTree } from "@/utils/tree";
+import { pinyin } from "pinyin-pro";
+import DragableTable from './DragableTable'
 
 export default {
+  components:{DragableTable},
   data() {
     return {
       formData: {},
@@ -237,7 +260,16 @@ export default {
       const res = await getDataProductType();
       this.treeData = res.data.data;
     },
-    // 获取流水线组件列表
+    sortArrayByPinyin(arr) {
+      return arr.sort((a, b) => {
+        // 将汉字转换为拼音，不包含声调
+        const pinyinA = pinyin(a.stopName, { toneType: "none",}).toLocaleLowerCase();
+        const pinyinB = pinyin(b.stopName, { toneType: "none" }).toLocaleLowerCase();
+        // 比较拼音
+        return pinyinA.localeCompare(pinyinB);
+      });
+    },
+    // 获取流水线原始组件列表
     async handleGetFlowStops(id) {
       const res = await getStopsInfoByFlowId(id);
       this.stops = res.data.data.map((v) => {
@@ -257,20 +289,25 @@ export default {
             allowableValues: item.allowableValues,
             customValue: item.customValue,
             description: item.description,
+            description1: "",
             propertySort: item.propertySort,
             example: item.example,
           })),
         };
       });
+      this.stops = this.stops.filter(v=>v.stopPublishingPropertyVos && v.stopPublishingPropertyVos.length)
+      this.sortArrayByPinyin(this.stops)
     },
     async handleAdd(row) {
-      this.$event.emit("loading", true);
-      this.reSet();
-      this.formData.flowId = row.id;
-      this.formData.description = row.description;
+      if (row.id !== this.formData.flowId) {
+        this.$event.emit("loading", true);
+        this.reSet();
+        this.formData.flowId = row.id;
+        this.formData.description = row.description;
+        await this.handleGetFlowStops(row.id);
+        this.$event.emit("loading", false);
+      }
       this.open = true;
-      await this.handleGetFlowStops(row.id);
-      this.$event.emit("loading", false);
     },
 
     async handleEdit(row) {
@@ -282,12 +319,25 @@ export default {
       this.$event.emit("loading", false);
       const publishInfo = res.data.data;
       this.formData.flowId = row.flowId;
-      const {id,name,productTypeId,description,version,coverFileId,instructionFileName} = publishInfo
+      const {
+        id,
+        name,
+        productTypeId,
+        description,
+        version,
+        coverFileId,
+        instructionFileName,
+      } = publishInfo;
       this.formData = {
-        flowId:row.flowId,
-        id,name,productTypeId,description,version,instructionFileName
-      }
-      this.getCoverFileImg(coverFileId)
+        flowId: row.flowId,
+        id,
+        name,
+        productTypeId,
+        description,
+        version,
+        instructionFileName,
+      };
+      this.getCoverFileImg(coverFileId);
       const publishStops = publishInfo.stops;
       if (publishStops.length) {
         publishStops.forEach((item) => {
@@ -297,9 +347,15 @@ export default {
             let idx = this.stops[index].stopPublishingPropertyVos.findIndex(
               (v) => v.propertyId === child.propertyId
             );
+            this.stops[index].bak1 = child.bak1
             this.stops[index].stopPublishingPropertyVos[idx].checked = true;
             this.stops[index].stopPublishingPropertyVos[idx].id = child.id;
             this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
+            this.stops[index].stopPublishingPropertyVos[idx].description =
+              child.description;
+            this.stops[index].stopPublishingPropertyVos[idx].description1 =
+              child.description;
+
             this.stops[index].stopPublishingPropertyVos[idx].fileId =
               child.fileId;
             this.stops[index].stopPublishingPropertyVos[idx].fileName =
@@ -317,9 +373,9 @@ export default {
       console.log(this.stops);
     },
 
-  async  getCoverFileImg(id){
-    if(!id) return 
-      const res =await downloadFile(id)
+    async getCoverFileImg(id) {
+      if (!id) return;
+      const res = await downloadFile(id);
       const reader = new FileReader();
       reader.readAsDataURL(res.data);
       reader.onload = () => {
@@ -328,13 +384,13 @@ export default {
     },
     // 保存（编辑或者更新）
     async handleSaveUpdateData() {
-      if(!this.formData.productTypeId || !this.formData.name){
-        this.$refs.formValidate.validate((valid) => {})
+      if (!this.formData.productTypeId || !this.formData.name) {
+        this.$refs.formValidate.validate((valid) => {});
         this.$Message.error({
-          content: '请按要求填写表单',
+          content: "请按要求填写表单",
           duration: 3,
         });
-        return 
+        return;
       }
       // 获取分类信息
       const productNode = findTree(this.treeData, this.formData.productTypeId);
@@ -351,6 +407,7 @@ export default {
           stopPublishingPropertyVos: item.stopPublishingPropertyVos.filter(
             (prop) => {
               if (prop.checked) {
+                prop.description = prop.description1 || prop.description;
                 //输入类型
                 if (prop.cascaderType.length === 2) {
                   if (prop.cascaderType[1] === 0 && !prop.fileName) {
@@ -372,109 +429,108 @@ export default {
           content: errMsg,
           duration: 3,
         });
-        this.$event.emit("loading", false);
         return;
       }
-      this.formData.stops = filteredArray;
-      if(!this.formData.stops.length){
+      if (!filteredArray.length) {
         this.$Message.error({
-          content: '请至少选择一个组件',
+          content: "请至少选择一个组件",
           duration: 3,
         });
-        return
+        return;
       }
       // 发布
+      this.$refs.DragableTableRef.handleOpen(filteredArray)
+
+    },
+   async handlePublish(data){
+      this.formData.stops = data;
       this.$event.emit("loading", true);
-
       const res = await publishingStops(this.formData);
-      if(res.data.code === 200){
-      //需要上传文件
-      let promiseList = [];
-      if (this.fileList.length || this.coverFile || this.instructionFile) {
-        const returnPropsList = res.data.data;
-        if (returnPropsList.length &&
-          this.fileList.length
-        ) {
-          // 多次上传文件
-          this.fileList.forEach((item) => {
-            const resObj = returnPropsList.find(
-              (v) => v.propertyId === item.id
-            );
-            if (resObj) {
-              // 组件stop上传文件
-              const res = uploadFile({
-                associateType: 3,
-                associateId: resObj.id,
-                file: item.file,
-              });
-              promiseList.push(res);
-            }
-          });
-        } 
-
-        // 上传封面文件
-        if (this.coverFile) {
-          const coverFileRes = uploadFile({
-            associateType: 5,
-            associateId: res.data.data[0].publishingId,
-            file: this.coverFile,
-          });
-          promiseList.push(coverFileRes);
-        }
-        // 上传说明书
-        if (this.instructionFile) {
-          const instructionFileRes = uploadFile({
-            associateType: 6,
-            associateId: res.data.data[0].publishingId,
-            file: this.instructionFile,
-          });
-          promiseList.push(instructionFileRes);
-        }
-
-        // 判断多次上传文件是否成功
-        Promise.all(promiseList).then((res) => {
-          let errPromise = res.filter((v) => v.data.code !== 200);
-          this.$event.emit("loading", false);
-          if (!errPromise.length) {
-            this.$Message.success({
-              content: this.$t("tip.success"),
-              duration: 3,
+      if (res.data.code === 200) {
+        //需要上传文件
+        let promiseList = [];
+        if (this.fileList.length || this.coverFile || this.instructionFile) {
+          const returnPropsList = res.data.data;
+          if (returnPropsList.length && this.fileList.length) {
+            // 多次上传文件
+            this.fileList.forEach((item) => {
+              const resObj = returnPropsList.find(
+                (v) => v.propertyId === item.id
+              );
+              if (resObj) {
+                // 组件stop上传文件
+                const res = uploadFile({
+                  associateType: 3,
+                  associateId: resObj.id,
+                  file: item.file,
+                });
+                promiseList.push(res);
+              }
             });
-            this.open = false;
-            this.reSet();
-          } else {
-            this.$Message.error({
-              content: this.$t("tip.fault_content"),
-              duration: 3,
-            });
-            this.open = false;
           }
-          console.log(res);
-        });
-      } else {
-        //编辑不需要上传文件
-        this.$event.emit("loading", false);
-        this.open = false;
-        this.$Message.success({
-          content: this.$t("tip.success"),
-          duration: 3,
-        });
-      }
-    }else {
+
+          // 上传封面文件
+          if (this.coverFile) {
+            const coverFileRes = uploadFile({
+              associateType: 5,
+              associateId: res.data.data[0].publishingId,
+              file: this.coverFile,
+            });
+            promiseList.push(coverFileRes);
+          }
+          // 上传说明书
+          if (this.instructionFile) {
+            const instructionFileRes = uploadFile({
+              associateType: 6,
+              associateId: res.data.data[0].publishingId,
+              file: this.instructionFile,
+            });
+            promiseList.push(instructionFileRes);
+          }
+
+          // 判断多次上传文件是否成功
+          Promise.all(promiseList).then((res) => {
+            let errPromise = res.filter((v) => v.data.code !== 200);
+            this.$event.emit("loading", false);
+            if (!errPromise.length) {
+              this.$Message.success({
+                content: this.$t("tip.success"),
+                duration: 3,
+              });
+              this.open = false;
+              this.reSet();
+            } else {
+              this.$Message.error({
+                content: this.$t("tip.fault_content"),
+                duration: 3,
+              });
+              this.open = false;
+            }
+            console.log(res);
+          });
+        } else {
+          //编辑不需要上传文件
           this.$event.emit("loading", false);
-          this.$Message.error({
-            content: this.$t("tip.fault_content"),
+          this.open = false;
+          this.$Message.success({
+            content: this.$t("tip.success"),
             duration: 3,
           });
-          this.open = false;
         }
-
+      } else {
+        this.$event.emit("loading", false);
+        this.$Message.error({
+          content: this.$t("tip.fault_content"),
+          duration: 3,
+        });
+        this.open = false;
+      }
     },
     reSet() {
       this.formData = {
-        name:null,
-        productTypeId:null,
-        description:null,
+        name: null,
+        productTypeId: null,
+        description: null,
       };
       this.$refs.formValidate.resetFields();
       this.fileList = [];
@@ -504,9 +560,14 @@ export default {
       this.fileList.push({ id: this.currentProps.propertyId, file: e });
       return false;
     },
-    handleCheckboxClick(item){
-      console.log(this.stops)
-      this.$set(item,'checked',!item.checked)
+    handleCheckboxClick(e, item,stop) {
+      // if (item.checked) {
+      //   e.stopPropagation();
+      // }
+      this.$set(item, "checked", !item.checked);
+      const flag = stop.stopPublishingPropertyVos.some(v=>v.checked)
+      this.$set(stop, "checked", flag);
+
     },
     normalizer(node) {
       return {
@@ -544,7 +605,7 @@ export default {
     margin: 0 10px 5px;
   }
 }
-.checkbox{
+.checkbox {
   position: relative;
   top: 1px;
 }

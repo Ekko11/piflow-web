@@ -52,7 +52,9 @@ export default {
           })
       });
       this.fileMap = fileMap
-      this.getImg(Object.keys(fileMap).join(','))
+      if(Object.keys(fileMap).length){
+        this.getImg(Object.keys(fileMap).join(','))
+      }
     },
     async getImg(ids){
       const _this = this
