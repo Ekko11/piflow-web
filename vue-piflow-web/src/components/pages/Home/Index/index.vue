@@ -38,7 +38,7 @@ export default {
         {
           img: require("@/assets/img/home/visualization.png"),
           name: "可视化",
-          route: "/visualization",
+          route: "",
         },
         {
           img: require("@/assets/img/home/intro.png"),
@@ -70,6 +70,7 @@ export default {
   },
   methods:{
     handleEnter(link){
+      if(!link)  return
         this.$router.push(link)
     }
   },

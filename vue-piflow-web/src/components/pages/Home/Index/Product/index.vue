@@ -2,6 +2,7 @@
   <div class="product">
     <div class="search">
       <Input
+      v-model="keyword"
         search
         enter-button
         @on-search="handleSearch"
@@ -10,7 +11,7 @@
     </div>
     <div class="contain">
       <div class="contain_l">
-        <h4>数据产品分类</h4>
+        <h4  style="cursor: pointer;" @click="handleChangeSelectNode(null,null)">数据产品分类</h4>
         <Tree
           :data="treeData"
           expand-node
@@ -27,8 +28,8 @@
               {{ item.description }}
             </div>
             <div class="contain_r-btn">
-              <Button>在线下载</Button>
-              <Button>查看</Button>
+              <Button v-if="(role === 'ADMIN' || userName === item.crtUser) || item.permission === 0" @click="handleDown(item.file.id)">在线下载</Button>
+              <!-- <Button>查看</Button> -->
             </div>
           </div>
         </div>
@@ -53,6 +54,7 @@
 <script>
 import { getDataProductType, getDataProductByPage } from "@/apis/dataProduct";
 import { downloadFileByIds } from "@/apis/file";
+import Cookies from "js-cookie";
 import JSZip from 'jszip'
 export default {
   data() {
@@ -63,31 +65,49 @@ export default {
       total: 0,
       page: 1,
       limit: 10,
+      keyword:'',
+      role:'USER',
+      userName:''
     };
   },
   created() {
     this.handleGetData();
+    this.handleGetRole()
   },
   methods: {
+    handleGetRole(){
+      let user = JSON.parse(Cookies.get("setUser"));
+      this.userName = Cookies.get("usre");
+      if (user && user[0].role.stringValue) {
+        console.log(user[0].role.stringValue);
+        this.role = user[0].role.stringValue;
+      } else {
+        this.role = "USER";
+      }
+    },
     async handleGetData() {
       const res = await getDataProductType();
       this.treeData = res.data.data;
-      this.handleChangeSelectNode(null, this.treeData[0]);
+      // this.handleChangeSelectNode(null, this.treeData[0]);
+      this.getTableData();
     },
-    handleSearch(val) {
-      console.log(val);
+    handleSearch() {
+      this.page = 1
+      this.getTableData();
     },
     handleChangeSelectNode(list, node) {
-      this.$set(node, "expand", !node.expand);
+      if(node)  this.$set(node, "expand", !node.expand);
       this.currentNode = node;
       this.getTableData();
     },
     async getTableData() {
-      const res = await getDataProductByPage({
+      const data = {
         page: this.page,
         limit: this.limit,
-        productTypeId: Number(this.currentNode.id),
-      });
+      }
+      if(this.currentNode)  data.productTypeId = Number(this.currentNode.id)
+      if(this.keyword)  data.keyword = this.keyword
+      const res = await getDataProductByPage(data);
       this.tableData = res.data.data;
       const ids = [];
       res.data.data.forEach((item) => {

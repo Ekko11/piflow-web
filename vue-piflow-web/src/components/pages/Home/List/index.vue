@@ -6,11 +6,12 @@
         <span class="legend" v-if="index !== parentList.length -1"><Icon type="ios-arrow-forward" /></span>
       </p>
     </div> -->
-    <p  class="return" @click="$router.push('/home')"><Icon type="ios-arrow-back" />返回</p>
     <h4 class="content_title">
-      <span>
-        {{ currentNode.name }}
-      </span>
+      <span @click="$router.push('/home')" style="cursor: pointer">{{
+        parentList[0].name
+      }}</span>
+      >>
+      <span>{{ currentNode.name }}</span>
     </h4>
     <div class="desc">
       {{ currentNode.description }}
@@ -36,7 +37,7 @@
         <template slot-scope="{ row }" slot="action">
           <div class="btn">
             <Button @click="handleEnter(row)">进入</Button>
-            <Button @click="handShowInstructions(row)">说明</Button>
+            <Button v-if="row.instructionFileId" @click="handShowInstructions(row)">说明</Button>
           </div>
         </template>
       </Table>
@@ -55,9 +56,11 @@
 </template>
 
 <script>
-import { findTree,findTreeStructure } from "@/utils/tree";
+import { findTree, findTreeStructure } from "@/utils/tree";
 import { getDataProductType } from "@/apis/dataProduct";
 import { getflowPublishListByProductTypeId } from "@/apis/flowPublish";
+import { getProcessPageByPublishingId } from "@/apis/process";
+import { downloadFile } from "@/apis/file";
 import Cookies from "js-cookie";
 export default {
   data() {
@@ -65,8 +68,8 @@ export default {
       page: 1,
       limit: 10,
       total: 0,
-      tableData:[],
-      parentList:[],
+      tableData: [],
+      parentList: [],
       currentNode: {},
       imgList: [require("@/assets/img/home/p2.png")],
       columns: [
@@ -98,53 +101,86 @@ export default {
     async getList() {
       const res = await getDataProductType();
       this.list = res.data.data;
-      this.handleSetCurrentNode(this.$route.query.type)
+      this.handleSetCurrentNode(this.$route.query.type);
     },
-    handleChangeNode(id){
-       this.$router.replace(`/home/list?type=${id}`);
-      this.handleSetCurrentNode(id)
-
+    handleChangeNode(id) {
+      this.$router.replace(`/home/list?type=${id}`);
+      this.handleSetCurrentNode(id);
     },
-    handleSetCurrentNode(id){
+    handleSetCurrentNode(id) {
       //获取当前节点
-      const node = findTree(this.list, id);  
+      const node = findTree(this.list, id);
       this.currentNode = node;
       //获取当前节点及直系父节点
-      let nodeList = findTreeStructure(this.list,(node)=>node.id === id,true) 
-      const parentList = []
-      let child = nodeList[0]
+      let nodeList = findTreeStructure(
+        this.list,
+        (node) => node.id === id,
+        true
+      );
+      const parentList = [];
+      let child = nodeList[0];
       while (child) {
-        parentList.push(child)
-        child = Array.isArray(child.children) ? child.children[0] : undefined
+        parentList.push(child);
+        child = Array.isArray(child.children) ? child.children[0] : undefined;
       }
-      parentList.pop()
-      this.parentList = parentList
+      parentList.pop();
+      this.parentList = parentList;
 
-      this.getTableData()
+      this.getTableData();
     },
-    async getTableData(){
+    async getTableData() {
       const data = {
-        page:this.page,
-        limit:this.limit,
-        productTypeId:this.currentNode.id
-      }
-      const res  = await getflowPublishListByProductTypeId(data)
-      this.tableData = res.data.data
-      this.total = res.data.count
+        page: this.page,
+        limit: this.limit,
+        productTypeId: this.currentNode.id,
+      };
+      const res = await getflowPublishListByProductTypeId(data);
+      this.tableData = res.data.data;
+      this.total = res.data.count;
     },
-    handleEnter(row) {
-      const link = `/home/flowConfig?id=${row.id}&type=${this.$route.query.type}`
-      if(Cookies.get("setUser")){
+    async handleEnter(row) {
+      if (Cookies.get("setUser")) {
+        this.$event.emit("loading", true);
+        const res = await getProcessPageByPublishingId({limit:10,page:1,publishingId:row.id});
+        this.$event.emit("loading", false);
+        let link;
+        if (res.data.data.length && res.data.data[0].state.text === "STARTED") {  //如果正在运行，直接进入运行界面
+          link = `/home/flowProcess?processId=${res.data.data.processId}`;
+        } else {
+          link = `/home/flowConfig?id=${row.id}&type=${this.$route.query.type}`;
+        }
         this.$router.push(link);
-      }else{
+
+      } else {
         this.$router.push({
-          path:'/login',
-          query: { redirect: link} 
+          path: "/login",
+          query: { redirect: `/home/list?type=${this.$route.query.type}` },
         });
       }
     },
-    handShowInstructions(row) {
-      console.log(row);
+    async handShowInstructions(row) {
+      this.$event.emit('loading',true)
+      const res = await downloadFile(row.instructionFileId);
+      // 将文件流转化为本地blod地址
+      var binaryData = [];
+      binaryData.push(res.data);
+      // 记得一定要设置application的类型
+      let url = window.URL.createObjectURL(
+        new Blob(binaryData, {
+          type: "application/pdf;charset=utf-8",
+        })
+      );
+      if (url != null && url != undefined && url) {
+        const { href } = this.$router.resolve({
+          path: "/pdf",
+          query: {
+            url: url,
+          },
+        });
+        // 新页面打开
+        window.open(href, "_blank");
+      }
+      this.$event.emit('loading',false)
     },
     onPageChange(pageNo) {
       this.page = pageNo;
@@ -162,9 +198,9 @@ export default {
 <style lang="scss" scoped>
 @import "../Index/index.scss";
 @import "../index.scss";
-.flow_process{
-    border: 1px dashed rgb(0, 111, 238);
-    margin-top: 20px;
+.flow_process {
+  border: 1px dashed rgb(0, 111, 238);
+  margin-top: 20px;
 }
 ::v-deep .list {
   margin-top: 32px;
@@ -225,14 +261,14 @@ export default {
   justify-content: flex-end;
   margin-top: 32px;
 }
-.parentList{
+.parentList {
   display: flex;
-  .name{
-    color: #3974AA;
+  .name {
+    color: #3974aa;
     cursor: pointer;
   }
-  .legend{
-    margin:0 4px;
+  .legend {
+    margin: 0 4px;
   }
 }
 </style>

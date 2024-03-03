@@ -1,87 +1,96 @@
 <template>
   <div>
-    <h4 class="content_title">· {{ publishInfo.name }} ·</h4>
+    <h4 class="content_title"> <Icon type="ios-undo" @click="$router.go(-1)"/>  · {{ publishInfo.name }} ·</h4>
     <div class="desc" v-if="publishInfo.description">
       {{ publishInfo.description }}
     </div>
 
-    <div class="contain" v-if="publishInfo.stops">
-      <div class="config">
-        <div class="config_l">
-          <!-- 输入 -->
-          <div class="wrap" v-if="fileInput.length">
-            <p>文件输入</p>
-            <div>
-              <div v-for="child in fileInput" :key="child.id">
-                <div class="label">
-                  {{ child.name }}
-                </div>
-                <div>
-                  <p
-                    @click="handleDownload(child.fileId, child.fileName)"
-                    class="fileExample"
-                  >
-                    <span>{{ child.fileName }}</span>
-                    <Icon type="md-cloud-download" />
-                  </p>
-                  <div @click="handleUpload(child)">
-                    <Upload
-                      :disabled="mode !== 'edit'"
-                      action="/null"
-                      :before-upload="handleBeforeUpload"
-                    >
-                      <Button class="uploadBtn" icon="md-cloud-upload"
-                        >Upload files</Button
-                      >
-                    </Upload>
-                    <p v-if="child.customFile">{{ child.customValue }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="wrap" v-if="textInput.length">
-            <p>普通输入</p>
-            <div>
-              <div v-for="child in textInput" :key="child.id">
-                <div class="label">
-                  {{ child.name }}
-                </div>
-                <div>
-                  <Input
-                    :disabled="mode !== 'edit'"
-                    v-model="child.customValue"
-                  ></Input>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="wrap" v-if="output.length">
-            <p>输出</p>
-            <div>
-              <div v-for="child in output" :key="child.id">
-                <div class="label">
-                  {{ child.name }}
-                </div>
-                <div>
-                  <Input
-                    :disabled="mode !== 'edit'"
-                    v-model="child.customValue"
-                  ></Input>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="config_r">
-          <img src="@/assets/img/home/p1.png" alt="" />
-        </div>
+ 
+    
+    <div class="config">
+      <div class="config_r" ref="imgWrap" :style="{backgroundImage:`url(${coverFileImg})`}">
       </div>
+      <div class="config_input"  v-for="child in list" :key="child.id">
+        <!-- 文件输入 -->
+        <div v-if="child.type === 0">
+          <div class="label">
+            {{ child.name }} <span class="fileDonw"  @click="handleDownload(child.fileId, child.fileName)">(样例下载)</span>
+          </div>
+          <div>
+            <div @click="handleUpload(child)">
+              <Upload
+                :disabled="mode !== 'edit'"
+                action="/null"
+                :before-upload="handleBeforeUpload"
+              >
+                <Button class="uploadBtn" icon="md-cloud-upload"
+                  >上传文件</Button
+                >
+              </Upload>
+              <p class="fileName" v-if="fileMap[child.id] || ( mode !== 'edit' )">{{mode !== 'edit' ? child.customValue:fileMap[child.id] }}</p>
+            </div>
+          </div>
+        </div>
+        <!-- 普通输入 -->
+        <div v-if="child.type === 1">
+          <div class="label">
+            {{ child.name }}       
+            <Poptip trigger="hover" placement="top" >
+                <Icon type="md-help-circle" style="color:rgba(0, 0, 0, 0.4)" />
+                <div class="toptipContent" slot="content">
+                    <p>推荐值：<span>{{child.customValue}}</span> </p>
+                    <p>描述：<span>{{child.description}}</span> </p>
+                </div>
+            </Poptip>
+          </div>
+          <div>
+            <Input
+              :disabled="mode !== 'edit'"
+              v-model="child.customValue"
+            ></Input>
+          </div>
+
+      </div>  
+      </div>
+      <div class="config_input" v-for="child in list" :key="child.id + 1">
+        <!-- 文件输入 -->
+        <div v-if="child.type === 0">
+          <div class="label">
+            {{ child.name }} <span class="fileDonw"  @click="handleDownload(child.fileId, child.fileName)">(样例下载)</span>
+          </div>
+          <div>
+            <div @click="handleUpload(child)">
+              <Upload
+                :disabled="mode !== 'edit'"
+                action="/null"
+                :before-upload="handleBeforeUpload"
+              >
+                <Button class="uploadBtn" icon="md-cloud-upload"
+                  >上传文件</Button
+                >
+              </Upload>
+              <p class="fileName" v-if="fileMap[child.id] || ( mode !== 'edit' )">{{mode !== 'edit' ? child.customValue:fileMap[child.id] }}</p>
+            </div>
+          </div>
+        </div>
+        <!-- 普通输入 -->
+        <div v-if="child.type === 1">
+          <div class="label">
+            {{ child.name }}
+          </div>
+          <div>
+            <Input
+              :disabled="mode !== 'edit'"
+              v-model="child.customValue"
+            ></Input>
+          </div>
+
+      </div>  
+      </div>
+
     </div>
 
+ 
 
     <div class="notice" v-if="noticeOpen">
       <div class="close" @click="handleNoticeClose">
@@ -99,9 +108,10 @@
   </div>
 </template>
     
-    <script>
+<script>
 import { getPublishingById } from "@/apis/flowPublish";
 import { getFileNameByHeaders,downloadByBlob, uploadFile } from "@/apis/file";
+import { downloadFile  } from "@/apis/file";
 export default {
   props: {
     mode: String,
@@ -120,11 +130,11 @@ export default {
   data() {
     return {
       publishInfo: {},
-      fileInput: [],
-      textInput: [],
-      output: [],
+      list:[],
+      fileMap:{},  //已上传文件map
       progress:0,
-      noticeOpen:false
+      noticeOpen:false,
+      coverFileImg:null,
     };
   },
 
@@ -141,21 +151,28 @@ export default {
       delete val.lastUpdateUser;
       delete val.enableFlag;
       this.publishInfo = val;
-
+      this.getCoverImg(val.coverFileId ||'1763853768035663872')
+      const list  = []
       this.publishInfo.stops.forEach((item) => {
         item.stopPublishingPropertyVos.forEach((v) => {
-          if (v.type === 0) {
-            this.fileInput.push(v);
-          } else if (v.type === 1) {
-            this.textInput.push(v);
-          } else {
-            this.output.push(v);
-          }
+          if (v.type === 1 || v.type === 0) {
+            list.push(v);
+          } 
         });
       });
+      this.list = list
     },
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
+    },
+    async getCoverImg(id){
+      const res = await downloadFile(id)
+      const reader = new FileReader();
+      reader.readAsDataURL(res.data);
+      reader.onload = () => {
+        this.coverFileImg = reader.result;
+        console.log(this.coverFileImg)
+      };
     },
 
     async handleGetStopsById() {
@@ -209,6 +226,8 @@ export default {
         associateType: 4,
         associateId: this.currentPropos.id,
       });
+      
+      this.$set(fileMap,currentPropos.id,e.name)
       this.currentPropos.customValue = res.data.data.filePath;
     },
     handleBeforeUpload(e) {
@@ -221,96 +240,72 @@ export default {
       this.noticeOpen = false
     }
   },
+
 };
 </script>
     
     <style lang="scss" scoped>
 @import "../../index.scss";
 ::v-deep .contain {
+
+
+
+}
+::v-deep .config{
+  overflow: hidden;
   background: #f7f9fa;
   padding: 48px 40px;
   margin-top: 32px;
-  .config {
-    display: flex;
-    justify-content: space-between;
-    &_l {
-      margin-right: 20px;
-      flex-grow: 1;
-      .wrap {
-        border: 1px dashed #006fee;
-        background: #e6f1fe;
-        margin-bottom: 20px;
-        padding: 0 20px 20px;
-        border-radius: 8px;
-        .fileExample {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          color: #005bc4;
-          cursor: pointer;
-          font-size: 14px;
-          span {
-            max-width: 80%;
-            display: inline-block;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-          }
-        }
-        > p {
-          font-size: 16px;
-          font-weight: 400;
-          margin: 10px 0;
-        }
-        > div {
-          display: flex;
-          flex-wrap: wrap;
-          margin-bottom: 20px;
-          > div {
-            &:nth-child(2n + 1) {
-              margin-right: 4%;
-            }
-            width: 48%;
-          }
-        }
-      }
-      .label {
-        font-size: 16px;
-        color: #18181b;
-        margin-bottom: 16px;
-        i {
-          font-size: 18px;
-          cursor: pointer;
-          margin-left: 5px;
-        }
-      }
-      .uploadBtn {
-        background: #a7cbf6;
-        border: none;
-        color: #005bc4;
-      }
-      .ivu-input {
-        border-radius: 6px;
-      }
-    }
-    &_r {
-      width: 528px;
-      height: 283px;
-      > img {
-        width: 100%;
-        height: 100%;
-      }
-    }
+  border-radius:  8px 8px 0 0 ;
+  &_r{
+    float: right;
+    width: 44%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 340px;
+    margin-bottom: 20px;
   }
-  .run {
-    background: #006fee;
-    color: #fff;
-  }
-  .progress {
-    margin: 40px 0;
+  &_input{
+    float: left;
+    width: 25%;
+    padding: 0 20px 20px 0;
+    box-sizing: border-box;
+    height: 120px;
+    
+    .ivu-input {
+      border-radius: 6px;
+    }
+    .label{
+      color: #18181B;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .uploadBtn {
+      background: #E6F1FE;
+      border: none;
+      color: #005BC4;
+      font-size: 11px;
+    }
+    .fileName{
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 100%;
+      color: #9b9393;
+    }
+    .fileDonw{
+        color: #005BC4;
+        font-size: 12px;
+        text-decoration-line: underline;
+        cursor: pointer;
+    }
+    .toptipContent{
+      word-break: break-all;
+      white-space: normal;
+      max-width: 400px;
+    }
   }
 }
-
 .btn {
   button {
     line-height: 24px;
@@ -363,5 +358,16 @@ export default {
     }
   }
 
+}
+
+.content_title{
+  position: relative;
+  i{
+    position: absolute;
+    left: 0;
+    top: 0;
+    line-height: 30px;
+    cursor: pointer;
+  }
 }
 </style>

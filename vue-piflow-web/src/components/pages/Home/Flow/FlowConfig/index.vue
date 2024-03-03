@@ -1,41 +1,41 @@
 <template>
   <div class="content">
-    <p class="return" @click="handleBack"><Icon type="ios-arrow-back" />返回</p>
     <Flow mode="edit" ref="flow" :flowInfo="publishInfo" />
-    <div class="history">
-      <div class="history_btn">
-        <Button class="run" @click="handleRun()">运行</Button>
-
-        <Button @click="historyIsShow = !historyIsShow"
-          >历史记录
-          <Icon
-            :type="historyIsShow ? 'md-arrow-dropup' : 'md-arrow-dropdown'"
-          />
-        </Button>
-      </div>
-      <div v-show="historyIsShow" class="history_list">
-        <Table :columns="columns" :data="historyData">
-          <template slot-scope="{ row }" slot="action">
-            <div class="btn">
-              <Button @click="handleEnter(row)">查看</Button>
-              <Button @click="handleShowLog(row)">日志查看</Button>
-              <Button @click="handleDownDataProduct(row)">数据产品下载</Button>
-              <Button v-if="row.dataProductList && row.dataProductList.length" @click="handDataPublish(row)">数据产品发布</Button>
-            </div>
-          </template>
-        </Table>
-        <div class="page">
-          <Page
-            show-elevator
-            size="small"
-            :total="total"
-            show-sizer
-            @on-change="onPageChange"
-            @on-page-size-change="onPageSizeChange"
-          />
+      <div class="history">
+        <div class="history_btn">
+          <Button class="run" @click="handleRun()">运行</Button>
+  
+          <Button @click="historyIsShow = !historyIsShow"
+            >历史记录
+            <Icon
+              :type="historyIsShow ? 'md-arrow-dropup' : 'md-arrow-dropdown'"
+            />
+          </Button>
+        </div>
+        <div v-show="historyIsShow" class="history_list">
+          <Table :columns="columns" :data="historyData">
+            <template slot-scope="{ row }" slot="action">
+              <div class="btn">
+                <Button @click="handleEnter(row)">查看</Button>
+                <Button @click="handleShowLog(row)">日志查看</Button>
+                <Button @click="handleDownDataProduct(row)">数据产品下载</Button>
+                <Button v-if="row.dataProductList && row.dataProductList.length" @click="handDataPublish(row)">数据产品发布</Button>
+              </div>
+            </template>
+          </Table>
+          <div class="page">
+            <Page
+              show-elevator
+              size="small"
+              :total="total"
+              show-sizer
+              @on-change="onPageChange"
+              @on-page-size-change="onPageSizeChange"
+            />
+          </div>
         </div>
       </div>
-    </div>
+
 
     <PublishModal ref="PublishModalRef" />
   </div>
@@ -71,11 +71,11 @@ export default {
         },
         {
           title: "运行时间",
-          key: "startTime",
+          key: "crtDttm",
         },
         {
           title: "运行状态",
-          key: "state.text",
+          key: "state",
           render: (h, params) => {
             return h("span", [params.row.state.text]);
           },
@@ -160,91 +160,24 @@ export default {
   
   <style lang="scss" scoped>
 @import "../../index.scss";
+.content{
+  max-width: 100%;
+  padding: 0 80px;
+}
 ::v-deep .contain {
   background: #f7f9fa;
-  padding: 48px 40px;
+  padding: 48px 40px 0;
+  border-radius: 8px 8px 0 0 ;
   margin-top: 32px;
-  .config {
-    display: flex;
-    justify-content: space-between;
-    &_l {
-      margin-right: 20px;
-      .wrap {
-        border: 1px dashed #006fee;
-        background: #e6f1fe;
-        margin-bottom: 20px;
-        padding: 20px;
-        border-radius: 8px;
-        .fileExample {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          color: #005bc4;
-          cursor: pointer;
-          font-size: 14px;
-          span {
-            max-width: 80%;
-            display: inline-block;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-          }
-        }
-        > p {
-          font-size: 20px;
-          font-weight: 400;
-        }
-        > div {
-          display: flex;
-          flex-wrap: wrap;
-          margin-bottom: 20px;
-          > div {
-            &:nth-child(2n + 1) {
-              margin-right: 4%;
-            }
-            width: 48%;
-          }
-        }
-      }
-      .label {
-        font-size: 16px;
-        color: #18181b;
-        margin-bottom: 16px;
-        i {
-          font-size: 18px;
-          cursor: pointer;
-          margin-left: 5px;
-        }
-      }
-      .uploadBtn {
-        background: #a7cbf6;
-        border: none;
-        color: #005bc4;
-      }
-      .ivu-input {
-        border-radius: 6px;
-      }
-    }
-    &_r {
-      width: 528px;
-      height: 283px;
-      > img {
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
-  .run {
-  }
-  .progress {
-    margin: 40px 0;
-  }
 }
 ::v-deep .history {
+  background: #f7f9fa;
+  padding: 0px 40px 48px;
+  border-radius: 0 0 8px 8px;
   &_btn {
     display: flex;
     justify-content: space-between;
-    margin: 12px 0;
+    margin-bottom: 12px;
     button {
       background: #f2eafa;
       border: none;

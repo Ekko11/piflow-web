@@ -91,7 +91,7 @@
         <div>
           <img
             v-if="this.file"
-            style="width: 100px; height: 40px"
+            style="width: 100px;"
             :src="this.file"
             alt=""
           />

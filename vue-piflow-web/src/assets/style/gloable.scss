@@ -1,8 +1,14 @@
+@font-face {
+    font-family: "YouSheBiaoTiHei";
+    src: url("../font/YouSheBiaoTiHei-2.ttf");
+  }
+
 body {
     background-color: #f7f7f7;
     font-size: 14px;
     background: url("../img/bgc.png");
 }
+
 body,
 html,
 #app {

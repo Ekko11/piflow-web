@@ -1,19 +1,22 @@
 <template>
   <div class="content">
-    <p class="return" @click="$router.go(-1)"><Icon type="ios-arrow-back" />返回</p>
     <Flow mode="process" :flowInfo="publishInfo" />
-    <div class="progress">
-      <div>
-        <p v-for="item in processIng" class="processIng" :key="item.id">
-          正在进行 {{ item.name }} ...
-        </p>
-      </div>
-      <Progress :percent="process" :stroke-width="12" status="active" />
-      <div class="btn">
-        <Button @click="handShowInstructions()">数据产品下载</Button>
-        <Button @click="handDataPublish()">数据产品发布</Button>
+    <div class="progressWrap">
+      <div class="progress">
+        <div>
+          <p v-if="process===0&& !processIng.length" class="processIng">正在进行...</p>
+          <p v-for="item in processIng" class="processIng" :key="item.id">
+            正在进行 {{ item.name }} ...
+          </p>
+        </div>
+        <Progress :percent="process" :stroke-width="12" status="active" />
+        <div class="btn">
+          <Button @click="handShowInstructions()">数据产品下载</Button>
+          <Button @click="handDataPublish()">数据产品发布</Button>
+        </div>
       </div>
     </div>
+
       <PublishModal ref="PublishModalRef"/>
   </div>
 </template>
@@ -85,6 +88,12 @@ export default {
     
 <style lang="scss" scoped>
 @import "../../index.scss";
+
+.content{
+  max-width: 100%;
+  padding: 0 80px  100px;
+}
+
 .processIng{
   text-align: center;
   animation: dong 2s linear 1s infinite;
@@ -108,6 +117,11 @@ export default {
   }
 }
 
+.progressWrap{
+  background: #f7f9fa;
+  padding: 0px 40px 48px;
+  border-radius: 0 0 8px 8px;
+}
 
 .btn {
   margin-top: 20px;

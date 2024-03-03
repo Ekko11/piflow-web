@@ -24,6 +24,7 @@
         cursor: pointer;
         position: relative;
         z-index: 2;
+        letter-spacing: 2px;
     }
     &-r{
         display: flex;
@@ -88,12 +89,8 @@
         font-size: 20px;
         font-weight: 600;
         text-align: center;
-        margin: 20px 0 32px;
+        margin: 48px 0 32px;
     }
 }
-.return{
-    margin-top: 20px;
-    color: #005bc4;
-    cursor: pointer;
-}
+
 

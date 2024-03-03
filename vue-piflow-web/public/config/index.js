@@ -1,6 +1,6 @@
 // 标题
-window.$SYSTEM_TITLE_EN = 'πFlow Big Data Pipeline System'
-window.$SYSTEM_TITLE_ZH = "πFlow大数据流水线管理系统"
+window.$SYSTEM_TITLE_EN = '生态站监测数据产品生产系统'
+window.$SYSTEM_TITLE_ZH = "生态站监测数据产品生产系统"
 
 // 介绍
 window.$SYSTEM_INTRODUCTION_INFO_EN = "πFlow is a big data pipeline system developed based on the distributed computing engine Spark. It realizes the flow configuration, operation and intelligent monitoring of big data collection, processing, storage and analysis in a WYSIWYG way, providing 100+ standardization Components, including Hadoop, Spark, MLlib, Hive, Solr, ElasticSearch, Redis, etc., supporting field-oriented and flexible secondary component development with superior performance."

@@ -51,12 +51,13 @@
             :before-upload="handleBeforeCoverFileUpload"
             :show-upload-list="false"
             style="width: 350px"
+            accept=".jpg, .jpeg, .png"
             class="upload"
           >
             <div>
               <img
                 v-if="this.coverFileImg"
-                style="width: 100px; height: 40px"
+                style="width: 100px;"
                 :src="this.coverFileImg"
                 alt=""
               />
@@ -74,11 +75,13 @@
         <FormItem label="说明书：" prop="coverFile">
           <Upload
             action="/aaa"
-            :before-upload="handleBeforeSpecificationUpload"
+            accept=".pdf"
+            :before-upload="handleBeforeinstructionFileUpload"
           >
             <Button icon="ios-cloud-upload-outline">Upload files</Button>
           </Upload>
-          <p v-if="specification">{{ specification.name }}</p>
+          <p v-if="instructionFile">{{ instructionFile.name}}</p>
+          <p v-if="!instructionFile && formData.instructionFileName">{{ formData.instructionFileName }}</p>
         </FormItem>
 
         <h4>选择发布组件</h4>
@@ -171,7 +174,7 @@
 import { getDataProductType, getStopsInfoByFlowId } from "@/apis/dataProduct";
 
 import { getPublishingById, publishingStops } from "@/apis/flowPublish";
-import { uploadFile } from "@/apis/file";
+import { uploadFile,downloadFile  } from "@/apis/file";
 
 import { findTree } from "@/utils/tree";
 
@@ -183,7 +186,7 @@ export default {
       currentUpload: 0,
       coverFile: null,
       coverFileImg: null,
-      specification: null,
+      instructionFile: null,
       stops: [],
       treeData: [],
       fileList: [],
@@ -279,11 +282,12 @@ export default {
       this.$event.emit("loading", false);
       const publishInfo = res.data.data;
       this.formData.flowId = row.flowId;
-      this.formData.id = publishInfo.id;
-      this.formData.name = publishInfo.name;
-      this.formData.productTypeId = publishInfo.productTypeId;
-      this.formData.description = publishInfo.description;
-      this.formData.version = publishInfo.version;
+      const {id,name,productTypeId,description,version,coverFileId,instructionFileName} = publishInfo
+      this.formData = {
+        flowId:row.flowId,
+        id,name,productTypeId,description,version,instructionFileName
+      }
+      this.getCoverFileImg(coverFileId)
       const publishStops = publishInfo.stops;
       if (publishStops.length) {
         publishStops.forEach((item) => {
@@ -312,6 +316,16 @@ export default {
       }
       console.log(this.stops);
     },
+
+  async  getCoverFileImg(id){
+    if(!id) return 
+      const res =await downloadFile(id)
+      const reader = new FileReader();
+      reader.readAsDataURL(res.data);
+      reader.onload = () => {
+        this.coverFileImg = reader.result;
+      };
+    },
     // 保存（编辑或者更新）
     async handleSaveUpdateData() {
       if(!this.formData.productTypeId || !this.formData.name){
@@ -322,7 +336,6 @@ export default {
         });
         return 
       }
-      this.$event.emit("loading", true);
       // 获取分类信息
       const productNode = findTree(this.treeData, this.formData.productTypeId);
       this.formData.productTypeId = Number(this.formData.productTypeId);
@@ -363,12 +376,21 @@ export default {
         return;
       }
       this.formData.stops = filteredArray;
+      if(!this.formData.stops.length){
+        this.$Message.error({
+          content: '请至少选择一个组件',
+          duration: 3,
+        });
+        return
+      }
       // 发布
+      this.$event.emit("loading", true);
+
       const res = await publishingStops(this.formData);
       if(res.data.code === 200){
       //需要上传文件
       let promiseList = [];
-      if (this.fileList.length || this.coverFile || this.specification) {
+      if (this.fileList.length || this.coverFile || this.instructionFile) {
         const returnPropsList = res.data.data;
         if (returnPropsList.length &&
           this.fileList.length
@@ -388,32 +410,25 @@ export default {
               promiseList.push(res);
             }
           });
-        } else {
-          this.$event.emit("loading", false);
-          this.$Message.error({
-            content: this.$t("tip.fault_content"),
-            duration: 3,
-          });
-          this.open = false;
-        }
+        } 
 
         // 上传封面文件
         if (this.coverFile) {
           const coverFileRes = uploadFile({
             associateType: 5,
-            associateId: this.formData.flowId,
+            associateId: res.data.data[0].publishingId,
             file: this.coverFile,
           });
           promiseList.push(coverFileRes);
         }
         // 上传说明书
-        if (this.specification) {
-          const specificationRes = uploadFile({
+        if (this.instructionFile) {
+          const instructionFileRes = uploadFile({
             associateType: 6,
-            associateId: this.formData.flowId,
-            file: this.specification,
+            associateId: res.data.data[0].publishingId,
+            file: this.instructionFile,
           });
-          promiseList.push(specificationRes);
+          promiseList.push(instructionFileRes);
         }
 
         // 判断多次上传文件是否成功
@@ -445,7 +460,14 @@ export default {
           duration: 3,
         });
       }
-      }
+    }else {
+          this.$event.emit("loading", false);
+          this.$Message.error({
+            content: this.$t("tip.fault_content"),
+            duration: 3,
+          });
+          this.open = false;
+        }
 
     },
     reSet() {
@@ -458,7 +480,7 @@ export default {
       this.fileList = [];
       this.coverFile = null;
       this.coverFileImg = null;
-      this.specification = null;
+      this.instructionFile = null;
     },
     // 标记选择上传的节点
     handleClickUpload(index, idx) {
@@ -473,8 +495,8 @@ export default {
       };
       return false;
     },
-    handleBeforeSpecificationUpload(e) {
-      this.specification = e;
+    handleBeforeinstructionFileUpload(e) {
+      this.instructionFile = e;
       return false;
     },
     handleBeforeUpload(e) {

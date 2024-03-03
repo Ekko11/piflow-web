@@ -33,69 +33,63 @@
     </div>
 
     <!-- add / update -->
-    <Modal
-      v-model="isOpen"
-      footer-hide
-      :title="formData.id ? '编辑' : '新增'"
-    >
+    <Modal v-model="isOpen" footer-hide :title="formData.id ? '编辑' : '新增'">
       <div class="modal-warp">
         <Form
-        ref="formValidate"
-        :model="formData"
-        :rules="ruleValidate"
-        :label-width="120"
-      >
-
-      <FormItem label="上级分类：" prop="parentId">
-        <treeselect
-          v-model="formData.parentId"
-          :placeholder="$t('modal.placeholder_select')"
-          :normalizer="normalizer"
-          :options="treeData"
-          :flat="true"
-          style="width: 100%; height: 32px"
-        />
-      </FormItem>
-      <FormItem label="发布名称：" prop="name">
-        <Input
-          v-model="formData.name"
-          placeholder="Enter publish name"
-        ></Input>
-      </FormItem>
-      <FormItem label="描述：" prop="description">
-        <Input
-          v-model="formData.description"
-          placeholder="Enter publish description"
-        ></Input>
-      </FormItem>
-      <FormItem label="描述：" prop="description">
-        <Upload
-        action="/null"
-        :before-upload="handleBeforeUpload"
-        :show-upload-list="false"
-        style="width: 350px"
-        accept=".jpg, .jpeg, .png"
-        class="upload"
-      >
-        <div>
-          <img
-            v-if="this.file"
-            style="width: 100px; height: 40px"
-            :src="this.file"
-            alt=""
-          />
-          <Icon
-            v-else
-            type="ios-cloud-upload"
-            size="52"
-            style="color: #3399ff"
-          ></Icon>
-          <p>Click or drag files here to upload</p>
-        </div>
-      </Upload>
-      </FormItem>
-    </Form>
- 
+          ref="formValidate"
+          :model="formData"
+          :rules="ruleValidate"
+          :label-width="120"
+        >
+          <FormItem label="上级分类：" prop="parentId">
+            <treeselect
+              v-model="formData.parentId"
+              :placeholder="$t('modal.placeholder_select')"
+              :normalizer="normalizer"
+              :options="treeData"
+              :flat="true"
+              style="width: 100%; height: 32px"
+            />
+          </FormItem>
+          <FormItem label="发布名称：" prop="name">
+            <Input
+              v-model="formData.name"
+              placeholder="Enter publish name"
+            ></Input>
+          </FormItem>
+          <FormItem label="描述：" prop="description">
+            <Input
+              v-model="formData.description"
+              placeholder="Enter publish description"
+            ></Input>
+          </FormItem>
+          <FormItem label="封面：" prop="file">
+            <Upload
+              action="/null"
+              :before-upload="handleBeforeUpload"
+              :show-upload-list="false"
+              style="width: 350px"
+              accept=".jpg, .jpeg, .png"
+              class="upload"
+            >
+              <div>
+                <img
+                  v-if="this.file"
+                  style="width: 100px"
+                  :src="this.file"
+                  alt=""
+                />
+                <Icon
+                  v-else
+                  type="ios-cloud-upload"
+                  size="52"
+                  style="color: #3399ff"
+                ></Icon>
+                <p>Click or drag files here to upload</p>
+              </div>
+            </Upload>
+          </FormItem>
+        </Form>
       </div>
       <div class="footer">
         <Button @click="isOpen = false" class="custom-btn-default">{{
@@ -105,7 +99,6 @@
           $t("modal.confirm")
         }}</Button>
       </div>
-
     </Modal>
   </section>
 </template>
@@ -115,13 +108,21 @@ import {
   saveDataProductType,
   deleteDataProductType,
 } from "@/apis/dataProduct";
-import { findTreeStructure,findTree } from "@/utils/tree";
-import {downloadFile} from '@/apis/file'
+import { findTreeStructure, findTree } from "@/utils/tree";
+import { downloadFile } from "@/apis/file";
 export default {
   data() {
+    const validateFile = (rule, value, callback) => {
+      if (!this.file) {
+        callback(new Error("Please upload image"));
+      } else {
+        callback();
+      }
+    };
+
     return {
       isOpen: false,
-      file:null,
+      file: null,
       InitFormData: {
         description: "",
         name: "",
@@ -140,6 +141,7 @@ export default {
             trigger: "blur",
           },
         ],
+        file: [{ required: true, validator: validateFile, trigger: "blur" }],
       },
       columns: [
         {
@@ -169,14 +171,21 @@ export default {
   },
   methods: {
     async handleComfirm() {
-      if(!this.formData.name || !this.formData.name.trim()) return
+      if (!this.formData.name || !this.formData.name.trim()|| !this.file){
+        this.$refs.formValidate.validate((valid) => {})
+        this.$Message.error({
+          content: '请按要求填写表单',
+          duration: 3,
+        });
+        return 
+      }
       this.$event.emit("loading", true);
       if (!this.formData.id) this.formData.level = this.parentNode.level + 1;
       this.formData.associateType = 0;
       const res = await saveDataProductType(this.formData);
       this.$event.emit("loading", false);
       if (res.data.code == 200) {
-        this.isOpen = false
+        this.isOpen = false;
         this.$Modal.success({
           title: this.$t("tip.title"),
           content: res.data.errorMsg,
@@ -225,11 +234,11 @@ export default {
     async handleEdit(row) {
       this.isOpen = true;
       this.file = null;
-      const { id, parentId, level, name, description} = row;
-      this.formData = { id, parentId, level, name, description};
-      if(row.fileId){
-        const res =await downloadFile(row.fileId)
-        this.renderImg(res.data)
+      const { id, parentId, level, name, description } = row;
+      this.formData = { id, parentId, level, name, description };
+      if (row.fileId) {
+        const res = await downloadFile(row.fileId);
+        this.renderImg(res.data);
       }
     },
     async handleGetData() {
@@ -245,30 +254,34 @@ export default {
           ischecked: true,
         },
       ];
-      if(this.parentNode){
-        this.handleSetExpand(this.parentNode)
-      }else{
-          this.handleChangeSelectNode(null,this.treeData[0])
+      if (this.parentNode) {
+        this.handleSetExpand(this.parentNode);
+      } else {
+        this.handleChangeSelectNode(null, this.treeData[0]);
       }
     },
-    handleSetExpand(node){
-      let nodeList = findTreeStructure(this.treeData,(v)=>v.id === node.id,true) 
-      const parentList = []
-      let child = nodeList[0]
+    handleSetExpand(node) {
+      let nodeList = findTreeStructure(
+        this.treeData,
+        (v) => v.id === node.id,
+        true
+      );
+      const parentList = [];
+      let child = nodeList[0];
       while (child) {
-        parentList.push(child)
-        child = Array.isArray(child.children) ? child.children[0] : undefined
+        parentList.push(child);
+        child = Array.isArray(child.children) ? child.children[0] : undefined;
       }
-      parentList.forEach((item,index)=>{
-        const treeItem =  findTree(this.treeData,item.id)
-        treeItem.expand = true
-        if(index === parentList.length -1){
-          this.handleChangeSelectNode(null,treeItem)
+      parentList.forEach((item, index) => {
+        const treeItem = findTree(this.treeData, item.id);
+        treeItem.expand = true;
+        if (index === parentList.length - 1) {
+          this.handleChangeSelectNode(null, treeItem);
         }
-      })
+      });
     },
     handleChangeSelectNode(list, node) {
-      console.log(node)
+      console.log(node);
       this.$set(node, "expand", true);
       this.parentNode = node;
       this.tableData = node.children?.map((v) => {
@@ -279,10 +292,10 @@ export default {
     },
     handleBeforeUpload(e) {
       this.formData.file = e;
-      this.renderImg(e)
+      this.renderImg(e);
       return false;
     },
-    renderImg(file){
+    renderImg(file) {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
@@ -345,7 +358,7 @@ export default {
     }
     .ivu-tree ul li .ivu-tree-title {
       width: 100%;
-      span{
+      span {
         overflow: hidden;
         text-overflow: ellipsis;
         word-break: break-all;
