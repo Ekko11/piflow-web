@@ -1,6 +1,8 @@
 import axios from "axios";
 import iView from 'view-design';
 import { formDataFormat } from "@/utils/formDataFormat";
+import {Notification} from 'element-ui'
+
 // 上传文件
 export function uploadFile(data) {
   return axios({
@@ -24,11 +26,31 @@ export function downloadFileByIds(ids) {
 
 
 // 根据id下载文件
-export function downloadFile(id) {
+export function downloadFile(id,showProgress) {
+  let  notify
   return axios({
     method: "get",
     url: `/file/getFileById?id=${id}`,
     responseType: "blob",
+    onDownloadProgress: function (ProgressEvent) {
+      if(showProgress){
+        const load = ProgressEvent.loaded;
+        const total = ProgressEvent.total;
+        const progress = Math.floor((load / total) * 100) + "%";
+        if(!notify){
+          notify = Notification({
+            title: '正在下载',
+            message: `当前已下载${progress}`,
+            duration: 0,
+            type: 'success'
+          });
+        }else{
+          notify.message =  `当前已下载${progress}`
+          if(progress === '100%')notify.close()
+        }
+      }
+ 
+    },
   });
 }
 
@@ -42,10 +64,10 @@ export function getFileNameByHeaders(headers, defaultFileName) {
 }
 
 // 封装的下载方法
-export const download = async (request, params, fileName) => {
+export const download = async (request, params, fileName,showProgress) => {
   try {
     fileName = fileName || "download.txt";
-    const res = await request(params);
+    const res = await request(params,showProgress);
     // 只要出现code就是异常
     if (res.data.code) {
       iView.Message.error({

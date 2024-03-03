@@ -8,7 +8,7 @@
     </div> -->
     <h4 class="content_title">
       <span @click="$router.push('/home')" style="cursor: pointer">{{
-        parentList[0].name
+        parentList.length && parentList[0].name
       }}</span>
       >>
       <span>{{ currentNode.name }}</span>

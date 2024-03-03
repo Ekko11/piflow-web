@@ -11,7 +11,7 @@
         </div>
         <Progress :percent="process" :stroke-width="12" status="active" />
         <div class="btn">
-          <Button @click="handShowInstructions()">数据产品下载</Button>
+          <Button @click="handleDownDataProduct()">数据产品下载</Button>
           <Button @click="handDataPublish()">数据产品发布</Button>
         </div>
       </div>
@@ -21,7 +21,7 @@
   </div>
 </template>
     
-    <script>
+<script>
 import { getAppInfo,getByProcessId } from "@/apis/process";
 import PublishModal from '@/components/pages/DataProductManagement/Publish/PublishModal'
 
@@ -78,6 +78,9 @@ export default {
     },
     handDataPublish(){
       this.$refs.PublishModalRef.handleAdd(this.data)
+    },
+    handleDownDataProduct() {
+      download(downloadFile, publishInfo.file.id,publishInfo.file.name,true);
     },
   },
   beforeDestroy() {

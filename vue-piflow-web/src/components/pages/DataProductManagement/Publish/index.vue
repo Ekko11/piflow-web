@@ -226,7 +226,7 @@ export default {
     },
     // 下载
     async handleDown(row) {
-      download(downloadFile, row.file.id);
+      download(downloadFile, row.file.id,row.file.name,true);
     },
     // 审核
     handleOpenApply(row) {

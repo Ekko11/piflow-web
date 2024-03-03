@@ -28,7 +28,7 @@
               {{ item.description }}
             </div>
             <div class="contain_r-btn">
-              <Button v-if="(role === 'ADMIN' || userName === item.crtUser) || item.permission === 0" @click="handleDown(item.file.id)">在线下载</Button>
+              <Button v-if="(role === 'ADMIN' || userName === item.crtUser) || item.permission === 0" @click="handleDown(item)">在线下载</Button>
               <!-- <Button>查看</Button> -->
             </div>
           </div>
@@ -53,7 +53,7 @@
 </template>
 <script>
 import { getDataProductType, getDataProductByPage } from "@/apis/dataProduct";
-import { downloadFileByIds } from "@/apis/file";
+import { downloadFileByIds,downloadFile,download } from "@/apis/file";
 import Cookies from "js-cookie";
 import JSZip from 'jszip'
 export default {
@@ -118,6 +118,10 @@ export default {
       });
       this.total = res.data.count;
       ids.length &&this.getImg(ids.join(","));
+    },
+        // 下载
+    async handleDown(row) {
+      download(downloadFile, row.file.id,row.file.fileName,true);
     },
     async getImg(ids) {
       const _this = this;

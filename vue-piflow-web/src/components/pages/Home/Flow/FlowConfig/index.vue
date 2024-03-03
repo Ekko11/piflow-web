@@ -98,7 +98,7 @@ export default {
       this.$router.push(`/home/list?type=${this.$route.query.type}`);
     },
     handleDownDataProduct(row) {
-      download(downloadFile, row.file.id);
+      download(downloadFile, row.file.id,row.file.name,true);
     },
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
