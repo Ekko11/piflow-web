@@ -1,13 +1,13 @@
 <template>
 
-  <Modal
-  v-model="open"
-  title="编辑"
-  :ok-text="$t('modal.ok_text')"
-  :cancel-text="$t('modal.cancel_text')"
-  @on-ok="handleComfirm"
->
+  <Modal v-model="open" title="编辑"  footer-hide>
   <div class="modal-warp">
+      <div class="item">
+      <label>数据产品：</label>
+      <Select v-model="formData.id"  style="width: 350px">
+        <Option v-for="item in dataProductList"   :key="item.id" :value="item.id">{{item.propertyName}}</Option>
+      </Select>
+    </div>
     <div class="item">
       <label>名称：</label>
       <Input
@@ -106,6 +106,14 @@
       </Upload>
     </div>
   </div>
+        <div class="footer">
+        <Button @click="open = false" class="custom-btn-default">{{
+          $t("modal.cancel_text")
+        }}</Button>
+        <Button @click="handleComfirm" class="custom-btn-primary">{{
+          $t("modal.confirm")
+        }}</Button>
+      </div>
 </Modal>
 </template>
 
@@ -120,6 +128,7 @@ export default {
       formData: {},
       open: false,
       treeData: [],
+      dataProductList:[],
       file:'',
       ruleValidate: {
         name: [
@@ -143,14 +152,14 @@ export default {
     },
 
     async handleAdd(row) {
+      this.dataProductList = row.dataProductList.filter(v=>v.state === 3)
       this.formData = {
         name:row.flowPublishing.name,
         description:row.flowPublishing.description,
         productTypeId:row.flowPublishing.productTypeId,
         productTypeName:row.flowPublishing.productTypeName,
-        version:row.dataProductList[0].version,
-        state:3,
-        id:row.dataProductList[0].id
+        // version:row.dataProductList[0].version,
+        // id:row.dataProductList[0].id
       }
       this.open = true;
     },
@@ -163,7 +172,17 @@ export default {
     },
     // 保存
     async handleComfirm() {
-      console.log(this.formData)
+      if(!this.formData.id  || !this.formData.name || !this.formData.file|| !this.formData.keyword || !this.formData.sdPublisher || !this.formData.email ){
+         console.log(this.formData)
+         this.$Message.error({
+              content: '请先把表单补充完整。',
+              duration: 3
+        });
+        return
+      }
+      const dataProduct = this.dataProductList.find(v=>v.id === this.formData.id)
+      this.formData.version = dataProduct.version
+      this.formData.state = dataProduct.state
       this.$event.emit("loading", true);
       const res = await saveDataProduct(this.formData);
       this.$event.emit("loading", false);
@@ -172,6 +191,7 @@ export default {
               content: res.data.errorMsg,
               duration: 3
         });
+        this.open =false
         this.$emit('onSubmit')
       }else{
         this.$Message.error({
@@ -207,7 +227,17 @@ export default {
 
 <style lang="scss" scoped>
 @import "./index.scss";
-
+.footer {
+  height: 40px;
+  padding-left: 20px;
+  border-top: 1px solid #dedede;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  button {
+    margin-right: 10px;
+  }
+}
 
 </style>
 

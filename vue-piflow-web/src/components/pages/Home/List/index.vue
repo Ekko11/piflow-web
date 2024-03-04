@@ -7,11 +7,11 @@
       </p>
     </div> -->
     <h4 class="content_title">
-      <span @click="$router.push('/home')" style="cursor: pointer">{{
+      <span @click="$router.push('/home')" style="cursor: pointer;text-decoration: underline;">{{
         parentList.length && parentList[0].name
       }}</span>
       >>
-      <span>{{ currentNode.name }}</span>
+      <span style="color:rgb(82, 82, 91)">{{ currentNode.name }}</span>
     </h4>
     <div class="desc">
       {{ currentNode.description }}
@@ -149,7 +149,7 @@ export default {
         this.$event.emit("loading", false);
         let link;
         if (res.data.data.length && res.data.data[0].state.text === "STARTED") {  //如果正在运行，直接进入运行界面
-          link = `/home/flowProcess?processId=${res.data.data[0].id}`;
+          link = `/home/flowProcess?processId=${res.data.data[0].id}&type=${this.$route.query.type}`;
         } else {
           link = `/home/flowConfig?id=${row.id}&type=${this.$route.query.type}`;
         }

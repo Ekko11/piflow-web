@@ -1,14 +1,16 @@
 <template>
   <div>
-    <h4 class="content_title"> <Icon type="ios-undo" @click="$router.go(-1)"/>  · {{ publishInfo.name }} ·</h4>
+    <h4 class="content_title"> 
+      <span style="cursor: pointer;"  @click="$router.push(`/home/list?type=${publishInfo.productTypeId}`)">{{publishInfo.productTypeName}}</span>
+      >>
+      <span  style="color:rgb(82, 82, 91)">{{ publishInfo.name }}</span>
+    </h4>
     <div class="desc" v-if="publishInfo.description">
       {{ publishInfo.description }}
     </div>
-
- 
     
     <div class="config">
-      <div class="config_r" ref="imgWrap" :style="{backgroundImage:`url(${coverFileImg})`}">
+      <div class="config_r" ref="imgWrap"  :style="{backgroundImage:`url(${coverFileImg})`}"  @click="handleViewShow">
       </div>
       <div class="config_input"  v-for="child in list" :key="child.id">
         <!-- 文件输入 -->
@@ -38,7 +40,8 @@
             <Poptip trigger="hover" placement="top" >
                 <Icon type="md-help-circle" style="color:rgba(0, 0, 0, 0.4)" />
                 <div class="toptipContent" slot="content">
-                    <p>推荐值：<span>{{child.customValue}}</span> </p>
+                    <p>所属组件：<span>{{child.stopName}}</span> </p>
+                    <p>推荐值：<span>{{child.customValue1}}</span> </p>
                     <p>描述：<span>{{child.description}}</span> </p>
                 </div>
             </Poptip>
@@ -46,6 +49,7 @@
           <div>
             <Input
               :disabled="mode !== 'edit'"
+              :placeholder="child.description"
               v-model="child.customValue"
             ></Input>
           </div>
@@ -54,7 +58,9 @@
       </div>
 
     </div>
-
+      <div class="preview">
+          <img :src="`${coverFileImg}`" alt="">
+      </div>
   </div>
 </template>
     
@@ -86,6 +92,9 @@ export default {
   },
 
   methods: {
+    handleViewShow(){
+
+    },
     init(val) {
       this.fileInput = [];
       this.textInput = [];
@@ -146,8 +155,9 @@ export default {
 };
 </script>
     
-<style lang="scss" scoped>
+    <style lang="scss" scoped>
 @import "../../index.scss";
+
 ::v-deep .config{
   overflow: hidden;
   background: #f7f9fa;
@@ -230,6 +240,22 @@ export default {
     top: 0;
     line-height: 30px;
     cursor: pointer;
+  }
+}
+
+.preview{
+  background: #9b9393;
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: none;
+  img{
+    max-width: 90%;
   }
 }
 </style>

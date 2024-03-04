@@ -1,41 +1,48 @@
 <template>
   <div class="content">
     <Flow mode="edit" ref="flow" :flowInfo="publishInfo" />
-      <div class="history">
-        <div class="history_btn">
-          <Button class="run" @click="handleRun()">运行</Button>
-  
-          <Button @click="historyIsShow = !historyIsShow"
-            >历史记录
-            <Icon
-              :type="historyIsShow ? 'md-arrow-dropup' : 'md-arrow-dropdown'"
-            />
-          </Button>
-        </div>
-        <div v-show="historyIsShow" class="history_list">
-          <Table :columns="columns" :data="historyData">
-            <template slot-scope="{ row }" slot="action">
-              <div class="btn">
-                <Button @click="handleEnter(row)">查看</Button>
-                <Button @click="handleShowLog(row)">日志查看</Button>
-                <Button @click="handleDownDataProduct(row)">数据产品下载</Button>
-                <Button v-if="row.dataProductList && row.dataProductList.length" @click="handDataPublish(row)">数据产品发布</Button>
-              </div>
-            </template>
-          </Table>
-          <div class="page">
-            <Page
-              show-elevator
-              size="small"
-              :total="total"
-              show-sizer
-              @on-change="onPageChange"
-              @on-page-size-change="onPageSizeChange"
-            />
-          </div>
+    <div class="history">
+      <div class="history_btn">
+        <Button class="run" @click="handleRun()">运行</Button>
+
+        <Button @click="historyIsShow = !historyIsShow"
+          >历史记录
+          <Icon
+            :type="historyIsShow ? 'md-arrow-dropup' : 'md-arrow-dropdown'"
+          />
+        </Button>
+      </div>
+      <div v-show="historyIsShow" class="history_list">
+        <Table :columns="columns" :data="historyData">
+          <template slot-scope="{ row }" slot="action">
+            <div class="btn">
+              <Button @click="handleEnter(row)">查看</Button>
+              <!-- <Button @click="handleShowLog(row)">日志查看</Button> -->
+              <Button v-if="row.dataProductList.some((v) => v.file)" @click="handleDownDataProduct(row)">数据产品下载</Button>
+              <Button
+                v-if="
+                  row.dataProductList &&
+                  row.dataProductList.length &&
+                  row.dataProductList.some((v) => v.state ===3)
+                "
+                @click="handDataPublish(row)"
+                >数据产品发布</Button
+              >
+            </div>
+          </template>
+        </Table>
+        <div class="page">
+          <Page
+            show-elevator
+            size="small"
+            :total="total"
+            show-sizer
+            @on-change="onPageChange"
+            @on-page-size-change="onPageSizeChange"
+          />
         </div>
       </div>
-
+    </div>
 
     <PublishModal ref="PublishModalRef" />
   </div>
@@ -44,7 +51,7 @@
   <script>
 import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
 import { getProcessPageByPublishingId } from "@/apis/process";
-import { downloadFile, download } from "@/apis/file";
+import { downloadFile, download, downloadFileByIds } from "@/apis/file";
 import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
 import Flow from "../components/flow";
 import axios from "axios";
@@ -63,7 +70,6 @@ export default {
       fileInput: [],
       textInput: [],
       output: [],
-
       columns: [
         {
           title: "名称",
@@ -72,6 +78,8 @@ export default {
         {
           title: "运行时间",
           key: "crtDttm",
+          width: 200,
+          align: "center",
         },
         {
           title: "运行状态",
@@ -79,6 +87,8 @@ export default {
           render: (h, params) => {
             return h("span", [params.row.state.text]);
           },
+          width: 150,
+          align: "center",
         },
         {
           title: "操作",
@@ -98,7 +108,13 @@ export default {
       this.$router.push(`/home/list?type=${this.$route.query.type}`);
     },
     handleDownDataProduct(row) {
-      download(downloadFile, row.file.id,row.file.name,true);
+      let ids = [];
+      row.dataProductList.forEach((v) => {
+        if (v.file && v.file.id) {
+          ids.push(v.file.id);
+        }
+      });
+      download(downloadFileByIds, ids, row.name, true);
     },
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
@@ -121,14 +137,27 @@ export default {
     // 根据流水线id 获取组件发布信息
     async handleGetStopsById() {
       const res = await getPublishingById(this.$route.query.id);
-      this.publishInfo = res.data.data;
-      this.getHistoryList();
+      if (res.data.code === 200) {
+       res.data.data.stops =  res.data.data.stops.map((v) => ({
+          ...v,
+          stopPublishingPropertyVos:v.stopPublishingPropertyVos.map(k=>({
+            ...k,
+            customValue1:k.customValue,
+            customValue:'',
+          }))
+        }));
+        this.publishInfo = res.data.data;
+        this.getHistoryList();
+      } else {
+        this.$Message.error({
+          content: res.data.errorMsg,
+          duration: 3,
+        });
+      }
     },
 
     handleEnter(row) {
-      this.$router.push(
-          `/home/flowProcess?processId=${row.id}`
-        );
+      this.$router.push(`/home/flowProcess?processId=${row.id}`);
     },
     handShowInstructions(row) {
       console.log(row);
@@ -141,9 +170,11 @@ export default {
         publishingId: this.publishInfo.id,
       };
       const res = await getProcessPageByPublishingId(data);
-      console.log(res);
       this.historyData = res.data.data;
       this.total = res.data.count;
+      if (this.historyData.length) {
+        this.historyIsShow = true;
+      }
     },
     onPageChange(pageNo) {
       this.page = pageNo;
@@ -160,14 +191,11 @@ export default {
   
   <style lang="scss" scoped>
 @import "../../index.scss";
-.content{
-  max-width: 100%;
-  padding: 0 80px;
-}
+
 ::v-deep .contain {
   background: #f7f9fa;
   padding: 48px 40px 0;
-  border-radius: 8px 8px 0 0 ;
+  border-radius: 8px 8px 0 0;
   margin-top: 32px;
 }
 ::v-deep .history {

@@ -14,12 +14,54 @@ export function uploadFile(data) {
     },
   });
 }
-// 根据id下载文件
-export function downloadFileByIds(ids) {
+// 根据多id下载zip文件
+export function downloadFileByIds(ids,showProgress) {
+  let  notify
+  let timer
   return axios({
     method: "get",
     url: `/file/getFileListByIds?ids=${ids}`,
     responseType: "blob",
+    onDownloadProgress: function (ProgressEvent) {
+      if(showProgress){
+        if(ProgressEvent.total){
+          const load = ProgressEvent.loaded;
+          const total = ProgressEvent.total;
+          const progress = Math.floor((load / total) * 100) + "%";
+          if(!notify){
+            notify = Notification({
+              title: '正在下载',
+              message: `当前已下载${progress}`,
+              duration: 0,
+              type: 'success'
+            });
+          }else{
+            notify.message =  `当前已下载${progress}`
+            if(progress === '100%')notify.close()
+          }
+        }else{
+          if(!notify){
+            notify = Notification({
+              title: '正在下载',
+              message: `正在下载中，请稍后...`,
+              duration: 0,
+              type: 'success'
+            });
+          }else{
+            if(timer){
+              clearTimeout(timer)
+            }
+            timer = setTimeout(()=>{
+            notify.message =  `下载已完成！`
+            notify.close()
+            },1000)
+          }
+
+        }
+
+      }
+ 
+    },
   });
 }
 
@@ -78,7 +120,6 @@ export const download = async (request, params, fileName,showProgress) => {
       const file = res.data;
       const blob = new Blob([file]);
       fileName = getFileNameByHeaders(res.headers, fileName);
-      console.log(fileName)
       downloadByBlob(blob, fileName);
     }
   } catch (error) {

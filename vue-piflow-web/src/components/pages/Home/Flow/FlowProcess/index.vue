@@ -4,52 +4,56 @@
     <div class="progressWrap">
       <div class="progress">
         <div>
-          <p v-if="process===0&& !processIng.length" class="processIng">正在进行...</p>
+          <p v-if="process === 0 && !processIng.length" class="processIng">
+            正在进行...
+          </p>
           <p v-for="item in processIng" class="processIng" :key="item.id">
             正在进行 {{ item.name }} ...
           </p>
         </div>
         <Progress :percent="process" :stroke-width="12" status="active" />
         <div class="btn">
-          <Button @click="handleDownDataProduct()">数据产品下载</Button>
-          <Button @click="handDataPublish()">数据产品发布</Button>
+          <Button v-if="data.dataProductList && data.dataProductList.length && data.dataProductList.some((v) => v.file )" @click="handleDownDataProduct()">数据产品下载</Button>
+          <Button v-if="state === 'COMPLETED' && data.dataProductList && data.dataProductList.some((v) => v.state === 3 ) " @click="handDataPublish()">数据产品发布</Button>
         </div>
       </div>
     </div>
 
-      <PublishModal ref="PublishModalRef"/>
+    <PublishModal ref="PublishModalRef" />
   </div>
 </template>
     
 <script>
-import { getAppInfo,getByProcessId } from "@/apis/process";
-import PublishModal from '@/components/pages/DataProductManagement/Publish/PublishModal'
-
+import { getAppInfo, getByProcessId } from "@/apis/process";
+import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
+import {  download, downloadFileByIds } from "@/apis/file";
 import Flow from "../components/flow";
 export default {
   components: {
-    Flow,PublishModal
+    Flow,
+    PublishModal,
   },
   data() {
     return {
       publishInfo: {},
       process: 0,
-      processIng: [ ],
+      data:{},
+      processIng: [],
+      state:'',
       completedStatus: ["COMPLETED", "FAILED", "KILLED"],
     };
   },
   created() {
-
     this.init();
   },
   methods: {
-   async init() {
-      const res = await getByProcessId(this.$route.query.processId)
-      this.data =res.data.data
+    async init() {
+      const res = await getByProcessId(this.$route.query.processId);
+      this.data = res.data.data;
       this.publishInfo = this.data.flowPublishing;
       this.processMonitoring(this.data.appId);
     },
-    
+
     async processMonitoring(appid) {
       const res = await getAppInfo({ appid });
       if (res.data.code === 200) {
@@ -76,11 +80,17 @@ export default {
       } else {
       }
     },
-    handDataPublish(){
-      this.$refs.PublishModalRef.handleAdd(this.data)
+    handDataPublish() {
+      this.$refs.PublishModalRef.handleAdd(this.data);
     },
     handleDownDataProduct() {
-      download(downloadFile, publishInfo.file.id,publishInfo.file.name,true);
+      let ids = [];
+      this.data.dataProductList.forEach((v) => {
+        if (v.file && v.file.id) {
+          ids.push(v.file.id);
+        }
+      });
+      download(downloadFileByIds, ids, this.data.name, true);
     },
   },
   beforeDestroy() {
@@ -92,27 +102,21 @@ export default {
 <style lang="scss" scoped>
 @import "../../index.scss";
 
-.content{
-  max-width: 100%;
-  padding: 0 80px  100px;
-}
-
-.processIng{
+.processIng {
   text-align: center;
   animation: dong 2s linear 1s infinite;
 }
-@keyframes dong{
-  0%{
+@keyframes dong {
+  0% {
     opacity: 0.3;
   }
-  50%{
+  50% {
     opacity: 1;
   }
-  100%{
+  100% {
     opacity: 0.3;
   }
 }
-
 
 ::v-deep .progress {
   i {
@@ -120,7 +124,7 @@ export default {
   }
 }
 
-.progressWrap{
+.progressWrap {
   background: #f7f9fa;
   padding: 0px 40px 48px;
   border-radius: 0 0 8px 8px;

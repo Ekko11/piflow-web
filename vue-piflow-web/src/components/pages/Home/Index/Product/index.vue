@@ -21,7 +21,8 @@
       </div>
       <div class="contain_r">
         <div v-for="item in tableData" :key="item.id" class="product_item">
-          <img :src=" fileMap[item.coverFile.id] || '@/assets/img/home/p1.png'" alt="" />
+          <img v-if="item.coverFile" :src=" fileMap[item.coverFile.id] || '@/assets/img/home/p1.png'" alt="" />
+          <img v-else src="@/assets/img/home/p1.png" alt="" />
           <div>
             <h4>{{ item.name }}</h4>
             <div class="contain_r-desc">
@@ -33,7 +34,7 @@
               <!-- <Button>查看</Button> -->
             </div>
           </div>
-        </div>
+        </div> 
         
         <!-- paging -->
         <div class="page" v-if="total">
@@ -182,7 +183,7 @@ export default {
       this.tableData = res.data.data;
       const ids = [];
       res.data.data.forEach((item) => {
-        if (item.coverFile.id && !this.fileMap[item.coverFile.id]) {
+        if (item.coverFile && item.coverFile.id && !this.fileMap[item.coverFile.id]) {
           ids.push(item.coverFile.id);
           this.$set(this.fileMap, item.coverFile.id, item.coverFile.fileName);
         }
