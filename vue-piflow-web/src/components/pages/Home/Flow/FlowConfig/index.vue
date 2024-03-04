@@ -125,19 +125,29 @@ export default {
         this.publishInfo.stops.find(v=>v.stopId === 'fac92355d0eb42358d7711d21302735f').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909763').customValue =  this.publishInfo.stops.find(v=>v.stopId === '7cd9ccfb5c16432cab698a05b0e2b7f9').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909762').customValue
         this.publishInfo.stops.find(v=>v.stopId === 'fac92355d0eb42358d7711d21302735f').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909764').customValue =  this.publishInfo.stops.find(v=>v.stopId === '7cd9ccfb5c16432cab698a05b0e2b7f9').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909761').customValue
       }
+      const data =  JSON.parse(JSON.stringify(this.publishInfo))
+      data.stops.forEach(v => {
+          v.stopPublishingPropertyVos.forEach(k=>{
+            k.customValue = k.customValue ? k.customValue:k.customValue1
+            delete k.allowableValues1
+          })
+      });
 
-      const res = await runPublishFlow(this.publishInfo);
+      const res = await runPublishFlow(data);
       this.$event.emit("loading", false);
-      if (res.data.code === 200) {
-        this.$router.push(
+      this.$router.push(
           `/home/flowProcess?processId=${res.data.data.processId}`
         );
-      } else {
-        this.$Message.error({
-          content: res.data.errorMsg,
-          duration: 3,
-        });
-      }
+      // if (res.data.code === 200) {
+      //   this.$router.push(
+      //     `/home/flowProcess?processId=${res.data.data.processId}`
+      //   );
+      // } else {
+      //   this.$Message.error({
+      //     content: res.data.errorMsg,
+      //     duration: 3,
+      //   });
+      // }
     },
     // 根据流水线id 获取组件发布信息
     async handleGetStopsById() {

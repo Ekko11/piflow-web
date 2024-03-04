@@ -24,7 +24,7 @@
 </template>
     
 <script>
-import { getAppInfo, getByProcessId } from "@/apis/process";
+import { getAppInfo, getByProcessId,getAppIdByProcessId } from "@/apis/process";
 import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
 import {  download, downloadFileByIds } from "@/apis/file";
 import Flow from "../components/flow";
@@ -44,14 +44,30 @@ export default {
     };
   },
   created() {
-    this.init();
+    this.init()
   },
   methods: {
+    async getAppId(){
+      const res = await getAppIdByProcessId(this.$route.query.processId);
+      if(res.data.code === 200 && res.data.appId){
+        if(this.appIdTimer) clearTimeout(this.appIdTimer)
+        this.processMonitoring(res.data.appId)
+      }else{
+        this.appIdTimer = setTimeout(() => {
+            this.getAppId();
+         }, 5000);
+      }
+    },
     async init() {
       const res = await getByProcessId(this.$route.query.processId);
       this.data = res.data.data;
       this.publishInfo = this.data.flowPublishing;
-      this.processMonitoring(this.data.appId);
+      if(res.data.data.appId){
+        this.processMonitoring(res.data.data.appId)
+      }else{
+        this.getAppId()
+      }
+      
     },
 
     async processMonitoring(appid) {
@@ -76,6 +92,9 @@ export default {
           }, 5000);
         } else {
           clearTimeout(this.timer);
+          const res = await getByProcessId(this.$route.query.processId);
+          this.data = res.data.data;
+          this.publishInfo = this.data.flowPublishing;
         }
       } else {
       }

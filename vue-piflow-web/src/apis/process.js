@@ -29,6 +29,13 @@ export function getByProcessId (id) {
 }
 
 
+// 获取Appid
+export function getAppIdByProcessId (id) {
+    return axios({
+        method:'get',
+        url:`/process/getAppIdByProcessId?processId=${id}`,
+    })
+}
 
 
 // 获取运行历史列表
