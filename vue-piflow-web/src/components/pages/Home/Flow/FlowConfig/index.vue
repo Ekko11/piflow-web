@@ -121,6 +121,11 @@ export default {
     },
     async handleRun() {
       this.$event.emit("loading", true);
+      if(this.publishInfo.id === '1764490182175752192'){
+        this.publishInfo.stops.find(v=>v.stopId === 'fac92355d0eb42358d7711d21302735f').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909763').customValue =  this.publishInfo.stops.find(v=>v.stopId === '7cd9ccfb5c16432cab698a05b0e2b7f9').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909762').customValue
+        this.publishInfo.stops.find(v=>v.stopId === 'fac92355d0eb42358d7711d21302735f').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909764').customValue =  this.publishInfo.stops.find(v=>v.stopId === '7cd9ccfb5c16432cab698a05b0e2b7f9').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909761').customValue
+      }
+
       const res = await runPublishFlow(this.publishInfo);
       this.$event.emit("loading", false);
       if (res.data.code === 200) {
