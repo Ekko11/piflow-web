@@ -133,7 +133,7 @@ export default {
         associateId: this.currentPropos.id,
       });
       
-      this.$set(fileMap,currentPropos.id,e.name)
+      this.$set(this.fileMap,this.currentPropos.id,e.name)
       this.currentPropos.customValue = res.data.data.filePath;
     },
     handleBeforeUpload(e) {
@@ -146,13 +146,8 @@ export default {
 };
 </script>
     
-    <style lang="scss" scoped>
+<style lang="scss" scoped>
 @import "../../index.scss";
-::v-deep .contain {
-
-
-
-}
 ::v-deep .config{
   overflow: hidden;
   background: #f7f9fa;
