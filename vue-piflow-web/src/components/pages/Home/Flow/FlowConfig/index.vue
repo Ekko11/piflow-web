@@ -121,9 +121,9 @@ export default {
     },
     async handleRun() {
       this.$event.emit("loading", true);
-      if(this.publishInfo.id === '1764490182175752192'){
-        this.publishInfo.stops.find(v=>v.stopId === 'fac92355d0eb42358d7711d21302735f').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909763').customValue =  this.publishInfo.stops.find(v=>v.stopId === '7cd9ccfb5c16432cab698a05b0e2b7f9').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909762').customValue
-        this.publishInfo.stops.find(v=>v.stopId === 'fac92355d0eb42358d7711d21302735f').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909764').customValue =  this.publishInfo.stops.find(v=>v.stopId === '7cd9ccfb5c16432cab698a05b0e2b7f9').stopPublishingPropertyVos.find(v=>v.id === '1764493523953909761').customValue
+      if(this.publishInfo.id === '1764900256811581440'){
+        this.publishInfo.stops.find(v=>v.stopId === 'a01ef52f1d32459c9629f2f0ce8ed1ad').stopPublishingPropertyVos.find(v=>v.id === '1764900256811581448').customValue =  this.publishInfo.stops.find(v=>v.stopId === 'd1573fbedec54738943bd228d73040c1').stopPublishingPropertyVos.find(v=>v.id === '1764900256811581453').customValue
+        this.publishInfo.stops.find(v=>v.stopId === 'a01ef52f1d32459c9629f2f0ce8ed1ad').stopPublishingPropertyVos.find(v=>v.id === '1764900256811581449').customValue =  this.publishInfo.stops.find(v=>v.stopId === 'd1573fbedec54738943bd228d73040c1').stopPublishingPropertyVos.find(v=>v.id === '1764900256811581452').customValue
       }
       const data =  JSON.parse(JSON.stringify(this.publishInfo))
       data.stops.forEach(v => {

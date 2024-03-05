@@ -196,7 +196,7 @@ export default {
           val.id &&
           JSON.stringify(val) !== JSON.stringify(this.publishInfo)
         ) {
-          if (val.id === "1764490182175752192") {
+          if (val.id === "1764900256811581440") {
             this.mock(val);
           } else {
             this.init(val);
@@ -238,7 +238,7 @@ export default {
       delete val.enableFlag;
       this.publishInfo = val;
 
-      this.getCoverImg(val.coverFileId || "1763853768035663872");
+      this.getCoverImg(val.coverFileId);
       const list = [];
       let tongliang = [];
       let weizhi = [];
@@ -248,8 +248,6 @@ export default {
       let yichangshuju = [];
       let mocafengsu = [];
       let chabiaofa = [];
-      // case "1764493523953909763":
-      // case "1764493523953909764":
       this.publishInfo.stops.forEach((item) => {
         item.stopPublishingPropertyVos.forEach((v) => {
           if (v.type === 1) {
@@ -266,38 +264,38 @@ export default {
           }
 
           switch (v.id) {
-            case "1764490182179946496":
-            case "1764493523949715456":
-            case "1764493523953909760":
+            case "1764900256811581451":
+            case "1764900256811581447":
+            case "1764900256815775751":
               tongliang.push(v);
               break;
-            case "1764493523953909762":
-            case "1764493523953909761":
+            case "1764900256811581452":
+            case "1764900256811581453":
               weizhi.push(v);
               break;
-            case "1764493523953909765":
-            case "1764493524008435712":
+            case "1764900256811581445":
+            case "1764900256811581446":
               yiqi.push(v);
               break;
-            case "1764493524012630016":
+            case "1764900256815775746":
               jiangyu.push(v);
               break;
-            case "1764493524012630017":
-            case "1764493524016824320":
-            case "1764493524016824321":
+            case "1764900256811581454":
+            case "1764900256815775744":
+            case "1764900256815775745":
               yuzhitichu.push(v);
               break;
-            case "1764493524016824324":
-            case "1764493524016824323":
-            case "1764493524016824322":
+            case "1764900256815775748":
+            case "1764900256815775749":
+            case "1764900256815775750":
               yichangshuju.push(v);
               break;
-            case "1764493524016824325":
+            case "1764900256815775747":
               mocafengsu.push(v);
               break;
-            case "1764490182179946497":
-            case "1764493524021018624":
-            case "1764493524016824326":
+            case "1764900256811581441":
+            case "1764900256811581442":
+            case "1764900256811581443":
               chabiaofa.push(v);
               break;
           }
@@ -352,7 +350,7 @@ export default {
       delete val.lastUpdateUser;
       delete val.enableFlag;
       this.publishInfo = val;
-      this.getCoverImg(val.coverFileId || "1763853768035663872");
+      this.getCoverImg(val.coverFileId );
       const list = [];
       this.publishInfo.stops.forEach((item) => {
         item.stopPublishingPropertyVos.forEach((v) => {
