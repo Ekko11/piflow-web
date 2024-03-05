@@ -30,11 +30,11 @@ export default new Router({
     //   name: 'bootPage',
     //   component: () => import('../components/pages/bootPage')
     // },
-    // {
-    //   path: '/pdf',
-    //   name: 'pdf',
-    //   component: () => import('../components/compon/PdfShow')
-    // },
+    {
+      path: '/pdf',
+      name: 'pdf',
+      component: () => import('../components/compon/PdfShow')
+    },
     // 门户界面
     {
       path: '/',
