@@ -6,6 +6,10 @@
         <Input v-model="lineChart.lineStyle.color" />
       </div> -->
       <div>
+        <label>显示标签：</label>
+        <Checkbox v-model="lineChart.label.show">是</Checkbox>
+      </div>
+      <div>
         <label>线宽：</label>
         <Input v-model="lineChart.lineStyle.width" />
       </div>
@@ -32,7 +36,6 @@ export default {
   computed: {
     ...mapGetters("graphConf", ["lineChart"]),
   },
-
 };
 </script>
 <style lang="scss" scoped>

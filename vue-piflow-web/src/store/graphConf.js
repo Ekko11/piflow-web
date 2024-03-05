@@ -30,13 +30,66 @@ const InitState = () => ({
     },
     dataZoom:[
       {
+        type: 'inside',
+        xAxisIndex: [0],
+        disabled:false,
+        end :100
+      },
+      {
         type: 'slider',
-        id : 'sliderX',
-        show: false,
+        show:false,
+        xAxisIndex: [0],
         bottom: 5,
-        height: 10
+        height: 10,
+        end :100
       }
     ],
+    toolbox: {
+      feature: {
+        dataZoom: {
+          yAxisIndex: false
+        },
+        brush: {
+          type: ['clear']
+        },
+
+      myFull: {
+        show: true,
+        title: '全屏查看',
+        icon: `image://${screenUrl}`,
+        onclick: (e) => {
+          // 注：yourEchartsId: 你的图表id
+          const element = document.getElementById(yourEchartsId);
+          if (element.requestFullScreen) { // HTML W3C 提议
+            element.requestFullScreen();
+          } else if (element.msRequestFullscreen) { // IE11
+            element.msRequestFullScreen();
+          } else if (element.webkitRequestFullScreen) { // Webkit (works in Safari5.1 and Chrome 15)
+            element.webkitRequestFullScreen();
+          } else if (element.mozRequestFullScreen) { // Firefox (works in nightly)
+            element.mozRequestFullScreen();
+          }
+          // 退出全屏
+          if (element.requestFullScreen) {
+            document.exitFullscreen();
+          } else if (element.msRequestFullScreen) {
+            document.msExitFullscreen();
+          } else if (element.webkitRequestFullScreen) {
+            document.webkitCancelFullScreen();
+          } else if (element.mozRequestFullScreen) {
+            document.mozCancelFullScreen();
+          }
+        },
+      },
+      }
+    },
+    brush: {
+      xAxisIndex: 'all',
+      brushLink: 'all',
+      outOfBrush: {
+        colorAlpha: 0.1
+      }
+    },
     legend: {
       show: true,
       orient: "horizontal",
@@ -157,6 +210,9 @@ const InitState = () => ({
       type: "solid",
       opacity: "1",
     },
+  },
+  brush:{
+    toolbox:['rect','clear']
   },
   extraOptions: {},
 });

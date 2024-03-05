@@ -15,13 +15,7 @@
           <Option value="category">类目轴</Option>
         </Select>
       </div>
-      <div>
-        <label>纵轴类型：</label>
-        <Select v-model="baseOptions.yAxis.type">
-          <Option value="value">数值轴</Option>
-          <Option value="category">类目轴</Option>
-        </Select>
-      </div>
+
     </div>
     <ExtraChartOptions />
 

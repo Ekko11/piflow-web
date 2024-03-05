@@ -68,47 +68,92 @@ export default {
     this.handleInit();
   },
   watch: {
-    xAxisType: {
-      handler: function (val) {
-        if (this.tableData.length && val) {
-          // try {
-            if (val.sort === "数值") {
-              this.originalData = this.originalData.sort((a, b) => {
-                const numA = parseFloat(a[val.label]);
-                const numB = parseFloat(b[val.label]);
-                if (numA < numB) return -1;
-                if (numA > numB) return 1;
-                return 0;
-              });
-            } else {
-              this.originalData = this.originalData.sort((a, b) =>
-                String(a[val.label]).localeCompare(String(b[val.label]))
-              );
-            }
-            this.xData = this.handleGetColums(val.label);
-            if(this.xData.length > 12 && this.baseOptions.dataZoom[0].show == false){
-               this.baseOptions.dataZoom[0].show = true
-            //  this.$store.dispatch("graphConf/changeBaseOptions", this.baseOptions)
-            }
-
-
-            // 由于大表的排序改变，所以y轴数据也需要重新生成
-            this.yData = this.yAxisType.map((item) => {
-              return {
-                itemStyle: {
-                  color: item.color,
-                },
-                name: item.label,
-                data: this.handleGetColums(item.label),
-              };
-            });
-          // } catch (err) {}
-        } else {
-          this.xData = [];
+    xAxisType(val) {
+      if (this.tableData.length) {
+         // 设置是否展示 dataZoom
+        this.xData = this.handleGetColums(val.label);
+        console.log(this.xData)
+         if ( this.xData.length > 12 &&  this.baseOptions.dataZoom[1].show == false ) {
+          console.log(11111111111111)
+          this.baseOptions.dataZoom[0].disabled == false
+          this.baseOptions.dataZoom[0].end = this.xData.length > 50 ?  30 : 50
+          this.baseOptions.dataZoom[1].show = true   
+          this.baseOptions.dataZoom[1].end = this.xData.length > 50 ?  30 : 50
+          console.log(this.baseOptions)
         }
-      },
-      deep: true,
+      }
     },
+    baseOptions(newVal, oldVal) {
+      if (newVal.xAxis.type !== oldVal.xAxis.type) {
+        //y轴类型改变
+        if (newVal.xAxis.type === "数值") {
+          this.originalData = this.originalData.sort((a, b) => {
+            const numA = parseFloat(a[this.xAxisType]);
+            const numB = parseFloat(b[this.xAxisType]);
+            if (numA < numB) return -1;
+            if (numA > numB) return 1;
+            return 0;
+          });
+        } else {
+          this.originalData = this.originalData.sort((a, b) =>
+            String(a[this.xAxisType]).localeCompare(String(b[this.xAxisType]))
+          );
+        }
+        this.xData = this.handleGetColums(this.xAxisType);
+
+        // 由于大表的排序改变，所以y轴数据也需要重新生成
+        this.yData = this.yAxisType.map((item) => {
+          return {
+            itemStyle: {
+              color: item.color,
+            },
+            name: item.label,
+            data: this.handleGetColums(item.label),
+          };
+        });
+      }
+    },
+    // xAxisType: {
+    //   handler: function (val) {
+    //     if (this.tableData.length && val) {
+    //       // try {
+    //       if (val.sort === "数值") {
+    //         this.originalData = this.originalData.sort((a, b) => {
+    //           const numA = parseFloat(a[val.label]);
+    //           const numB = parseFloat(b[val.label]);
+    //           if (numA < numB) return -1;
+    //           if (numA > numB) return 1;
+    //           return 0;
+    //         });
+    //       } else {
+    //         this.originalData = this.originalData.sort((a, b) =>
+    //           String(a[val.label]).localeCompare(String(b[val.label]))
+    //         );
+    //       }
+    //       this.xData = this.handleGetColums(val.label);
+    //       if (
+    //         this.xData.length > 12 &&
+    //         this.baseOptions.dataZoom[0].show == false
+    //       ) {
+    //         this.baseOptions.dataZoom[0].show = true;
+    //       }
+    //       // 由于大表的排序改变，所以y轴数据也需要重新生成
+    //       this.yData = this.yAxisType.map((item) => {
+    //         return {
+    //           itemStyle: {
+    //             color: item.color,
+    //           },
+    //           name: item.label,
+    //           data: this.handleGetColums(item.label),
+    //         };
+    //       });
+    //       // } catch (err) {}
+    //     } else {
+    //       this.xData = [];
+    //     }
+    //   },
+    //   deep: true,
+    // },
     yAxisType: {
       handler: function (arr) {
         if (this.originalData.length) {
@@ -152,7 +197,7 @@ export default {
         return newVal;
       },
     },
-
+    //获取series  由 图类型设置 （this[this.chartType]） 和  ydata 共同生成
     series() {
       const obj = JSON.parse(JSON.stringify(this[this.chartType]));
       const list = this.yData.map((item) => ({
@@ -163,13 +208,13 @@ export default {
     },
   },
   methods: {
-    // 自动保存   
+    // 自动保存
     handleAutoUpdate() {
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);
       }
       this.autoSaveTimeout = setTimeout(() => {
-        this.handleUpdate("update");
+        this.handleUpdate("update", "auto");
       }, 4000);
     },
     handleInit() {
@@ -284,7 +329,9 @@ export default {
       });
     },
 
-    handleUpdate(type) {
+    handleUpdate(type, action) {
+      if (action == "auto") return;
+
       const configInfo = {
         chartType: this.chartType,
         baseOptions: handleFormata(this.baseOptions),
@@ -292,7 +339,9 @@ export default {
         xAxisType: this.xAxisType,
         yAxisType: this.yAxisType,
       };
-      this.$event.emit("loading", true);
+      if (action !== "auto") {
+        this.$event.emit("loading", true);
+      }
       this.$axios({
         method: "POST",
         baseURL: baseUrl,
@@ -305,11 +354,12 @@ export default {
       }).then((res) => {
         this.$event.emit("loading", false);
         if (res.data.code === 200) {
-          this.isOpen = false;
-          this.$Message.success({
-            content: this.$t("tip.update_success_content"),
-            duration: 3,
-          });
+          if (action !== "auto") {
+            this.$Message.success({
+              content: this.$t("tip.update_success_content"),
+              duration: 3,
+            });
+          }
         } else {
           this.$Message.error({
             content: res.data.msg,
