@@ -7,7 +7,7 @@
       </p>
     </div> -->
     <h4 class="content_title">
-      <span @click="$router.push('/home')" style="cursor: pointer;text-decoration: underline;">{{
+      <span  style="cursor: pointer;text-decoration: underline;">{{
         parentList.length && parentList[0].name
       }}</span>
       >>

@@ -20,14 +20,14 @@
     </div>
     <div class="item">
       <label class="self">分类：</label>
-      <treeselect
+      <!-- <treeselect
         v-model="formData.productTypeId"
         :placeholder="$t('modal.placeholder_select')"
         :normalizer="normalizer"
         :options="treeData"
         :flat="true"
         style="width: 350px"
-      />
+      /> -->
     </div>
     <div class="item">
       <label>权限：</label>

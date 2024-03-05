@@ -19,7 +19,7 @@
               <Button @click="handleEnter(row)">查看</Button>
               <!-- <Button @click="handleShowLog(row)">日志查看</Button> -->
               <Button v-if="row.dataProductList.some((v) => v.file)" @click="handleDownDataProduct(row)">数据产品下载</Button>
-              <Button
+              <!-- <Button
                 v-if="
                   row.dataProductList &&
                   row.dataProductList.length &&
@@ -27,7 +27,7 @@
                 "
                 @click="handDataPublish(row)"
                 >数据产品发布</Button
-              >
+              > -->
             </div>
           </template>
         </Table>
@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <PublishModal ref="PublishModalRef" />
+    <!-- <PublishModal ref="PublishModalRef" /> -->
   </div>
 </template>
   
@@ -93,7 +93,7 @@ export default {
         {
           title: "操作",
           slot: "action",
-          width: 400,
+          width: 200,
           align: "center",
         },
       ],
@@ -119,6 +119,7 @@ export default {
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
     },
+
     async handleRun() {
       this.$event.emit("loading", true);
       if(this.publishInfo.id === '1764900256811581440'){
@@ -136,13 +137,13 @@ export default {
       const res = await runPublishFlow(data);
       this.$event.emit("loading", false);
       this.$router.push(
-          `/home/flowProcess?processId=${res.data.data.processId}`
+          `/flowProcess?processId=${res.data.data.processId}`
         );
 
         
       // if (res.data.code === 200) {
       //   this.$router.push(
-      //     `/home/flowProcess?processId=${res.data.data.processId}`
+      //     `/flowProcess?processId=${res.data.data.processId}`
       //   );
       // } else {
       //   this.$Message.error({
@@ -153,7 +154,7 @@ export default {
     },
     // 根据流水线id 获取组件发布信息
     async handleGetStopsById() {
-      const res = await getPublishingById(this.$route.query.id);
+      const res = await getPublishingById('1764900256811581440');
       if (res.data.code === 200) {
        res.data.data.stops =  res.data.data.stops.map((v) => ({
           ...v,
@@ -174,7 +175,7 @@ export default {
     },
 
     handleEnter(row) {
-      this.$router.push(`/home/flowProcess?processId=${row.id}`);
+      this.$router.push(`/flowProcess?processId=${row.id}`);
     },
     handShowInstructions(row) {
       console.log(row);

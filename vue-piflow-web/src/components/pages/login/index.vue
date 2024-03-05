@@ -7,7 +7,7 @@
         <h1>{{title }}</h1>
       </div>
     </div>
-      <div class="homeBtn" @click="handleToHome"><Icon type="ios-aperture" />门户</div>
+      <!-- <div class="homeBtn" @click="handleToHome"><Icon type="ios-aperture" />门户</div> -->
     </div>
 
     <i class="map"></i>
@@ -215,8 +215,8 @@ export default {
             Cookies.set('state', "jwtok");
             Cookies.set('usre', this.username);
             Cookies.set('setUser', JSON.stringify(res.data.jwtUser.roles));
-
-            this.getIsInBootPage();
+            this.$router.push('/flowConfig')
+            // this.getIsInBootPage();
           } else {
             this.$Message["error"]({
               background: true,

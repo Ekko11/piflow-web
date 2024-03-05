@@ -1,7 +1,7 @@
 <template>
   <div style="background: #fff;" >
     <div class="head">
-      <div class="head-l" @click="handleBack">生态站监测数据产品生产系统</div>
+      <div class="head-l" >生态站监测数据产品生产系统</div>
       <div class="head-m"></div>
       <div class="head-r" >
         <div v-if="!user.username" @click="handleLogin">
@@ -17,10 +17,10 @@
             @click="handleLogout"
           />
         </div>
-        <div  @click="handleEnter"> 
+        <!-- <div  @click="handleEnter"> 
           <img src="@/assets/img/home/setting.png" alt="" />
           <span>后台管理</span>
-        </div>
+        </div> -->
       </div>
     </div>
     <router-view></router-view>
@@ -57,6 +57,7 @@ export default {
           this.$store.commit("setToken", "");
           this.$store.commit("setUser", {});
           this.user = {};
+          this.$router.push("/login");
         },
       });
     },

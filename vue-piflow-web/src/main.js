@@ -128,10 +128,10 @@ router.beforeEach((to, from, next) => {
   if (state == 'jwtok') { //登录过来直接进去
     next();
   } else {
-    if ( whiteList.includes(to.path) || to.path.includes('home')) {
+    if ( whiteList.includes(to.path) ) {
       next();
     } else{
-      next({path: '/home'});
+      next({path: '/login'});
     }
   }
 });

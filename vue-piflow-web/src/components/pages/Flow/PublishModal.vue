@@ -29,14 +29,14 @@
           ></Input>
         </FormItem>
         <FormItem label="分类：" prop="name">
-          <treeselect
+          <!-- <treeselect
             v-model="formData.productTypeId"
             :placeholder="$t('modal.placeholder_select')"
             :normalizer="normalizer"
             :options="treeData"
             :flat="true"
             style="width: 100%; height: 32px"
-          />
+          /> -->
         </FormItem>
         <FormItem label="描述：" prop="description">
           <Input

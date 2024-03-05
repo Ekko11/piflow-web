@@ -14,12 +14,12 @@
         <Progress :percent="process" :stroke-width="12" status="active" />
         <div class="btn">
           <Button v-if="data.dataProductList && data.dataProductList.length && data.dataProductList.some((v) => v.file )" @click="handleDownDataProduct()">数据产品下载</Button>
-          <Button v-if="state === 'COMPLETED' && data.dataProductList && data.dataProductList.some((v) => v.state === 3 ) " @click="handDataPublish()">数据产品发布</Button>
+          <!-- <Button v-if="state === 'COMPLETED' && data.dataProductList && data.dataProductList.some((v) => v.state === 3 ) " @click="handDataPublish()">数据产品发布</Button> -->
         </div>
       </div>
     </div>
 
-    <PublishModal ref="PublishModalRef" />
+    <!-- <PublishModal ref="PublishModalRef" /> -->
   </div>
 </template>
     

@@ -105,7 +105,7 @@ module.exports = {
     public: `${require('ip').address()}:8081`,
     proxy: {
       '/piflow-web': {
-        target: 'http://10.168.111.13:6001/',
+        target: 'http://159.226.111.52:6001/',
         // target: 'http://localhost:6002/piflow-web/admin',
         // target: 'http://127.0.0.1:6001',
         changeOrigin: true,
