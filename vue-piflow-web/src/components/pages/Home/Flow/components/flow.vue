@@ -252,27 +252,27 @@ export default {
           list: weizhi,
         },
         {
-          name: "仪器安装高度信息",
+          name: "WPL 校正",
           list: yiqi,
         },
         {
-          name: "降雨数据剔除",
+          name: "通量数据质控: (1) 降雨数据剔除",
           list: jiangyu,
         },
         {
-          name: "阈值剔除",
+          name: "通量数据质控: (2) 阈值剔除",
           list: yuzhitichu,
         },
         {
-          name: "异常数据检测剔除",
+          name: "通量数据质控: (3) 异常数据检测剔除",
           list: yichangshuju,
         },
         {
-          name: "摩擦风速校正",
+          name: "通量数据质控: (4) 摩擦风速校正",
           list: mocafengsu,
         },
         {
-          name: "查表法插补",
+          name: "缺失数据插补：查表法插补",
           list: chabiaofa,
         }
       );
