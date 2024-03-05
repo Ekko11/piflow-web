@@ -5,10 +5,10 @@
       <div class="progress">
         <div>
           <p v-if="process === 0 && !processIng.length" class="processIng">
-            正在进行...
+            排队中
           </p>
           <p v-for="item in processIng" class="processIng" :key="item.id">
-            正在进行 {{ item.name }} ...
+            正在进行 <span style="font-weight: 600;">{{ item.name }} </span>
           </p>
         </div>
         <Progress :percent="process" :stroke-width="12" status="active" />

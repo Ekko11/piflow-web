@@ -71,13 +71,9 @@
 
     <div v-if="list1.length">
       <div class="config1">
-        <div
-          class="config1_r"
-          ref="imgWrap"
-          :style="{ backgroundImage: `url(${coverFileImg})` }"
-          @click="handleViewShow(true)"
-        >
-          <Icon type="ios-expand" />
+        <div class="config1_r"  @click="handleViewShow(true)" >
+            <Icon type="ios-expand" />
+            <img :src="coverFileImg" alt="">
         </div>
         
         <div>
@@ -537,18 +533,27 @@ export default {
     width: 44%;
     background-size: cover;
     background-repeat: no-repeat;
-    height: 340px;
+    height: 430px;
     margin-bottom: 20px;
-    cursor: pointer;
     background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 6px;
     position: relative;
-    i{
+    cursor: pointer;
+      img{
+        max-width: 100%;
+        max-height: 100%;
+      }
+      i{
       position: absolute;
       right: 10px;
       top: 6px;
       font-size: 23px;
       opacity: 0.9;
-    }
+      }
   }
   .config_l {
     overflow: hidden;
@@ -584,6 +589,10 @@ export default {
 
     .ivu-input {
       border-radius: 6px;
+      border-color: #3974AA;
+      &[disabled]{
+        border-color: #dcdee2;
+      }
     }
     .label {
       color: #18181b;
