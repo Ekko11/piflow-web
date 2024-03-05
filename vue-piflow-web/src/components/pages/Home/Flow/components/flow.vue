@@ -479,7 +479,7 @@ export default {
 
 
   .config_input {
-    width: 25%;
+    width: 30%;
     padding: 10px 10px;
     box-sizing: border-box;
 
