@@ -85,7 +85,7 @@ export default {
           title: "运行状态",
           key: "state",
           render: (h, params) => {
-            return h("span", [params.row.state.text]);
+            return h("span", [  (params.row.state && params.row.state.text) || 'INIT']);
           },
           width: 150,
           align: "center",
@@ -138,6 +138,8 @@ export default {
       this.$router.push(
           `/home/flowProcess?processId=${res.data.data.processId}`
         );
+
+        
       // if (res.data.code === 200) {
       //   this.$router.push(
       //     `/home/flowProcess?processId=${res.data.data.processId}`

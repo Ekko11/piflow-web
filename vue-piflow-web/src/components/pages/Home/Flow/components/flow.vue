@@ -585,7 +585,7 @@ export default {
     padding: 10px 10px;
     box-sizing: border-box;
 
-    .ivu-input {
+    .ivu-input,.ivu-select-selection {
       border-radius: 6px;
       border-color: #3974AA;
       &[disabled]{
