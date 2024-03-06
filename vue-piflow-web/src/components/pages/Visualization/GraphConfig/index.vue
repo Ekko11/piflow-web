@@ -74,7 +74,6 @@ export default {
         this.xData = this.handleGetColums(val.label);
         console.log(this.xData)
          if ( this.xData.length > 12 &&  this.baseOptions.dataZoom[1].show == false ) {
-          console.log(11111111111111)
           this.baseOptions.dataZoom[0].disabled == false
           this.baseOptions.dataZoom[0].end = this.xData.length > 50 ?  30 : 50
           this.baseOptions.dataZoom[1].show = true   
@@ -330,8 +329,6 @@ export default {
     },
 
     handleUpdate(type, action) {
-      if (action == "auto") return;
-
       const configInfo = {
         chartType: this.chartType,
         baseOptions: handleFormata(this.baseOptions),

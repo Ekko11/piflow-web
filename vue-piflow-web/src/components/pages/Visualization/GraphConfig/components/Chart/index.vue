@@ -23,11 +23,51 @@
       <Button type="primary" size="small" @click="handleDown">下载图表</Button>
     </div>
     <div>
-        <div class="chart" ref="chart" style="width: 100%"></div>
+      <div class="chart" id="chart" ref="chart" style="width: 100%"></div>
     </div>
   </section>
 </template>
 <script>
+
+const  toolbox = {
+      feature: {
+        dataZoom: {
+          yAxisIndex: false
+        },
+        brush: {
+          type: ['clear']
+        },
+        myText: {
+          show: true,
+          title: '全屏查看',
+          icon: `image://${require('../../images/full.svg')}`,
+          onclick: function (e){
+            // 注：yourEchartsId: 你的图表id
+            const element = document.getElementById('chart');
+            console.log(element)
+            if (element.requestFullScreen) { // HTML W3C 提议
+              element.requestFullScreen();
+            } else if (element.msRequestFullscreen) { // IE11
+              element.msRequestFullScreen();
+            } else if (element.webkitRequestFullScreen) { // Webkit (works in Safari5.1 and Chrome 15)
+              element.webkitRequestFullScreen();
+            } else if (element.mozRequestFullScreen) { // Firefox (works in nightly)
+              element.mozRequestFullScreen();
+            }
+            // 退出全屏
+            if (element.requestFullScreen) {
+              document.exitFullscreen();
+            } else if (element.msRequestFullScreen) {
+              document.msExitFullscreen();
+            } else if (element.webkitRequestFullScreen) {
+              document.webkitCancelFullScreen();
+            } else if (element.mozRequestFullScreen) {
+              document.mozCancelFullScreen();
+            }
+          },
+        },
+      }
+    }
 import echarts from "echarts";
 export default {
   name: "Chart",
@@ -41,15 +81,19 @@ export default {
   },
   methods: {
     handleInit() {
+       const options = {
+        ...this.options,
+        toolbox
+       }
       if (this.chart) {
         this.chart.clear();
-        this.chart.setOption(this.options);
+        this.chart.setOption(options);
       } else {
         // 某些浏览器大小下，由于父元素设置了flex-grow:1,导致获取高度异常
         console.log(this.$refs.chart.offsetHeight)
         setTimeout(() => {
           this.chart = echarts.init(this.$refs.chart);
-          this.chart.setOption(this.options);
+          this.chart.setOption(options);
         }, 1000);
       }
 
@@ -119,12 +163,12 @@ export default {
     overflow: hidden;
   }
   > div:last-child {
-    height: calc( 100% - 60px);
+    height: calc(100% - 60px);
     margin-top: 20px;
-      > div {
-        width: 100%;
-        height: 100%;
-      }
+    > div {
+      width: 100%;
+      height: 100%;
+    }
   }
   .chart_wrap-btn {
     position: absolute;

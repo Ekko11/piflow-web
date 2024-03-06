@@ -273,7 +273,7 @@ export default {
           })
             .then((res) => {
               if (res.data.code === 200) {
-                this.$Modal.success({
+                this.$Message.success({
                   title: this.$t("tip.title"),
                   content:
                     `${row.name} ` + this.$t("tip.delete_success_content"),
@@ -310,7 +310,7 @@ export default {
         .then((res) => {
           if (res.data.code === 200) {
             this.tableData = res.data.data;
-            this.total = res.data.count;
+            this.total = res.data.totalCount;
           } else {
             this.$Message.error({
               content: this.$t("tip.request_fail_content"),
