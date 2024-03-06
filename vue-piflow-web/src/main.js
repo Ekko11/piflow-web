@@ -126,7 +126,11 @@ const whiteList = ['/login','/home']; //不需要登录能访问的path
 router.beforeEach((to, from, next) => {
   let state = Cookies.get('state'); //获取缓存看是否登录过
   if (state == 'jwtok') { //登录过来直接进去
-    next();
+    if(to.path === '/'){
+      next({path:'/flowConfig'})
+    }else{
+      next();
+    }
   } else {
     if ( whiteList.includes(to.path) ) {
       next();

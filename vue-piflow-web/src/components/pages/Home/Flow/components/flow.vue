@@ -252,7 +252,7 @@ export default {
           list: weizhi,
         },
         {
-          name: "WPL 校正",
+          name: "储存项计算",
           list: yiqi,
         },
         {
@@ -433,7 +433,6 @@ export default {
     width: 100%;
     background-size: cover;
     background-repeat: no-repeat;
-    height: 430px;
     margin-bottom: 20px;
     background-position: center;
     display: flex;

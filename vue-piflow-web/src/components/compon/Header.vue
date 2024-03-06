@@ -69,7 +69,7 @@ export default {
         });
     },
     handleToHome(){
-      this.$router.push('/home')
+      this.$router.push('/')
     }
   },
 };

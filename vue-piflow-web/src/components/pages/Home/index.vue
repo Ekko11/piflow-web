@@ -17,10 +17,10 @@
             @click="handleLogout"
           />
         </div>
-        <!-- <div  @click="handleEnter"> 
+        <div v-if="role == 'ADMIN'"  @click="handleEnter"> 
           <img src="@/assets/img/home/setting.png" alt="" />
           <span>后台管理</span>
-        </div> -->
+        </div>
       </div>
     </div>
     <router-view></router-view>
@@ -33,13 +33,19 @@ export default {
   data() {
     return {
       user: {},
+      role:''
     };
   },
   created() {
     let state = Cookies.get("state"); //获取缓存看是否登录过
     if (state == "jwtok") {
       this.user = { username: Cookies.get("usre") };
+      this.userName = Cookies.get("usre");
+      let Role = JSON.parse(Cookies.get("setUser"));
+       this.role = Role[0].role.stringValue;
     }
+
+
   },
   methods: {
     handleLogout() {
@@ -70,7 +76,7 @@ export default {
     handleEnter() {
       let state = Cookies.get("state"); //获取缓存看是否登录过
       if (state == "jwtok") {
-        this.$router.push("/");
+        this.$router.push("/manage");
       } else {
         this.$router.push("/login");
       }
