@@ -11,67 +11,14 @@
     </h4>
     <div class="desc" v-if="publishInfo.description">
       {{ publishInfo.description }}
+      <span v-if="flowInfo.instructionFileId">（<span  class="instruction" @click="handShowInstructions">查看说明书</span>）</span>
+      
     </div>
+
 
     <div v-if="list.length">
       <div class="config">
-        <div class="config_r" ref="imgWrap"  :style="{backgroundImage:`url(${coverFileImg})`}"  @click="handleViewShow">
-          <Icon type="ios-expand" />
-        </div>
-        <div class="config_input"  v-for="child in list" :key="child.id">
-          <!-- 文件输入 -->
-          <div v-if="child.type === 0">
-            <div class="label">
-              {{ child.name }} <span class="fileDonw"  @click="handleDownload(child)">(样例下载)</span>
-            </div>
-            <div>
-              <div @click="handleUpload(child)">
-                <Upload
-                  :disabled="mode !== 'edit'"
-                  action="/null"
-                  :before-upload="handleBeforeUpload"
-                >
-                  <Button class="uploadBtn" icon="md-cloud-upload"
-                    >上传文件</Button
-                  >
-                </Upload>
-                <p class="fileName" v-if="fileMap[child.id] || ( mode !== 'edit' )">{{mode !== 'edit' ? child.customValue:fileMap[child.id] }}</p>
-              </div>
-            </div>
-          </div>
-          <!-- 普通输入 -->
-          <div v-if="child.type === 1">
-            <div class="label">
-              {{ child.name }}       
-              <Poptip trigger="hover" placement="top" >
-                  <Icon type="md-help-circle" style="color:rgba(0, 0, 0, 0.4)" />
-                  <div class="toptipContent" slot="content">
-                      <p>所属组件：<span>{{child.stopName}}</span> </p>
-                      <p>推荐值：<span>{{child.customValue1}}</span> </p>
-                      <p>描述：<span>{{child.description}}</span> </p>
-                  </div>
-              </Poptip>
-            </div>
-            <div>
-              <Input
-                :disabled="mode !== 'edit'"
-                :placeholder="child.description"
-                v-model="child.customValue"
-              ></Input>
-            </div>
-  
-        </div>  
-        </div>
-  
-      </div>
-
-
-    </div>
-
-
-    <div v-if="list1.length">
-      <div class="config1">
-        <div class="config1_r"  @click="handleViewShow(true)" >
+        <div class="config_r"  @click="handleViewShow(true)" >
             <Icon type="ios-expand" />
             <img :src="coverFileImg" alt="">
         </div>
@@ -372,6 +319,30 @@ export default {
       });
       this.list = list;
     },
+    async handShowInstructions() {
+      this.$event.emit('loading',true)
+      const res = await downloadFile(this.flowInfo.instructionFileId);
+      // 将文件流转化为本地blod地址
+      var binaryData = [];
+      binaryData.push(res.data);
+      // 记得一定要设置application的类型
+      let url = window.URL.createObjectURL(
+        new Blob(binaryData, {
+          type: "application/pdf;charset=utf-8",
+        })
+      );
+      if (url != null && url != undefined && url) {
+        const { href } = this.$router.resolve({
+          path: "/pdf",
+          query: {
+            url: url,
+          },
+        });
+        // 新页面打开
+        window.open(href, "_blank");
+      }
+      this.$event.emit('loading',false)
+    },
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
     },
@@ -409,69 +380,6 @@ export default {
     
     <style lang="scss" scoped>
 @import "../../index.scss";
-::v-deep .config{
-  overflow: hidden;
-  background: #f7f9fa;
-  padding: 48px 40px;
-  margin-top: 32px;
-  border-radius:  8px 8px 0 0 ;
-  &_r{
-    float: right;
-    width: 44%;
-    background-size: contain;
-    background-repeat: no-repeat;
-    height: 340px;
-    margin-bottom: 20px;
-    position: relative;
-    i{
-      position: absolute;
-      right: 10px;
-      top: 6px;
-      font-size: 23px;
-      opacity: 0.9;
-    }
-  }
-  &_input{
-    float: left;
-    width: 25%;
-    padding: 0 20px 20px 0;
-    box-sizing: border-box;
-    height: 120px;
-    
-    .ivu-input {
-      border-radius: 6px;
-    }
-    .label{
-      color: #18181B;
-      font-size: 14px;
-      margin-bottom: 16px;
-    }
-    .uploadBtn {
-      background: #E6F1FE;
-      border: none;
-      color: #005BC4;
-      font-size: 11px;
-    }
-    .fileName{
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 100%;
-      color: #9b9393;
-    }
-    .fileDonw{
-        color: #005BC4;
-        font-size: 12px;
-        text-decoration-line: underline;
-        cursor: pointer;
-    }
-    .toptipContent{
-      word-break: break-all;
-      white-space: normal;
-      max-width: 400px;
-    }
-  }
-}
 
 .btn {
   button {
@@ -520,7 +428,7 @@ export default {
   }
 }
 
-::v-deep .config1 {
+::v-deep .config {
   overflow: hidden;
   background: #f7f9fa;
   padding: 48px 40px;
@@ -557,6 +465,7 @@ export default {
     overflow: hidden;
     border-radius: 6px;
     margin-bottom: 20px;
+    border: 1px dashed #3974AA;
     h4 {
       line-height: 26px;
       background: #3974AA;
@@ -566,7 +475,6 @@ export default {
     >div{
       display: flex;
       flex-wrap: wrap;
-      border: 1px dashed #3974AA;
       border-radius: 0 0 6px 6px;
       border-top: none;
     }
@@ -635,5 +543,11 @@ export default {
       padding-bottom: 6px;
     }
   }
+
+}
+.instruction{
+  color: #005bc4;
+  cursor: pointer;
+  text-decoration: underline;
 }
 </style>

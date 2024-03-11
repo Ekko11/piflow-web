@@ -337,7 +337,7 @@ export default {
     if (!!isRole && isRole[0].role.stringValue !== "ADMIN") {
       hideList = ["categoryManagement","flowManagement","operationManagement",];
     } else {
-      hideList = ["flowHistory", "preference","produceAccreditManagement",];
+      hideList = ["flowHistory", "preference"];
     }
     console.log(hideList);
     this.menulist.forEach((item, index, arr) => {

@@ -3,21 +3,23 @@
     <Flow mode="edit" ref="flow" :flowInfo="publishInfo" />
     <div class="history">
       <div class="history_btn">
-        <Button class="run" @click="handleRun()">运行</Button>
-
         <Button @click="historyIsShow = !historyIsShow"
           >历史记录
           <Icon
             :type="historyIsShow ? 'md-arrow-dropup' : 'md-arrow-dropdown'"
           />
         </Button>
+        <div>
+          <Button class="stop" @click="handleRun()">暂存</Button>
+          <Button class="run" @click="handleRun()">运行</Button>
+        </div>
       </div>
       <div v-show="historyIsShow" class="history_list">
         <Table :columns="columns" :data="historyData">
           <template slot-scope="{ row }" slot="action">
             <div class="btn">
               <Button @click="handleEnter(row)">查看</Button>
-              <!-- <Button @click="handleShowLog(row)">日志查看</Button> -->
+              <Button @click="handleShowLog(row)">日志查看</Button>
               <Button v-if="row.dataProductList.some((v) => v.file)" @click="handleDownDataProduct(row)">数据产品下载</Button>
               <Button
                 v-if="
@@ -45,20 +47,22 @@
     </div>
 
     <PublishModal ref="PublishModalRef" />
+    <Log ref="LogRef" />
   </div>
 </template>
   
   <script>
 import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
-import { getProcessPageByPublishingId } from "@/apis/process";
+import { getProcessPageByPublishingId,getLogUrl } from "@/apis/process";
 import { downloadFile, download, downloadFileByIds } from "@/apis/file";
 import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
 import Flow from "../components/flow";
-import axios from "axios";
+import Log from "../components/Log";
 export default {
   components: {
     PublishModal,
     Flow,
+    Log
   },
   data() {
     return {
@@ -90,6 +94,10 @@ export default {
           width: 150,
           align: "center",
         },
+         {
+          title: "结束时间",
+          key: "lastUpdateDttm",
+        },
         {
           title: "操作",
           slot: "action",
@@ -119,6 +127,11 @@ export default {
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
     },
+    // 暂停
+    async  handleStop(){
+      
+    },
+    // 运行
     async handleRun() {
       this.$event.emit("loading", true);
       if(this.publishInfo.id === '1764900256811581440'){
@@ -172,14 +185,23 @@ export default {
         });
       }
     },
-
+    //查看进程
     handleEnter(row) {
       this.$router.push(`/home/flowProcess?processId=${row.id}`);
     },
-    handShowInstructions(row) {
-      console.log(row);
+    // 查看日志
+    async handleShowLog(row){
+      const res = await  getLogUrl({appId:row.appId})
+      if(res.data.code === 200 && res.data.stderrLog.includes('http')){
+          this.$refs.LogRef.handleOpen(res.data.stdoutLog,res.data.stderrLog)
+      }else{
+         this.$Message.warning({
+          content: '暂无日志',
+          duration: 3,
+        });
+      }
+        console.log(row)
     },
-
     async getHistoryList() {
       const data = {
         limit: 10,

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { formDataFormat } from '@/utils/formDataFormat'
 
 // 根据发布流水线Id分页获取运行历史列表
 export function getProcessPageByPublishingId (data) {
@@ -46,4 +47,30 @@ export function getProcessHistoryPageOfSelf (data) {
         data
     })
 }
+
+
+// 获取日志地址
+export function getLogUrl (data) {
+    return axios({
+        method:'post',
+        url:'/process/getLogUrl',
+        data:formDataFormat(data),
+        headers:{
+            'Content-Type':'multipart/form-data'
+        },
+    })
+}
+
+// 获取日志详情
+export function getLog (data) {
+    return axios({
+        method:'post',
+        url:'/process/getLog',
+        data:formDataFormat(data),
+        headers:{
+            'Content-Type':'multipart/form-data'
+        },
+    })
+}
+
 

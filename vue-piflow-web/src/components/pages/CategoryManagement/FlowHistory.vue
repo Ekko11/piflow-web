@@ -61,6 +61,10 @@ export default {
           key: "startTime",
         },
         {
+          title: "结束时间",
+          key: "lastUpdateDttm",
+        },
+        {
           title: "运行状态",
           key: "state.text",
           render: (h, params) => {
@@ -87,7 +91,7 @@ export default {
       });
       this.tableData = res.data.data
       this.total = res.data.count
-      console.log(res);
+      if(this.total) this.isOpen = true 
     },
     handleEnter(row) {
       this.$router.push(
