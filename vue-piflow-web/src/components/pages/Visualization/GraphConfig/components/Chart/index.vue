@@ -35,7 +35,7 @@ const  toolbox = {
           yAxisIndex: false
         },
         brush: {
-          type: ['clear']
+          type: ['']
         },
         myText: {
           show: true,

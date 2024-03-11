@@ -39,8 +39,8 @@ const InitState = () => ({
         type: 'slider',
         show:false,
         xAxisIndex: [0],
-        bottom: 5,
-        height: 10,
+        bottom: 0,
+        height: 20,
         end :100
       }
     ],
@@ -141,7 +141,7 @@ const InitState = () => ({
     type: "line",
     smooth: true,
     label: {
-      show: true,
+      show: false,
     },
     lineStyle: {
       // color: "#000",
@@ -155,7 +155,7 @@ const InitState = () => ({
     type: "bar",
     barMaxWidth: "20",
     label: {
-      show: true,
+      show: false,
       distance: 10,
       color: "#000",
       position: "top",

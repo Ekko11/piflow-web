@@ -77,6 +77,7 @@
     <div class="item" v-if="!formData.id">
       <label class="self">{{$t('visualconfig.datasource')}}：</label>
       <Select v-model="formData.graphTemplateId" 
+      :transfer="true"
         style="width:350px">
         <Option
             v-for="item in dataSourceList"

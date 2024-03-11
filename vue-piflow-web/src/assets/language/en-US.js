@@ -146,6 +146,7 @@ module.exports = {
         update_title: "Visualization Source Configuration",
         database:'MySQL',
         datasheet:'Table',
+        sheetName:'Sheet Name',
         type:'Type',
         upload:'Upload Excel',
         name:'Name',

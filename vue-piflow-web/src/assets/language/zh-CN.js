@@ -146,6 +146,7 @@ module.exports = {
         update_title: "更改数据源配置",
         database:'数据库',
         datasheet:'数据表',
+        sheetName:'工作表',
         type:'类型',
         upload:'上传Excel',
         name:'名称',

@@ -115,6 +115,16 @@
             <Icon type="ios-trash"  @click="handleDelFile"/>
           </div>
         </div>
+        <div class="item" v-if="formData.type === 'excel' &&  !formData.id">
+          <label>{{ $t("datasource.sheetName") }}：</label>
+          <Input
+            v-model="formData.sheetName"
+            show-word-limit
+            maxlength="100"
+            :placeholder="$t('modal.placeholder')"
+            style="width: 350px"
+          />
+        </div>
         <div class="item" v-if="formData.type === 'mysql' || formData.id">
           <label class="self">{{ $t("datasource.database") }}：</label>
           <Select
@@ -136,7 +146,9 @@
           v-if="dataSheetList.length && (formData.type === 'mysql' || formData.id)"
         >
           <label class="self">{{ $t("datasource.datasheet") }}：</label>
-          <Select v-model="formData.tableName" style="width: 350px">
+          <Select v-model="formData.tableName"
+          :transfer="true"
+           style="width: 350px">
             <Option v-for="item in dataSheetList" :value="item" :key="item">
               {{ item }}</Option
             >
