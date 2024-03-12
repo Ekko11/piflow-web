@@ -129,7 +129,7 @@
 </template>
 
 <script>
-import PublishModal from './PublishModal'
+import PublishModal from './PublishModal/index.vue'
 export default {
   name: "flow",
   components: {PublishModal},
