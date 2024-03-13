@@ -22,9 +22,6 @@ export default {
       stdoutLog:'',
     };
   },
-  created() {
-    this.handleOpen();
-  },
   methods: {
     handleOpen(stdoutLog, stderrLog) {
       this.stdoutLog = stdoutLog;

@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import PublishModal from "../PublishModal";
+import PublishModal from '../PublishModal/index.vue'
 
 import { deleteFlowPublish,getflowPublishList } from "@/apis/flowPublish";
 

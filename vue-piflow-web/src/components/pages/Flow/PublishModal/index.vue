@@ -17,15 +17,16 @@
               v-for="(item, index) in stops"
               :key="index"
               @click="currentStop = item"
+              :class="{ active: currentStop.stopId === item.stopId }"
             >
               <span>
+                {{ item.stopName }}
                 <Icon
                   v-if="item.checked"
                   style="color: #2f7ae1; font-size: 16px"
                   type="md-checkbox-outline"
                 />
-                {{ item.stopName }}</span
-              >
+              </span>
             </li>
           </ul>
         </div>
@@ -68,7 +69,7 @@
                 <Input
                   v-model="child.description1"
                   type="textarea"
-                  :rows="3"
+                  :rows="2"
                   :placeholder="child.description"
                   style="width: 300px"
                 />
@@ -113,9 +114,9 @@
 
       <!-- 右 -->
       <div class="content_r">
-        <h4>发布信息</h4>
+        <h4>发布配置</h4>
 
-        <Collapse simple>
+        <Collapse simple accordion v-model="collapseValue">
           <Panel name="1">
             发布信息
             <div slot="content">
@@ -131,7 +132,7 @@
                     placeholder="Enter publish name"
                   ></Input>
                 </FormItem>
-                <FormItem label="分类：" prop="name">
+                <FormItem label="分类：" prop="productTypeId">
                   <treeselect
                     v-model="formData.productTypeId"
                     :placeholder="$t('modal.placeholder_select')"
@@ -155,7 +156,7 @@
                     action="/null"
                     :before-upload="handleBeforeCoverFileUpload"
                     :show-upload-list="false"
-                    style="width: 350px"
+                    style="width: 100%"
                     accept=".jpg, .jpeg, .png"
                     class="upload"
                   >
@@ -177,11 +178,12 @@
                   </Upload>
                 </FormItem>
 
-                <FormItem label="说明书：" prop="coverFile">
+                <FormItem label="说明书：" prop="instruction">
                   <Upload
                     action="/aaa"
                     accept=".pdf"
                     :before-upload="handleBeforeinstructionFileUpload"
+                    style="width: 100%;"
                   >
                     <Button icon="ios-cloud-upload-outline"
                       >Upload files</Button
@@ -199,45 +201,88 @@
           <Panel name="2">
             组件分组
             <div slot="content">
-              <h4>当前已选中组件</h4>
+              <h4>
+                待分组组件
+              </h4>
               <!-- 待选列表 -->
-              <div>
-                <ul class="drop_content" @dragover.prevent @drop="handleDrop($event,waitingList)">
-                  <li
-                    v-for="item in waitingList"
-                    :key="item.id"
-                    draggable="true"
-                    @dragstart="handleDropStart($event,item,waitingList)"
+              <div
+                class="drop_content"
+                @dragover.prevent
+                @drop="handleDrop($event, waitingList)"
+              >
+                <p
+                  v-for="item in waitingList"
+                  :key="item.id"
+                  draggable="true"
+                  @dragstart="handleDropStart($event, item, waitingList)"
+                >
+                  {{ item.stopName }}
+                </p>
+              </div>
+
+              <h4 class="group_title">
+                分组排序
+                <Button size="small" @click="handleAddGroupList"
+                  >添加分组</Button
+                >
+              </h4>
+              <draggable
+                v-model="groupList"
+                group="site"
+                animation="300"
+                dragClass="dragClass"
+                ghostClass="ghostClass"
+                chosenClass="chosenClass"
+                handle=".move"
+              >
+                <transition-group>
+                  <div
+                    v-for="(item, index) in groupList"
+                    class="group_item"
+                    :key="index"
                   >
-                    <p>{{ item.stopName }}</p>
-                  </li>
-                </ul>
-              </div>
+                    <Icon
+                      type="md-close-circle"
+                      class="close"
+                      @click="handleDeleteGroupItem(index)"
+                    />
 
-              <h4>分组列表</h4>
+                    <div class="item">
+                      <label>
+                        <Icon type="ios-menu" class="move" /> 名称：</label
+                      >
+                      <Input
+                        v-model="item.name"
+                        show-word-limit
+                        maxlength="100"
+                        :placeholder="$t('modal.placeholder')"
+                        style="width: 300px"
+                      />
+                    </div>
 
-              <div v-for="(item,index) in groupList" :key="index">
-                <div class="item">
-                  <label>分组名称：</label>
-                  <Input
-                    v-model="item.name"
-                    show-word-limit
-                    maxlength="100"
-                    :placeholder="$t('modal.placeholder')"
-                    style="width: 300px"
-                  />
-                </div>
-                <div class="drop_content"  @dragover.prevent @drop="handleDrop($event,item.list)">
-                    <p v-for="child in item.list" :key="child.stopId"                      
-                    draggable="true"
-                    @dragstart="handleDropStart($event,child,item.list)">{{child.stopName}}</p>
-                </div>
-              </div>
-
-
-              <div>
-                <Button @click="handleAddGroupList">添加分组</Button>
-              </div>
+                    <div class="item">
+                      <label>组件：</label>
+                      <div
+                        class="drop_content"
+                        @dragover.prevent
+                        @drop="handleDrop($event, item.list)"
+                      >
+                        <div v-show="!item.list.length" class="placeholder">
+                          请将上方待分组组件拖入该区域
+                        </div>
+                        <p
+                          v-for="child in item.list"
+                          :key="child.stopId"
+                          draggable="true"
+                          @dragstart="handleDropStart($event, child, item.list)"
+                        >
+                          {{ child.stopName }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </transition-group>
+              </draggable>
             </div>
           </Panel>
         </Collapse>
@@ -261,13 +306,18 @@ import { pinyin } from "pinyin-pro";
 import { findTree } from "@/utils/tree";
 import { getDataProductType, getStopsInfoByFlowId } from "@/apis/dataProduct";
 import { getPublishingById, publishingStops } from "@/apis/flowPublish";
+import { uploadFile, downloadFile } from "@/apis/file";
 
+import draggable from "vuedraggable";
 export default {
+  components: { draggable },
   data() {
     return {
       formData: {},
-      open: true,
+      collapseValue:'1',
+      open: false,
       stops: [], //组件列表
+      activeStopLi: 0,
       treeData: [],
       fileList: [],
       currentStop: null, //当前展示组件
@@ -276,12 +326,13 @@ export default {
       instructionFile: null,
       selectedList: [], //已选列表
       waitingList: [], //待选列表
-       //分组
-      groupList: [{
-        name:'',
-        sort:'',
-        list:[]
-      }],
+      //分组
+      groupList: [
+        {
+          name: "",
+          list: [],
+        },
+      ],
       cascaderData: [
         //级联选项
         {
@@ -311,6 +362,20 @@ export default {
             trigger: "blur",
           },
         ],
+        productTypeId: [
+          {
+            required: true,
+            message: "The productType cannot be empty",
+            trigger: "blur",
+          },
+        ],
+        instruction: [
+          {
+            required: true,
+            message: "The instruction cannot be empty",
+            trigger: "blur",
+          },
+        ],
         coverFile: [
           {
             required: true,
@@ -322,26 +387,264 @@ export default {
     };
   },
   methods: {
-    handleAddGroupList(){
-        this.groupList.push({
-        name:'',
-        sort:'',
-        list:[]
-      })
-    },
-    // 开始拖拽
-    handleDropStart(e,item,list){
-        this.dragItem = item   //当前操作项
-        this.actionList = list      //当前操作的列表（从哪个列表拖走的）
-    },
-    // 放到目的区域
-    handleDrop(e,list){ 
-      const i =  this.actionList.findIndex(v=>v.stopId === this.dragItem.stopId)
-      list.push(this.dragItem)    //拖拽放入目标列表
-      this.actionList.splice(i,1)
+    async handleAdd(row) {
+      if (row.id !== this.formData.flowId) {
+        this.$event.emit("loading", true);
+        this.reSet();
+        this.formData.flowId = row.id;
+        this.formData.description = row.description;
+        await this.handleGetFlowStops(row.id);
+        this.$event.emit("loading", false);
+      }
+      this.open = true;
     },
 
-    handleSave() {},
+    async handleEdit(row) {
+      this.reSet();
+      this.open = true;
+      this.groupList = [];
+      this.$event.emit("loading", true);
+      await this.handleGetFlowStops(row.flowId);
+      const res = await getPublishingById(row.id);
+      this.$event.emit("loading", false);
+      const publishInfo = res.data.data;
+      this.formData.flowId = row.flowId;
+      const {
+        id,
+        name,
+        productTypeId,
+        description,
+        version,
+        coverFileId,
+        instructionFileName,
+      } = publishInfo;
+      this.formData = {
+        flowId: row.flowId,
+        id,
+        name,
+        productTypeId,
+        description,
+        version,
+        instructionFileName,
+      };
+      this.getCoverFileImg(coverFileId);
+      const publishStops = publishInfo.stops;
+
+      if (publishStops.length) {
+        this.selectedList = publishStops;
+        publishStops.forEach((item) => {
+          let t = this.groupList.findIndex((v) => v.name === item.bak2);
+          if (t === -1) {
+            this.groupList.push({
+              name: item.bak2,
+              sort: item.bak1,
+              list: [item],
+            });
+          } else {
+            this.groupList[t].list.push(item);
+          }
+
+          // 属性回填
+          let index = this.stops.findIndex((v) => v.stopId === item.stopId);
+          this.stops[index].checked = true;
+          this.stops[index].bak1 = item.bak1;
+          this.stops[index].bak2 = item.bak2;
+          item.stopPublishingPropertyVos.forEach((child) => {
+            let idx = this.stops[index].stopPublishingPropertyVos.findIndex(
+              (v) => v.propertyId === child.propertyId
+            );
+            this.stops[index].bak1 = child.bak1;
+            this.stops[index].stopPublishingPropertyVos[idx].checked = true;
+            this.stops[index].stopPublishingPropertyVos[idx].id = child.id;
+            this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
+            this.stops[index].stopPublishingPropertyVos[idx].description =
+              child.description;
+            this.stops[index].stopPublishingPropertyVos[idx].description1 =
+              child.description;
+
+            this.stops[index].stopPublishingPropertyVos[idx].fileId =
+              child.fileId;
+            this.stops[index].stopPublishingPropertyVos[idx].fileName =
+              child.fileName;
+            this.stops[index].stopPublishingPropertyVos[idx].version =
+              child.version;
+            this.stops[index].stopPublishingPropertyVos[idx].publishingId =
+              child.publishingId;
+            this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
+            this.stops[index].stopPublishingPropertyVos[idx].cascaderType =
+              child.type === 2 ? [child.type] : [1, child.type];
+          });
+        });
+
+        this.groupList.sort((a, b) => a.sort - b.sort);
+      }
+      console.log(this.stops);
+    },
+
+    // 点击保存  处理数据
+    handleSave() {
+      if (this.waitingList.length) {
+        this.$Message.error({
+          content: "请将所有已选组件进行分组",
+          duration: 3,
+        });
+        return;
+      }
+      if (
+        !this.formData.productTypeId ||
+        !this.formData.name ||
+        !this.coverFile ||
+        !this.instructionFile
+      ) {
+        this.$refs.formValidate.validate((valid) => {});
+        this.$Message.error({
+          content: "请将发布信息补充完整",
+          duration: 3,
+        });
+        return;
+      }
+
+      // 组件添加分类名称和排序属性
+      let stopList = [];
+      this.groupList.forEach((v, i) => {
+        v.list.forEach((it) => {
+          it.bak1 = i + "";
+          it.bak2 = v.name;
+        });
+        stopList = stopList.concat(v.list);
+      });
+
+      if (!stopList.length) {
+        this.$Message.error({
+          content: "请至少选择一个组件",
+          duration: 3,
+        });
+        return;
+      }
+      // 获取分类信息
+      const productNode = findTree(this.treeData, this.formData.productTypeId);
+      this.formData.productTypeId = Number(this.formData.productTypeId);
+      this.formData.productTypeName = productNode.name;
+      this.formData.productTypeDescription = productNode.description;
+
+      let errMsg = "";
+      // 筛选stops中的选中项
+      stopList = stopList.map((item) => ({
+        ...item,
+        stopPublishingPropertyVos: item.stopPublishingPropertyVos.filter(
+          (prop) => {
+            if (prop.checked) {
+              prop.description = prop.description1 || prop.description;
+              //输入类型
+              if (prop.cascaderType.length === 2) {
+                if (prop.cascaderType[1] === 0 && !prop.fileName) {
+                  //文件
+                  errMsg = `请确保组件 ${item.stopName} 的参数 ${prop.propertyName} 的文件不为空`;
+                }
+                prop.type = prop.cascaderType[1];
+              } else {
+                prop.type = prop.cascaderType[0] || 1; //默认普通输入
+              }
+            }
+            return prop.checked;
+          }
+        ),
+      }));
+      // 选中项空文件提示
+      if (errMsg) {
+        this.$Message.error({
+          content: errMsg,
+          duration: 3,
+        });
+        return;
+      }
+      this.handlePublish(stopList);
+    },
+    // 请求发送接口
+    async handlePublish(data) {
+      this.formData.stops = data;
+      this.$event.emit("loading", true);
+      const res = await publishingStops(this.formData);
+      if (res.data.code === 200) {
+        //需要上传文件
+        let promiseList = [];
+        if (this.fileList.length || this.coverFile || this.instructionFile) {
+          const returnPropsList = res.data.data;
+          if (returnPropsList.length && this.fileList.length) {
+            // 多次上传文件
+            this.fileList.forEach((item) => {
+              const resObj = returnPropsList.find(
+                (v) => v.propertyId === item.id
+              );
+              if (resObj) {
+                // 组件stop上传文件
+                const res = uploadFile({
+                  associateType: 3,
+                  associateId: resObj.id,
+                  file: item.file,
+                });
+                promiseList.push(res);
+              }
+            });
+          }
+
+          // 上传封面文件
+          if (this.coverFile) {
+            const coverFileRes = uploadFile({
+              associateType: 5,
+              associateId: res.data.data[0].publishingId,
+              file: this.coverFile,
+            });
+            promiseList.push(coverFileRes);
+          }
+          // 上传说明书
+          if (this.instructionFile) {
+            const instructionFileRes = uploadFile({
+              associateType: 6,
+              associateId: res.data.data[0].publishingId,
+              file: this.instructionFile,
+            });
+            promiseList.push(instructionFileRes);
+          }
+
+          // 判断多次上传文件是否成功
+          Promise.all(promiseList).then((res) => {
+            let errPromise = res.filter((v) => v.data.code !== 200);
+            this.$event.emit("loading", false);
+            if (!errPromise.length) {
+              this.$Message.success({
+                content: this.$t("tip.success"),
+                duration: 3,
+              });
+              this.open = false;
+              this.reSet();
+            } else {
+              this.$Message.error({
+                content: this.$t("tip.fault_content"),
+                duration: 3,
+              });
+              this.open = false;
+            }
+            console.log(res);
+          });
+        } else {
+          //编辑不需要上传文件
+          this.$event.emit("loading", false);
+          this.open = false;
+          this.$Message.success({
+            content: this.$t("tip.success"),
+            duration: 3,
+          });
+        }
+      } else {
+        this.$event.emit("loading", false);
+        this.$Message.error({
+          content: this.$t("tip.fault_content"),
+          duration: 3,
+        });
+        this.open = false;
+      }
+    },
 
     // 获取流水线原始组件列表
     async handleGetFlowStops(id) {
@@ -373,8 +676,38 @@ export default {
       this.stops = this.stops.filter(
         (v) => v.stopPublishingPropertyVos && v.stopPublishingPropertyVos.length
       );
-      this.currentStop = this.stops[0];
       this.sortArrayByPinyin(this.stops);
+      this.currentStop = this.stops[0];
+    },
+
+    // 删除分组
+    handleDeleteGroupItem(index) {
+      this.waitingList = this.waitingList.concat(this.groupList[index].list);
+      this.groupList.splice(index, 1);
+    },
+    // 添加分组
+    handleAddGroupList() {
+      this.groupList.unshift({
+        name: "",
+        list: [],
+      });
+    },
+    // 开始拖拽
+    handleDropStart(e, item, list) {
+      this.dragItem = item; //当前操作项
+      this.actionList = list; //当前操作的列表（从哪个列表拖走的）
+    },
+    // 放到目的区域
+    handleDrop(e, list) {
+      if (!this.dragItem) return;
+      const i = this.actionList.findIndex(
+        (v) => v.stopId === this.dragItem.stopId
+      );
+      list.push(this.dragItem); //拖拽放入目标列表
+      this.actionList.splice(i, 1);
+
+      this.dragItem = "";
+      this.actionList = [];
     },
 
     // 重置
@@ -389,6 +722,14 @@ export default {
       this.coverFile = null;
       this.coverFileImg = null;
       this.instructionFile = null;
+      this.selectedList = [];
+      this.waitingList = [];
+      this.groupList = [
+        {
+          name: "",
+          list: [],
+        },
+      ];
     },
 
     // 属性选中  组件自动选中
@@ -416,12 +757,10 @@ export default {
           this.waitingList.splice(index, 1);
         }
       } else {
-        console.log(stop, this.selectedList);
         // 如果选中且未加入已选中列表，加入已分组待分组列表
         const index = this.selectedList.findIndex(
           (v) => v.stopId === stop.stopId
         );
-        console.log(index);
         if (index === -1) {
           this.selectedList.push(stop);
           this.waitingList.push(stop);
@@ -496,11 +835,9 @@ export default {
   },
   created() {
     this.getTreeData();
-    this.handleGetFlowStops("d06c0c87f3cb45059bf88eab24d7ed25");
   },
 };
 </script>
-
 
 <style lang="scss" scoped>
 @import "./index.scss";

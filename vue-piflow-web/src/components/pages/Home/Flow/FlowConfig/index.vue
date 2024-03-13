@@ -20,12 +20,16 @@
             <div class="btn">
               <Button @click="handleEnter(row)">查看</Button>
               <Button @click="handleShowLog(row)">日志查看</Button>
-              <Button v-if="row.dataProductList.some((v) => v.file)" @click="handleDownDataProduct(row)">数据产品下载</Button>
+              <Button
+                v-if="row.dataProductList.some((v) => v.file)"
+                @click="handleDownDataProduct(row)"
+                >数据产品下载</Button
+              >
               <Button
                 v-if="
                   row.dataProductList &&
-                  row.dataProductList.length &&
-                  row.dataProductList.some((v) => v.state ===3)
+                    row.dataProductList.length &&
+                    row.dataProductList.some((v) => v.state === 3)
                 "
                 @click="handDataPublish(row)"
                 >数据产品发布</Button
@@ -50,10 +54,10 @@
     <Log ref="LogRef" />
   </div>
 </template>
-  
-  <script>
+
+<script>
 import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
-import { getProcessPageByPublishingId,getLogUrl } from "@/apis/process";
+import { getProcessPageByPublishingId, getLogUrl } from "@/apis/process";
 import { downloadFile, download, downloadFileByIds } from "@/apis/file";
 import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
 import Flow from "../components/flow";
@@ -62,7 +66,7 @@ export default {
   components: {
     PublishModal,
     Flow,
-    Log
+    Log,
   },
   data() {
     return {
@@ -89,12 +93,14 @@ export default {
           title: "运行状态",
           key: "state",
           render: (h, params) => {
-            return h("span", [  (params.row.state && params.row.state.text) || 'INIT']);
+            return h("span", [
+              (params.row.state && params.row.state.text) || "INIT",
+            ]);
           },
           width: 150,
           align: "center",
         },
-         {
+        {
           title: "结束时间",
           key: "lastUpdateDttm",
         },
@@ -128,31 +134,24 @@ export default {
       this.$refs.PublishModalRef.handleAdd(row);
     },
     // 暂停
-    async  handleStop(){
-      
-    },
+    async handleStop() {},
     // 运行
     async handleRun() {
       this.$event.emit("loading", true);
-      if(this.publishInfo.id === '1764900256811581440'){
-        this.publishInfo.stops.find(v=>v.stopId === 'a01ef52f1d32459c9629f2f0ce8ed1ad').stopPublishingPropertyVos.find(v=>v.id === '1764900256811581448').customValue =  this.publishInfo.stops.find(v=>v.stopId === 'd1573fbedec54738943bd228d73040c1').stopPublishingPropertyVos.find(v=>v.id === '1764900256811581453').customValue
-        this.publishInfo.stops.find(v=>v.stopId === 'a01ef52f1d32459c9629f2f0ce8ed1ad').stopPublishingPropertyVos.find(v=>v.id === '1764900256811581449').customValue =  this.publishInfo.stops.find(v=>v.stopId === 'd1573fbedec54738943bd228d73040c1').stopPublishingPropertyVos.find(v=>v.id === '1764900256811581452').customValue
-      }
-      const data =  JSON.parse(JSON.stringify(this.publishInfo))
-      data.stops.forEach(v => {
-          v.stopPublishingPropertyVos.forEach(k=>{
-            k.customValue = k.customValue ? k.customValue:k.customValue1
-            delete k.allowableValues1
-          })
+      const data = JSON.parse(JSON.stringify(this.publishInfo));
+      data.stops.forEach((v) => {
+        v.stopPublishingPropertyVos.forEach((k) => {
+          k.customValue = k.customValue ? k.customValue : k.customValue1;
+          delete k.allowableValues1;
+        });
       });
 
       const res = await runPublishFlow(data);
       this.$event.emit("loading", false);
       this.$router.push(
-          `/home/flowProcess?processId=${res.data.data.processId}`
-        );
+        `/home/flowProcess?processId=${res.data.data.processId}`
+      );
 
-        
       // if (res.data.code === 200) {
       //   this.$router.push(
       //     `/home/flowProcess?processId=${res.data.data.processId}`
@@ -168,13 +167,13 @@ export default {
     async handleGetStopsById() {
       const res = await getPublishingById(this.$route.query.id);
       if (res.data.code === 200) {
-       res.data.data.stops =  res.data.data.stops.map((v) => ({
+        res.data.data.stops = res.data.data.stops.map((v) => ({
           ...v,
-          stopPublishingPropertyVos:v.stopPublishingPropertyVos.map(k=>({
+          stopPublishingPropertyVos: v.stopPublishingPropertyVos.map((k) => ({
             ...k,
-            customValue1:k.customValue,
-            customValue:'',
-          }))
+            customValue1: k.customValue,
+            customValue: "",
+          })),
         }));
         this.publishInfo = res.data.data;
         this.getHistoryList();
@@ -190,17 +189,16 @@ export default {
       this.$router.push(`/home/flowProcess?processId=${row.id}`);
     },
     // 查看日志
-    async handleShowLog(row){
-      const res = await  getLogUrl({appId:row.appId})
-      if(res.data.code === 200 && res.data.stderrLog.includes('http')){
-          this.$refs.LogRef.handleOpen(res.data.stdoutLog,res.data.stderrLog)
-      }else{
-         this.$Message.warning({
-          content: '暂无日志',
+    async handleShowLog(row) {
+      const res = await getLogUrl({ appId: row.appId });
+      if (res.data.code === 200 && res.data.stderrLog.includes("http")) {
+        this.$refs.LogRef.handleOpen(res.data.stdoutLog, res.data.stderrLog);
+      } else {
+        this.$Message.warning({
+          content: "暂无日志",
           duration: 3,
         });
       }
-        console.log(row)
     },
     async getHistoryList() {
       const data = {
@@ -227,8 +225,8 @@ export default {
   },
 };
 </script>
-  
-  <style lang="scss" scoped>
+
+<style lang="scss" scoped>
 @import "../../index.scss";
 
 ::v-deep .contain {

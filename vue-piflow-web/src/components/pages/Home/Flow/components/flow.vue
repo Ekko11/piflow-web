@@ -11,85 +11,113 @@
     </h4>
     <div class="desc" v-if="publishInfo.description">
       {{ publishInfo.description }}
-      <span v-if="flowInfo.instructionFileId">（<span  class="instruction" @click="handShowInstructions">查看说明书</span>）</span>
-      
+      <span v-if="flowInfo.instructionFileId"
+        >（<span class="instruction" @click="handShowInstructions"
+          >查看说明书</span
+        >）</span
+      >
     </div>
-
 
     <div v-if="list.length">
       <div class="config">
-        <div class="config_r"  @click="handleViewShow(true)" >
-            <Icon type="ios-expand" />
-            <img :src="coverFileImg" alt="">
+        <div class="config_r" @click="handleViewShow(true)">
+          <Icon type="ios-expand" />
+          <img :src="coverFileImg" alt="" />
         </div>
-        
-        <div>
+
+        <div v-if="list.length">
           <div
-          v-for="(item, index) in list1"
-          :class="`config_l config_l${index}`"
-          :key="index"
-        >
-          <h4>{{ item.name }}</h4>
-          <div>
-            <div v-for="child in item.list" class="config_input" :key="child.id">
-              <!-- 文件输入 -->
-              <div v-if="child.showType === 'upload'" class="config_input-upload">
-                <div class="label">
-                    <span  class="title">{{ child.name }}</span>
+            v-for="(item, index) in list"
+            class="config_l"
+            :key="index"
+          >
+            <h4>{{ item.name }}</h4>
+            <div>
+              <div
+                v-for="child in item.list"
+                class="config_input"
+                :key="child.id"
+              >
+                <!-- 文件输入 -->
+                <div
+                  v-if="child.showType === 'upload'"
+                  class="config_input-upload"
+                >
+                  <div class="label">
+                    <span class="title">{{ child.name }}</span>
                     <span class="fileDonw" @click="handleDownload(child)"
-                    >(样例下载)</span
-                  >
-                </div>
-                <div>
-                  <div @click="handleUpload(child)">
-                    <Upload
-                      :disabled="mode !== 'edit'"
-                      action="/null"
-                      :before-upload="handleBeforeUpload"
+                      >(样例下载)</span
                     >
-                      <Button class="uploadBtn" icon="md-cloud-upload"
-                        >上传文件</Button
-                      >
-                    </Upload>
-                    <p class="fileName" v-if="fileMap[child.id] || mode !== 'edit'">
-                      {{ mode !== "edit" ? child.customValue : fileMap[child.id] }}
-                    </p>
                   </div>
-                </div>
-              </div>
-              <!-- 普通输入 -->
-              <div v-if="child.showType === 'input'" class="config_input-input">
-                <div class="label">
-                    <span  class="title">{{ child.name }}</span>
-                    <Poptip trigger="hover" placement="top">
-                    <Icon type="md-help-circle" style="color: rgba(0, 0, 0, 0.4)" />
-                    <div class="toptipContent" slot="content">
-                      <p>
-                        所属组件：<span>{{ child.stopName }}</span>
-                      </p>
-                      <p>
-                        推荐值：<span>{{ child.customValue1 }}</span>
-                      </p>
-                      <p>
-                        描述：<span>{{ child.description }}</span>
+                  <div>
+                    <div @click="handleUpload(child)">
+                      <Upload
+                        :disabled="mode !== 'edit'"
+                        action="/null"
+                        :before-upload="handleBeforeUpload"
+                      >
+                        <Button class="uploadBtn" icon="md-cloud-upload"
+                          >上传文件</Button
+                        >
+                      </Upload>
+                      <p
+                        class="fileName"
+                        v-if="fileMap[child.id] || mode !== 'edit'"
+                      >
+                        {{
+                          mode !== "edit"
+                            ? child.customValue
+                            : fileMap[child.id]
+                        }}
                       </p>
                     </div>
-                  </Poptip>
+                  </div>
                 </div>
-                <div>
-                  <Input
-                    :disabled="mode !== 'edit'"
-                    :placeholder="child.customValue1"
-                    v-model="child.customValue"
-                  ></Input>
-                </div>
-              </div>  
-                <!-- 选择器 -->
-                <div v-if="child.showType === 'select'" class="config_input-select">
+                <!-- 普通输入 -->
+                <div
+                  v-if="child.showType === 'input'"
+                  class="config_input-input"
+                >
                   <div class="label">
                     <span class="title">{{ child.name }}</span>
                     <Poptip trigger="hover" placement="top">
-                      <Icon type="md-help-circle" style="color: rgba(0, 0, 0, 0.4)" />
+                      <Icon
+                        type="md-help-circle"
+                        style="color: rgba(0, 0, 0, 0.4)"
+                      />
+                      <div class="toptipContent" slot="content">
+                        <p>
+                          所属组件：<span>{{ child.stopName }}</span>
+                        </p>
+                        <p>
+                          推荐值：<span>{{ child.customValue1 }}</span>
+                        </p>
+                        <p>
+                          描述：<span>{{ child.description }}</span>
+                        </p>
+                      </div>
+                    </Poptip>
+                  </div>
+                  <div>
+                    <Input
+                      :disabled="mode !== 'edit'"
+                      :placeholder="child.customValue1"
+                      v-model="child.customValue"
+                    ></Input>
+                  </div>
+                </div>
+                <!-- 选择器 -->
+                <div
+                  v-if="child.showType === 'select'"
+                  class="config_input-select"
+                >
+                  <div class="label">
+                    <span class="title">{{ child.name }}</span>
+                    <Poptip trigger="hover" placement="top">
+                      <Icon
+                        type="md-help-circle"
+                        style="color: rgba(0, 0, 0, 0.4)"
+                      />
                       <div class="toptipContent" slot="content">
                         <p>
                           所属组件：<span>{{ child.stopName }}</span>
@@ -109,18 +137,19 @@
                       :placeholder="child.customValue1"
                       v-model="child.customValue"
                     >
-                   <Option v-for="v in child.allowableValues1" :key="v" :value="v">{{ v }}</Option>
-                  
-                  </Select>
+                      <Option
+                        v-for="v in child.allowableValues1"
+                        :key="v"
+                        :value="v"
+                        >{{ v }}</Option
+                      >
+                    </Select>
                   </div>
-                </div>  
+                </div>
+              </div>
             </div>
           </div>
-  
         </div>
-        </div>
-  
-  
       </div>
     </div>
     <div class="preview" v-show="previewShow" @click="handleViewShow(false)">
@@ -128,7 +157,7 @@
     </div>
   </div>
 </template>
-    
+
 <script>
 import { uploadFile, download, downloadFile } from "@/apis/file";
 export default {
@@ -143,11 +172,7 @@ export default {
           val.id &&
           JSON.stringify(val) !== JSON.stringify(this.publishInfo)
         ) {
-          if (val.id === "1764900256811581440") {
-            this.mock(val);
-          } else {
-            this.init(val);
-          }
+          this.init(val);
         }
       },
       deep: true,
@@ -158,7 +183,6 @@ export default {
     return {
       publishInfo: {},
       list: [],
-      list1: [],
       fileMap: {}, //已上传文件map
       progress: 0,
       coverFileImg: null,
@@ -169,121 +193,7 @@ export default {
 
   methods: {
     handleViewShow(flag) {
-      console.log(flag);
       this.previewShow = flag;
-    },
-    mock(val) {
-      this.fileInput = [];
-      this.textInput = [];
-      this.output = [];
-      delete val.crtDttm;
-      delete val.crtDttmString;
-      delete val.crtUser;
-      delete val.lastUpdateDttm;
-      delete val.lastUpdateDttmString;
-      delete val.lastUpdateUser;
-      delete val.enableFlag;
-      this.publishInfo = val;
-
-      this.getCoverImg(val.coverFileId);
-      const list = [];
-      let tongliang = [];
-      let weizhi = [];
-      let yiqi = [];
-      let jiangyu = [];
-      let yuzhitichu = [];
-      let yichangshuju = [];
-      let mocafengsu = [];
-      let chabiaofa = [];
-      this.publishInfo.stops.forEach((item) => {
-        item.stopPublishingPropertyVos.forEach((v) => {
-          if (v.type === 1) {
-            let type = "input";
-            try {
-              v.allowableValues1 = JSON.parse(v.allowableValues);
-              if (v.allowableValues1.length > 1) {
-                type = "select";
-              }
-            } catch (err) {}
-            v.showType = type;
-          } else if (v.type === 0) {
-            v.showType = "upload";
-          }
-
-          switch (v.id) {
-            case "1764900256811581451":
-            case "1764900256811581447":
-            case "1764900256815775751":
-              tongliang.push(v);
-              break;
-            case "1764900256811581452":
-            case "1764900256811581453":
-              weizhi.push(v);
-              break;
-            case "1764900256811581445":
-            case "1764900256811581446":
-              yiqi.push(v);
-              break;
-            case "1764900256815775746":
-              jiangyu.push(v);
-              break;
-            case "1764900256811581454":
-            case "1764900256815775744":
-            case "1764900256815775745":
-              yuzhitichu.push(v);
-              break;
-            case "1764900256815775748":
-            case "1764900256815775749":
-            case "1764900256815775750":
-              yichangshuju.push(v);
-              break;
-            case "1764900256815775747":
-              mocafengsu.push(v);
-              break;
-            case "1764900256811581441":
-            case "1764900256811581442":
-            case "1764900256811581443":
-              chabiaofa.push(v);
-              break;
-          }
-        });
-      });
-      list.push(
-        {
-          name: "通量、气象输入数据文件",
-          list: tongliang,
-        },
-        {
-          name: "通量站位置信息",
-          list: weizhi,
-        },
-        {
-          name: "仪器安装高度信息",
-          list: yiqi,
-        },
-        {
-          name: "降雨数据剔除",
-          list: jiangyu,
-        },
-        {
-          name: "阈值剔除",
-          list: yuzhitichu,
-        },
-        {
-          name: "异常数据检测剔除",
-          list: yichangshuju,
-        },
-        {
-          name: "摩擦风速校正",
-          list: mocafengsu,
-        },
-        {
-          name: "查表法插补",
-          list: chabiaofa,
-        }
-      );
-      this.list1 = list;
-      this.ismock = true;
     },
     init(val) {
       this.fileInput = [];
@@ -297,9 +207,21 @@ export default {
       delete val.lastUpdateUser;
       delete val.enableFlag;
       this.publishInfo = val;
-      this.getCoverImg(val.coverFileId );
-      const list = [];
+      val.coverFileId && this.getCoverImg(val.coverFileId);
+      let list = [];
       this.publishInfo.stops.forEach((item) => {
+        let t = list.findIndex((v) => v.name === item.bak2);
+          if (t === -1) {
+            list.push({
+              name: item.bak2,
+              sort: item.bak1,
+              list: [...item.stopPublishingPropertyVos],
+            });
+          } else {
+            list[t].list = list[t].list.concat(item.stopPublishingPropertyVos);
+          }
+
+
         item.stopPublishingPropertyVos.forEach((v) => {
           if (v.type === 1) {
             let type = "input";
@@ -310,17 +232,20 @@ export default {
               }
             } catch (err) {}
             v.showType = type;
-            list.push(v);
           } else if (v.type === 0) {
             v.showType = "upload";
-            list.push(v);
           }
         });
       });
+      // 分组排序
+      list.sort((a, b) => a.sort - b.sort);
+      // 去除全是输出的分组
+      list = list.filter(v=>v.list.some(it=>it.showType))
+
       this.list = list;
     },
     async handShowInstructions() {
-      this.$event.emit('loading',true)
+      this.$event.emit("loading", true);
       const res = await downloadFile(this.flowInfo.instructionFileId);
       // 将文件流转化为本地blod地址
       var binaryData = [];
@@ -341,7 +266,7 @@ export default {
         // 新页面打开
         window.open(href, "_blank");
       }
-      this.$event.emit('loading',false)
+      this.$event.emit("loading", false);
     },
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
@@ -377,8 +302,8 @@ export default {
   },
 };
 </script>
-    
-    <style lang="scss" scoped>
+
+<style lang="scss" scoped>
 @import "../../index.scss";
 
 .btn {
@@ -435,11 +360,9 @@ export default {
   margin-top: 32px;
   border-radius: 8px 8px 0 0;
   &_r {
-    float: right;
-    width: 44%;
+    width: 100%;
     background-size: cover;
     background-repeat: no-repeat;
-    height: 430px;
     margin-bottom: 20px;
     background-position: center;
     display: flex;
@@ -465,26 +388,18 @@ export default {
     overflow: hidden;
     border-radius: 6px;
     margin-bottom: 20px;
-    border: 1px dashed #3974AA;
+    border: 1px dashed #3974aa;
     h4 {
       line-height: 26px;
-      background: #3974AA;
+      background: #3974aa;
       text-indent: 10px;
       color: #fff;
     }
-    >div{
+    > div {
       display: flex;
       flex-wrap: wrap;
       border-radius: 0 0 6px 6px;
       border-top: none;
-    }
-  }
-  .config_l0,
-  .config_l1 {
-    width: 50%;
-    overflow: hidden;
-    .config_input {
-      width: 50%;
     }
   }
 
@@ -493,10 +408,11 @@ export default {
     padding: 10px 10px;
     box-sizing: border-box;
 
-    .ivu-input,.ivu-select-selection {
+    .ivu-input,
+    .ivu-select-selection {
       border-radius: 6px;
-      border-color: #3974AA;
-      &[disabled]{
+      border-color: #3974aa;
+      &[disabled] {
         border-color: #dcdee2;
       }
     }
@@ -505,7 +421,7 @@ export default {
       font-size: 14px;
       margin-bottom: 11px;
       display: flex;
-      .title{
+      .title {
         max-width: calc(100% - 22px);
         display: inline-block;
         word-break: break-all;
@@ -539,13 +455,13 @@ export default {
       white-space: normal;
       max-width: 400px;
     }
-    &-input,&-select{
+    &-input,
+    &-select {
       padding-bottom: 6px;
     }
   }
-
 }
-.instruction{
+.instruction {
   color: #005bc4;
   cursor: pointer;
   text-decoration: underline;
