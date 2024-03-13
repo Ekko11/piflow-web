@@ -13,22 +13,14 @@
         :options="options"
         @saveOptions="handleUpdate"
         @autoSave="handleAutoUpdate"
-        @showTableData="show = true"
+        @showTableData="handleShowOriginDataTable"
       />
     </div>
-    <Modal
-      v-model="show"
-      title="原始数据预览"
-      footer-hide
-      width="60vw"
-      @on-cancel="show = false"
-    >
-      <OriginDataTable :originalData="originalData" />
-    </Modal>
+    <OriginDataTable  ref="OriginDataTableRef"  />
   </div>
 </template>
-  
-  <script>
+
+<script>
 import { baseUrl } from "../config/index";
 import ChartType from "./components/ChartType";
 import BaseChartOptions from "./components/BaseChartOptions";
@@ -65,20 +57,25 @@ export default {
   },
 
   created() {
-    this.handleInit();
+    if (this.$route.query.id) {
+      this.handleInit();
+    } else if (this.$route.query.tableName) {
+      this.handleCreatByQuery();
+    }
   },
   watch: {
     xAxisType(val) {
       if (this.tableData.length) {
-         // 设置是否展示 dataZoom
+        // 设置是否展示 dataZoom
         this.xData = this.handleGetColums(val.label);
-        console.log(this.xData)
-         if ( this.xData.length > 12 &&  this.baseOptions.dataZoom[1].show == false ) {
-          this.baseOptions.dataZoom[0].disabled == false
-          this.baseOptions.dataZoom[0].end = this.xData.length > 50 ?  30 : 50
-          this.baseOptions.dataZoom[1].show = true   
-          this.baseOptions.dataZoom[1].end = this.xData.length > 50 ?  30 : 50
-          console.log(this.baseOptions)
+        if (
+          this.xData.length > 12 &&
+          this.baseOptions.dataZoom[1].show == false
+        ) {
+          this.baseOptions.dataZoom[0].disabled == false;
+          this.baseOptions.dataZoom[0].end = this.xData.length > 50 ? 30 : 50;
+          this.baseOptions.dataZoom[1].show = true;
+          this.baseOptions.dataZoom[1].end = this.xData.length > 50 ? 30 : 50;
         }
       }
     },
@@ -154,7 +151,7 @@ export default {
     //   deep: true,
     // },
     yAxisType: {
-      handler: function (arr) {
+      handler: function(arr) {
         if (this.originalData.length) {
           this.yData = arr.map((item) => {
             return {
@@ -182,7 +179,7 @@ export default {
       "pieChart",
     ]),
     options: {
-      get: function () {
+      get: function() {
         if (!this.baseOptions?.xAxis) return {};
         const data = JSON.parse(JSON.stringify(this.baseOptions));
         const obj = {
@@ -192,7 +189,7 @@ export default {
         obj.xAxis.data = this.xData;
         return obj;
       },
-      set: function (newVal) {
+      set: function(newVal) {
         return newVal;
       },
     },
@@ -207,6 +204,67 @@ export default {
     },
   },
   methods: {
+    handleShowOriginDataTable(){
+      console.log(this.$refs)
+      this.$refs.OriginDataTableRef.show(this.originalData)
+    },
+    handleCreatByQuery() {
+      this.$event.emit("loading", true);
+      this.$axios({
+        method: "POST",
+        baseURL: baseUrl,
+        url: "/visual/getVisualData",
+        data: { tableName: this.$route.query.tableName },
+      })
+        .then((res) => {
+          this.$event.emit("loading", false);
+          if (res.data.code === 200) {
+            const list = res.data.data;
+            this.originalData = list;
+            this.tableData = Object.keys(list[0]).map((item) => {
+              const obj = {
+                label: item,
+                data: [],
+              };
+              this.originalData.forEach((v) => {
+                obj.data.push(v[item]);
+              });
+              return obj;
+            });
+
+            // 配置项
+            this.$store.dispatch(
+              "graphConf/changeBaseOptions",
+              this.baseOptions
+            );
+
+            if (this.$route.query.x) {
+              const xAxisType = { label: this.$route.query.x };
+              this.$store.dispatch("graphConf/changexAxisType", xAxisType);
+            }
+            if (this.$route.query.y) {
+              let yAxisType = this.$route.query.y.split(",").map((v, i) => ({
+                label: v,
+                color: this.baseOptions.color[i],
+              }));
+              this.$store.dispatch("graphConf/changeyAxisType", yAxisType);
+            }
+          } else {
+            this.$Message.error({
+              content: this.$t("tip.request_fail_content"),
+              duration: 3,
+            });
+          }
+        })
+        .catch((error) => {
+          this.$event.emit("loading", false);
+          this.$Message.error({
+            content: this.$t("tip.fault_content"),
+            duration: 3,
+          });
+        });
+    },
+
     // 自动保存
     handleAutoUpdate() {
       if (this.autoSaveTimeout) {
@@ -329,6 +387,7 @@ export default {
     },
 
     handleUpdate(type, action) {
+      if (!this.$route.query.id) return;
       const configInfo = {
         chartType: this.chartType,
         baseOptions: handleFormata(this.baseOptions),
@@ -368,7 +427,7 @@ export default {
   },
 };
 </script>
-  <style lang="scss" scoped>
+<style lang="scss" scoped>
 @import "./index.scss";
 .wrap {
   height: calc(100% - 89px);
@@ -379,7 +438,7 @@ export default {
     width: 400px;
     flex-shrink: 0;
   }
-  > div:last-child {
+  .wrap_r {
     position: relative;
     flex-grow: 1;
     display: flex;
@@ -392,5 +451,3 @@ export default {
   }
 }
 </style>
-  
-  

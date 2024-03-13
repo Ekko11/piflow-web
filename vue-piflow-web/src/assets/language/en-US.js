@@ -147,6 +147,8 @@ module.exports = {
         database:'MySQL',
         datasheet:'Table',
         sheetName:'Sheet Name',
+        excelName:'Excel Name',
+        sheetNamePlaceholder:'Default selection is the first Sheet',
         type:'Type',
         upload:'Upload Excel',
         name:'Name',

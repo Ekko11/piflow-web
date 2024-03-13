@@ -11,7 +11,7 @@
       </div>
       <div>
         <label>线宽：</label>
-        <Input v-model="lineChart.lineStyle.width" />
+        <InputNumber v-model="lineChart.lineStyle.width" :max="10" :min="0" />
       </div>
       <div>
         <label>线样式：</label>
@@ -23,7 +23,7 @@
       </div>
       <div>
         <label>不透明度：</label>
-        <Input v-model="lineChart.lineStyle.opacity" />
+        <InputNumber v-model="lineChart.lineStyle.opacity" :max="1" :min="0"  :step="0.1"/>
       </div>
     </div>
   </section>

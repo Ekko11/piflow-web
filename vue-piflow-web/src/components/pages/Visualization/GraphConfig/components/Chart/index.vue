@@ -6,7 +6,7 @@
         >原始数据</Button
       >
 
-      <Poptip placement="top">
+      <Poptip placement="top" v-if="$route.query.id"> 
         <Button type="primary" size="small" style="margin-right: 5px"
           >保存配置</Button
         >
