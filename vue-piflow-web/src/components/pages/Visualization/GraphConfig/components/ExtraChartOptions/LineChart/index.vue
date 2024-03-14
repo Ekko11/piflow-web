@@ -10,6 +10,15 @@
         <Checkbox v-model="lineChart.label.show">是</Checkbox>
       </div>
       <div>
+        <label>小数位数：</label>
+        <InputNumber
+          v-model="lineChart.label.float"
+          type="number"
+          :min="-1"
+          :max="30"
+        />
+      </div>
+      <div>
         <label>线宽：</label>
         <InputNumber v-model="lineChart.lineStyle.width" :max="10" :min="0" />
       </div>
@@ -23,7 +32,12 @@
       </div>
       <div>
         <label>不透明度：</label>
-        <InputNumber v-model="lineChart.lineStyle.opacity" :max="1" :min="0"  :step="0.1"/>
+        <InputNumber
+          v-model="lineChart.lineStyle.opacity"
+          :max="1"
+          :min="0"
+          :step="0.1"
+        />
       </div>
     </div>
   </section>

@@ -74,10 +74,11 @@
           :placeholder="$t('modal.placeholder')"
           style="width: 350px"/>
     </div>
-    <div class="item" v-if="!formData.id">
+    <div class="item">
       <label class="self">{{$t('visualconfig.datasource')}}：</label>
       <Select v-model="formData.graphTemplateId" 
       :transfer="true"
+      :disabled="formData.id"
         style="width:350px">
         <Option
             v-for="item in dataSourceList"
@@ -185,8 +186,8 @@ export default {
       }
     },
     handleEdit(row){
-      const {id,name,description} = row
-      this.formData = {id,name,description}
+      const {id,name,description,graphTemplateId} = row
+      this.formData = {id,name,description,graphTemplateId}
       this.isOpen = true
     },
     handleConfirm(){

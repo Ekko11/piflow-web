@@ -145,17 +145,18 @@ const InitState = () => ({
     },
     lineStyle: {
       // color: "#000",
-      width: "2",
+      width: 2,
       type: "solid",
-      opacity: "1",
+      opacity: 1,
     },
 
   },
   barChart: {
     type: "bar",
-    barMaxWidth: "20",
+    barMaxWidth: 20,
     label: {
       show: false,
+      float:2,
       distance: 10,
       color: "#000",
       position: "top",
@@ -168,9 +169,10 @@ const InitState = () => ({
     },
     lineStyle: {
       // color: "#000",
-      width: "2",
+      float:2,
+      width: 2,
       type: "solid",
-      opacity: "1",
+      opacity: 1,
     },
   },
   brush:{

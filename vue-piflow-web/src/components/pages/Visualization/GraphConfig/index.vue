@@ -196,6 +196,14 @@ export default {
     //获取series  由 图类型设置 （this[this.chartType]） 和  ydata 共同生成
     series() {
       const obj = JSON.parse(JSON.stringify(this[this.chartType]));
+      obj.label.formatter = (param)=>  { 
+        const i = obj.label.float
+        if(i == -1){  
+            return param.value
+        }else{
+          return   Math.floor(param.value *Math.pow(10,i))/Math.pow(10,i)
+        }
+      } 
       const list = this.yData.map((item) => ({
         ...obj,
         ...item,

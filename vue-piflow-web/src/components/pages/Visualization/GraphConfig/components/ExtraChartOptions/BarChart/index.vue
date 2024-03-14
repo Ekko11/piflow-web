@@ -14,6 +14,10 @@
                 <label>显示标签：</label>
                 <Checkbox v-model="barChart.label.show">是</Checkbox>
             </div>
+            <div>
+              <label>小数位数：</label>
+              <InputNumber  v-model="barChart.label.float" type="number"  :min="-1"  :max="30"/>
+            </div>
           </div>
         </template>
       </Panel>
