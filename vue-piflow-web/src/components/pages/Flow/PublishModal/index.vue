@@ -137,8 +137,9 @@
                     v-model="formData.productTypeId"
                     :placeholder="$t('modal.placeholder_select')"
                     :normalizer="normalizer"
-                    :options="treeData"
                     :flat="true"
+                    :options="treeData"
+                    :disable-branch-nodes="true"
                     style="width: 100%; height: 32px"
                   />
                 </FormItem>
@@ -151,7 +152,7 @@
                   ></Input>
                 </FormItem>
 
-                <FormItem label="封面：" prop="coverFile">
+                <FormItem label="封面：" prop="coverFileImgName">
                   <Upload
                     action="/null"
                     :before-upload="handleBeforeCoverFileUpload"
@@ -178,7 +179,7 @@
                   </Upload>
                 </FormItem>
 
-                <FormItem label="说明书：" prop="instruction">
+                <FormItem label="说明书：" prop="instructionFileName">
                   <Upload
                     action="/aaa"
                     accept=".pdf"
@@ -189,8 +190,7 @@
                       >Upload files</Button
                     >
                   </Upload>
-                  <p v-if="instructionFile">{{ instructionFile.name }}</p>
-                  <p v-if="!instructionFile && formData.instructionFileName">
+                  <p v-if="formData.instructionFileName">
                     {{ formData.instructionFileName }}
                   </p>
                 </FormItem>
@@ -309,12 +309,21 @@ import { getPublishingById, publishingStops } from "@/apis/flowPublish";
 import { uploadFile, downloadFile } from "@/apis/file";
 
 import draggable from "vuedraggable";
+import { Form, FormItem } from "view-design";
 export default {
   components: { draggable },
   data() {
+    const isEmpty = (rule, value, callback) => {
+        if (value == null || value == undefined || value == "") {
+          callback(new Error('The productTypeId cannot be empty'))
+        } else {
+          callback();
+        }
+ };
+
     return {
       formData: {},
-      collapseValue:'1',
+      collapseValue: "1",
       open: false,
       stops: [], //组件列表
       activeStopLi: 0,
@@ -363,26 +372,18 @@ export default {
           },
         ],
         productTypeId: [
-          {
-            required: true,
-            message: "The productType cannot be empty",
-            trigger: "blur",
-          },
+          {required: true, message: 'The productTypeId cannot be empty', trigger: 'blur', type: 'number', validator: isEmpty},
         ],
-        instruction: [
+        coverFileImgName:[
           {
-            required: true,
-            message: "The instruction cannot be empty",
-            trigger: "blur",
-          },
+            required: true, trigger: 'blur', message: "The coverFileImg cannot be empty",
+          }
         ],
-        coverFile: [
+        instructionFileName:[
           {
-            required: true,
-            message: "The coverFile cannot be empty",
-            trigger: "blur",
-          },
-        ],
+            required: true, trigger: 'blur', message: "The instructionFile cannot be empty",
+          }
+        ]
       },
     };
   },
@@ -478,7 +479,6 @@ export default {
 
         this.groupList.sort((a, b) => a.sort - b.sort);
       }
-      console.log(this.stops);
     },
 
     // 点击保存  处理数据
@@ -490,20 +490,19 @@ export default {
         });
         return;
       }
+      this.$refs.formValidate.validate((valid) => {});
       if (
         !this.formData.productTypeId ||
         !this.formData.name ||
-        !this.coverFile ||
-        !this.instructionFile
+        !this.coverFileImg ||
+        !this.formData.instructionFileName
       ) {
-        this.$refs.formValidate.validate((valid) => {});
         this.$Message.error({
           content: "请将发布信息补充完整",
           duration: 3,
         });
         return;
       }
-
       // 组件添加分类名称和排序属性
       let stopList = [];
       this.groupList.forEach((v, i) => {
@@ -563,8 +562,10 @@ export default {
     // 请求发送接口
     async handlePublish(data) {
       this.formData.stops = data;
+      const params = JSON.parse(JSON.stringify(this.formData))
+      delete  params.coverFileImgName
       this.$event.emit("loading", true);
-      const res = await publishingStops(this.formData);
+      const res = await publishingStops(params);
       if (res.data.code === 200) {
         //需要上传文件
         let promiseList = [];
@@ -617,6 +618,7 @@ export default {
                 duration: 3,
               });
               this.open = false;
+              this.$emit('publishOver')
               this.reSet();
             } else {
               this.$Message.error({
@@ -625,11 +627,11 @@ export default {
               });
               this.open = false;
             }
-            console.log(res);
           });
         } else {
           //编辑不需要上传文件
           this.$event.emit("loading", false);
+          this.$emit('publishOver')
           this.open = false;
           this.$Message.success({
             content: this.$t("tip.success"),
@@ -638,6 +640,7 @@ export default {
         }
       } else {
         this.$event.emit("loading", false);
+        this.$emit('publishOver')
         this.$Message.error({
           content: this.$t("tip.fault_content"),
           duration: 3,
@@ -716,6 +719,7 @@ export default {
         name: null,
         productTypeId: null,
         description: null,
+        instructionFileName:null
       };
       this.$refs.formValidate.resetFields();
       this.fileList = [];
@@ -778,11 +782,13 @@ export default {
       const reader = new FileReader();
       reader.readAsDataURL(e);
       reader.onload = () => {
+        this.$set(this.formData,'coverFileImgName','占位')
         this.coverFileImg = reader.result;
       };
       return false;
     },
     handleBeforeinstructionFileUpload(e) {
+      this.$set(this.formData,'instructionFileName',e.name)
       this.instructionFile = e;
       return false;
     },
@@ -799,6 +805,7 @@ export default {
       const reader = new FileReader();
       reader.readAsDataURL(res.data);
       reader.onload = () => {
+        this.$set(this.formData,'coverFileImgName','占位')
         this.coverFileImg = reader.result;
       };
     },

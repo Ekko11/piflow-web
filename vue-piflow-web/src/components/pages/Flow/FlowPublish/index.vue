@@ -38,7 +38,7 @@
       />
     </div>
 
-    <PublishModal ref="PublishModal"/>
+    <PublishModal ref="PublishModal" @publishOver="getTableData"/>
   </section>
 </template>
 

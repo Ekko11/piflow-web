@@ -45,6 +45,20 @@
                 >
                   <div class="label">
                     <span class="title">{{ child.name }}</span>
+                    <Poptip trigger="hover" placement="top">
+                      <Icon
+                        type="md-help-circle"
+                        style="color: rgba(0, 0, 0, 0.4)"
+                      />
+                      <div class="toptipContent" slot="content">
+                        <p>
+                          所属组件：<span>{{ child.stopName }}</span>
+                        </p>
+                        <p>
+                          描述：<span>{{ child.description }}</span>
+                        </p>
+                      </div>
+                    </Poptip>
                     <span class="fileDonw" @click="handleDownload(child)"
                       >(样例下载)</span
                     >
@@ -227,7 +241,7 @@ export default {
             let type = "input";
             try {
               v.allowableValues1 = JSON.parse(v.allowableValues);
-              if (v.allowableValues1.length > 0) {
+              if (v.allowableValues1.length > 0 && v.allowableValues1[0].trim()) {
                 type = "select";
               }
             } catch (err) {}

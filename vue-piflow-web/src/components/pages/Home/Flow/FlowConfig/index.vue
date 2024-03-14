@@ -250,6 +250,7 @@ export default {
       &.run {
         background: #006fee;
         color: #fff;
+        margin-left: 10px;
       }
     }
   }
