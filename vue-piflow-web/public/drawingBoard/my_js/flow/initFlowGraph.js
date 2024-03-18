@@ -658,13 +658,40 @@ function queryStopsProperty(stopPageId, loadId) {
                     $("#div_properties_example_table").html("");
                     var tbody_example = document.createElement("tbody");
                     // propertiesVo
+                    stopsVoData.propertiesVo.sort((a,b)=>{  
+                        const nameA = a.name.toLowerCase(); // 转换为小写以便不区分大小写排序  
+                        const nameB = b.name.toLowerCase(); // 转换为小写以便不区分大小写排序  
+                        if (nameA < nameB) {  
+                            return -1;  
+                        }  
+                        if (nameA > nameB) {  
+                            return 1;  
+                        }  
+                        // 如果名称相同，则返回0  
+                        return 0;  
+                    })
                     var propertiesVo = stopsVoData.propertiesVo;
+                    if(stopsVoData.bundel === "cn.piflow.bundle.visualization.VisualDisplay"){
+                        const i = propertiesVo.findIndex(v=>v.displayName === 'visTableName')
+                        if( i !== -1 && !propertiesVo[i].customValue){
+                            ajaxRequest({
+                                type: "POST",
+                                url: "/stops/updateStopsOne",
+                                async: true,
+                                data: {
+                                    "id": propertiesVo[i].id,
+                                    "content":  stopsVoData.id
+                                },
+                            }) 
+                        }
+                    }
                     if (propertiesVo && propertiesVo.length > 0) {
                         var tbody = document.createElement("tbody");
                         for (var y = 0; y < propertiesVo.length; y++) {
                             if (!propertiesVo[y]) {
                                 continue;
                             }
+                            if(propertiesVo[y].name === "visTableName") continue
                             var propertyVo = propertiesVo[y];
                             var propertyVo_id = propertyVo.id;
                             var propertyVo_name = propertyVo.name;
