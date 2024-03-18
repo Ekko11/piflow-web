@@ -119,8 +119,11 @@
         td{
             padding: 20px;
         }
+        th{
+            line-height: 40px;
+        }
     }
-    table,table tr th, table tr td {
+    table,table  th, table tr td {
         border:1px solid #C9D8DE; 
         
     }

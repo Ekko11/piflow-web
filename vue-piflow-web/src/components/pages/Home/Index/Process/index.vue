@@ -51,20 +51,19 @@ export default {
             }
           })
       });
-      this.fileMap = fileMap
       if(Object.keys(fileMap).length){
-        this.getImg(Object.keys(fileMap).join(','))
+        this.getImg(Object.keys(fileMap).join(','),fileMap)
       }
     },
-    async getImg(ids){
+    async getImg(ids,fileMap){
       const _this = this
       const res = await downloadFileByIds(ids)
       const zip = new JSZip()
       zip.loadAsync(res.data).then((res) => {
-        for (const key in _this.fileMap) {
-          var base = res.file(res.files[_this.fileMap[key]].name).async("base64");
+        for (const key in fileMap) {
+          var base = res.file(res.files[fileMap[key]].name).async("base64");
           base.then(function (res) {
-            _this.fileMap[key] = 'data:image/png;base64,' + res
+            _this.$set(_this.fileMap,key,'data:image/png;base64,' + res)
            })
 
         }

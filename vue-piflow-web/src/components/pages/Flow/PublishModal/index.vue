@@ -86,7 +86,7 @@
               <div
                 class="item"
                 v-if="child.cascaderType[1] === 0"
-                @click="handleClickUpload(index, idx)"
+                @click="handleClickUpload(child)"
               >
                 <label>上传文件：</label>
                 <div>
@@ -774,8 +774,8 @@ export default {
     },
 
     // 标记选择上传的节点
-    handleClickUpload(index, idx) {
-      this.currentProps = this.stops[index].stopPublishingPropertyVos[idx];
+    handleClickUpload(item) {
+      this.currentProps = item;
     },
     handleBeforeCoverFileUpload(e) {
       this.coverFile = e;

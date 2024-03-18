@@ -99,6 +99,7 @@ export default {
       treeData: [],
       tableData: [],
       fileMap: {},
+      copyFileMap:{},
       total: 0,
       page: 1,
       limit: 10,
@@ -148,9 +149,9 @@ export default {
       this.isOpen =true
     },
     handleGetRole(){
-      let user = JSON.parse(Cookies.get("setUser"));
       this.userName = Cookies.get("usre");
-      if (user && user[0].role.stringValue) {
+      if (Cookies.get("setUser") && user[0].role.stringValue) {
+        let user = JSON.parse(Cookies.get("setUser"));
         console.log(user[0].role.stringValue);
         this.role = user[0].role.stringValue;
       } else {
@@ -183,9 +184,9 @@ export default {
       this.tableData = res.data.data;
       const ids = [];
       res.data.data.forEach((item) => {
-        if (item.coverFile && item.coverFile.id && !this.fileMap[item.coverFile.id]) {
+        if (item.coverFile && item.coverFile.id && !this.copyFileMap[item.coverFile.id]) {
           ids.push(item.coverFile.id);
-          this.$set(this.fileMap, item.coverFile.id, item.coverFile.fileName);
+          this.$set(this.copyFileMap, item.coverFile.id, item.coverFile.fileName);
         }
       });
       this.total = res.data.count;
@@ -201,12 +202,13 @@ export default {
       const zip = new JSZip();
       zip.loadAsync(res.data).then((res) => {
         for (const file in res.files) {
-          console.log(file,_this.fileMap)
           var base = res.file(file).async("base64");
           base.then(function (res) {
-            for (const fileId in _this.fileMap) {
-              if (file === _this.fileMap[fileId]) {
+            for (const fileId in _this.copyFileMap) {
+              if (file === _this.copyFileMap[fileId]) {
+                  _this.$set(_this.copyFileMap,fileId, "data:image/png;base64," + res);
                   _this.$set(_this.fileMap,fileId, "data:image/png;base64," + res);
+                  
               }
             }
           });
