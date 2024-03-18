@@ -5,7 +5,7 @@ var thisEditor = null;
 var drawingBoardType = "PROCESS"
 var index = true
 var nodeArr, xmlDate, parentsId, processType, processGroupId, parentProcessId, pID, appId, processState,
-    getCheckpointParam, progress;
+    getCheckpointParam, progress,currentProcessStops;
 
 
 function initProcessCrumbs(parentAccessPath) {
@@ -365,7 +365,7 @@ function queryProcessStopsProperty(processId, pageId) {
                 if (!processStopVo) {
                     $('#process_property_inc_no_data').show();
                 } else {
-
+                    currentProcessStops = processStopVo
                     // Stop Basic Information
                     $("#stopNameShow").text(processStopVo.name);
                     $("#span_processStopVo_description").text(processStopVo.description);
@@ -375,6 +375,7 @@ function queryProcessStopsProperty(processId, pageId) {
                     if ( processStopVo.visualizationType === '' ){
                         $("#process_info_inc_load_chart").css('display','none');
                     } else if (processStopVo.visualizationType === 'CustomView') {
+                        $('#process_info_inc_load_link_visualization').show()
                         getCustomView(processStopVo.id);
                     } else {
                         $("#process_info_inc_load_chart").css('display','block');
@@ -534,6 +535,10 @@ function ClickSlider() {
         $(this).toggleClass("triggerSlider-open");
         index = !index
     });
+}
+
+function linkToVisualization(...params){
+    console.log(params)
 }
 
 function getChart(e,softData,isSoft, ifTheFirst) {
