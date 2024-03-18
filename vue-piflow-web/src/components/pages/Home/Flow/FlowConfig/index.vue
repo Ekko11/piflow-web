@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <Flow mode="edit" ref="flow" :flowInfo="publishInfo" />
+    <Flow mode="edit" ref="flow" :flowInfo="publishInfo" @nameMap="handleNameMap"/>
     <div class="history">
       <div class="history_btn">
         <Button @click="historyIsShow = !historyIsShow"
@@ -10,7 +10,7 @@
           />
         </Button>
         <div>
-          <Button class="stop" @click="handleRun()">暂存</Button>
+          <!-- <Button class="stop" @click="handleRun()">暂存</Button> -->
           <Button class="run" @click="handleRun()">运行</Button>
         </div>
       </div>
@@ -133,6 +133,9 @@ export default {
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
     },
+    handleNameMap(val){
+      this.nameMap = val
+    },
     // 暂停
     async handleStop() {},
     // 运行
@@ -142,9 +145,24 @@ export default {
       data.stops.forEach((v) => {
         v.stopPublishingPropertyVos.forEach((k) => {
           k.customValue = k.customValue ? k.customValue : k.customValue1;
+
+          // 同名属性 赋值
+          for (const key in this.nameMap) {
+            const i = this.nameMap[key].findIndex(t=>t === k.id)
+            if(i !== -1){
+              let targetProp
+              data.stops.forEach(q=>{
+                let obj =  q.stopPublishingPropertyVos.find(m => m.id === key)
+                if(obj) targetProp = obj
+              })
+              k.customValue = targetProp.customValue ? targetProp.customValue : targetProp.customValue1;
+            }
+          }
+
           delete k.allowableValues1;
         });
       });
+
 
       const res = await runPublishFlow(data);
       this.$event.emit("loading", false);
@@ -152,16 +170,7 @@ export default {
         `/home/flowProcess?processId=${res.data.data.processId}`
       );
 
-      // if (res.data.code === 200) {
-      //   this.$router.push(
-      //     `/home/flowProcess?processId=${res.data.data.processId}`
-      //   );
-      // } else {
-      //   this.$Message.error({
-      //     content: res.data.errorMsg,
-      //     duration: 3,
-      //   });
-      // }
+
     },
     // 根据流水线id 获取组件发布信息
     async handleGetStopsById() {

@@ -432,9 +432,9 @@ export default {
       const publishStops = publishInfo.stops;
 
       if (publishStops.length) {
-        this.selectedList = publishStops;
         publishStops.forEach((item) => {
           let t = this.groupList.findIndex((v) => v.name === item.bak2);
+          item.stopPublishingPropertyVos.forEach(v=>v.checked = true)
           if (t === -1) {
             this.groupList.push({
               name: item.bak2,
@@ -445,6 +445,10 @@ export default {
             this.groupList[t].list.push(item);
           }
 
+          this.groupList.forEach(v=>{
+            v.list.sort((a,b)=>a.bak3 - b.bak3)
+          })
+
           // 属性回填
           let index = this.stops.findIndex((v) => v.stopId === item.stopId);
           this.stops[index].checked = true;
@@ -454,6 +458,8 @@ export default {
             let idx = this.stops[index].stopPublishingPropertyVos.findIndex(
               (v) => v.propertyId === child.propertyId
             );
+            child.checked = true
+            child.cascaderType = child.type === 2 ? [child.type] : [1, child.type]
             this.stops[index].bak1 = child.bak1;
             this.stops[index].stopPublishingPropertyVos[idx].checked = true;
             this.stops[index].stopPublishingPropertyVos[idx].id = child.id;
@@ -472,12 +478,13 @@ export default {
             this.stops[index].stopPublishingPropertyVos[idx].publishingId =
               child.publishingId;
             this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
-            this.stops[index].stopPublishingPropertyVos[idx].cascaderType =
-              child.type === 2 ? [child.type] : [1, child.type];
+            this.stops[index].stopPublishingPropertyVos[idx].cascaderType =child.cascaderType
           });
         });
-
+        this.selectedList = [...publishStops];
         this.groupList.sort((a, b) => a.sort - b.sort);
+        this.groupList = [...this.groupList];
+        console.log(this.groupList)
       }
     },
 
@@ -506,9 +513,10 @@ export default {
       // 组件添加分类名称和排序属性
       let stopList = [];
       this.groupList.forEach((v, i) => {
-        v.list.forEach((it) => {
+        v.list.forEach((it,k) => {
           it.bak1 = i + "";
           it.bak2 = v.name;
+          it.bak3 = k
         });
         stopList = stopList.concat(v.list);
       });
@@ -527,6 +535,7 @@ export default {
       this.formData.productTypeDescription = productNode.description;
 
       let errMsg = "";
+      console.log(stopList)
       // 筛选stops中的选中项
       stopList = stopList.map((item) => ({
         ...item,
@@ -557,6 +566,7 @@ export default {
         });
         return;
       }
+      console.log(stopList)
       this.handlePublish(stopList);
     },
     // 请求发送接口
@@ -571,21 +581,16 @@ export default {
         let promiseList = [];
         if (this.fileList.length || this.coverFile || this.instructionFile) {
           const returnPropsList = res.data.data;
-          if (returnPropsList.length && this.fileList.length) {
+          if (this.fileList.length) {
             // 多次上传文件
             this.fileList.forEach((item) => {
-              const resObj = returnPropsList.find(
-                (v) => v.propertyId === item.id
-              );
-              if (resObj) {
                 // 组件stop上传文件
                 const res = uploadFile({
                   associateType: 3,
-                  associateId: resObj.id,
+                  associateId: item.id,
                   file: item.file,
                 });
                 promiseList.push(res);
-              }
             });
           }
 
@@ -794,7 +799,8 @@ export default {
     },
     handleBeforeUpload(e) {
       this.currentProps.fileName = e.name;
-      this.fileList.push({ id: this.currentProps.propertyId, file: e });
+      // 编辑模式下有id
+      this.fileList.push({ id:this.currentProps.id || this.currentProps.propertyId, file: e });
       return false;
     },
 

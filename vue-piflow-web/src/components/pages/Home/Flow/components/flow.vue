@@ -223,6 +223,7 @@ export default {
       this.publishInfo = val;
       val.coverFileId && this.getCoverImg(val.coverFileId);
       let list = [];
+      const nameMap = {}
       this.publishInfo.stops.forEach((item) => {
         let t = list.findIndex((v) => v.name === item.bak2);
           if (t === -1) {
@@ -232,7 +233,15 @@ export default {
               list: [...item.stopPublishingPropertyVos],
             });
           } else {
-            list[t].list = list[t].list.concat(item.stopPublishingPropertyVos);
+            item.stopPublishingPropertyVos.forEach(v=>{
+              const k = list[t].list.findIndex(t => t.name === v.name)
+              if(k === -1){
+                list[t].list.push(v);
+              }else{
+                nameMap[list[t].list[k].id] =nameMap[list[t].list[k].id]?[...nameMap[list[t].list[k].id],v.id]:[v.id]
+              }
+            })
+
           }
 
 
@@ -251,12 +260,18 @@ export default {
           }
         });
       });
+
       // 分组排序
       list.sort((a, b) => a.sort - b.sort);
+      // 分组内属性排序
+      list.forEach(v=>{
+            v.list.sort((a,b)=>a.bak3 - b.bak3)
+      })
       // 去除全是输出的分组
       list = list.filter(v=>v.list.some(it=>it.showType))
 
       this.list = list;
+      this.$emit('nameMap',nameMap)
     },
     async handShowInstructions() {
       this.$event.emit("loading", true);
