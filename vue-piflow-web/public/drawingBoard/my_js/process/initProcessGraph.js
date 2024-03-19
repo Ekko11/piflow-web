@@ -552,7 +552,11 @@ function linkToVisualization(...params){
     if(currentProcessStops.processStopPropertyVoList && currentProcessStops.processStopPropertyVoList.length){
         currentProcessStops.processStopPropertyVoList.forEach(v=>{
             if(map[v.name]){
-                link += `${map[v.name]}=${v.customValue}&`
+                if(v.name === 'visTableName'){
+                    link +=  `tableName=vis_flow_${v.customValue}&`
+                }else{
+                    link += `${map[v.name]}=${v.customValue}&`
+                }
             }
         })
     }

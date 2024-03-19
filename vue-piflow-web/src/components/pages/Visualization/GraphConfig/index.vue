@@ -28,7 +28,7 @@ import ExtraChartOptions from "./components/ExtraChartOptions";
 import AxisSelect from "./components/AxisSelect";
 import Chart from "./components/Chart";
 import OriginDataTable from "./components/OriginDataTable";
-import { mapGetters, mapState } from "vuex";
+import { mapGetters } from "vuex";
 import { handleDeepMerge, handleFormata } from "./utils";
 export default {
   name: "GraphConfig",
@@ -48,7 +48,7 @@ export default {
       // 格式化的数据
       tableData: [],
       // 原始数据
-      originalData: [],
+      originalSortTableData: [],
       // xAxisType: "",
       xData: [],
       // yAxisType: [],
@@ -77,82 +77,16 @@ export default {
           this.baseOptions.dataZoom[1].show = true;
           this.baseOptions.dataZoom[1].end = this.xData.length > 50 ? 30 : 50;
         }
+        this.handleChangeOriginSortData()
       }
     },
-    baseOptions(newVal, oldVal) {
-      if (newVal.xAxis.type !== oldVal.xAxis.type) {
-        //y轴类型改变
-        if (newVal.xAxis.type === "数值") {
-          this.originalData = this.originalData.sort((a, b) => {
-            const numA = parseFloat(a[this.xAxisType]);
-            const numB = parseFloat(b[this.xAxisType]);
-            if (numA < numB) return -1;
-            if (numA > numB) return 1;
-            return 0;
-          });
-        } else {
-          this.originalData = this.originalData.sort((a, b) =>
-            String(a[this.xAxisType]).localeCompare(String(b[this.xAxisType]))
-          );
-        }
-        this.xData = this.handleGetColums(this.xAxisType);
-
-        // 由于大表的排序改变，所以y轴数据也需要重新生成
-        this.yData = this.yAxisType.map((item) => {
-          return {
-            itemStyle: {
-              color: item.color,
-            },
-            name: item.label,
-            data: this.handleGetColums(item.label),
-          };
-        });
-      }
+    xSort() {
+      console.log(1)
+      this.handleChangeOriginSortData()
     },
-    // xAxisType: {
-    //   handler: function (val) {
-    //     if (this.tableData.length && val) {
-    //       // try {
-    //       if (val.sort === "数值") {
-    //         this.originalData = this.originalData.sort((a, b) => {
-    //           const numA = parseFloat(a[val.label]);
-    //           const numB = parseFloat(b[val.label]);
-    //           if (numA < numB) return -1;
-    //           if (numA > numB) return 1;
-    //           return 0;
-    //         });
-    //       } else {
-    //         this.originalData = this.originalData.sort((a, b) =>
-    //           String(a[val.label]).localeCompare(String(b[val.label]))
-    //         );
-    //       }
-    //       this.xData = this.handleGetColums(val.label);
-    //       if (
-    //         this.xData.length > 12 &&
-    //         this.baseOptions.dataZoom[0].show == false
-    //       ) {
-    //         this.baseOptions.dataZoom[0].show = true;
-    //       }
-    //       // 由于大表的排序改变，所以y轴数据也需要重新生成
-    //       this.yData = this.yAxisType.map((item) => {
-    //         return {
-    //           itemStyle: {
-    //             color: item.color,
-    //           },
-    //           name: item.label,
-    //           data: this.handleGetColums(item.label),
-    //         };
-    //       });
-    //       // } catch (err) {}
-    //     } else {
-    //       this.xData = [];
-    //     }
-    //   },
-    //   deep: true,
-    // },
     yAxisType: {
       handler: function(arr) {
-        if (this.originalData.length) {
+        if (this.originalSortTableData.length) {
           this.yData = arr.map((item) => {
             return {
               itemStyle: {
@@ -162,6 +96,8 @@ export default {
               data: this.handleGetColums(item.label),
             };
           });
+        this.handleChangeOriginSortData()
+
         }
       },
       deep: true,
@@ -171,6 +107,8 @@ export default {
     ...mapGetters("graphConf", [
       "chartType",
       "xAxisType",
+      "xSort",
+      "float",
       "yAxisType",
       "baseOptions",
       "extraOptions",
@@ -196,9 +134,9 @@ export default {
     //获取series  由 图类型设置 （this[this.chartType]） 和  ydata 共同生成
     series() {
       const obj = JSON.parse(JSON.stringify(this[this.chartType]));
+      const i = this.float
       obj.label.formatter = (param)=>  { 
-        const i = obj.label.float
-        if(i == -1){  
+        if((!i && i!==0 ) ||  i == -1){  
             return param.value
         }else{
           return   Math.floor(param.value *Math.pow(10,i))/Math.pow(10,i)
@@ -212,9 +150,40 @@ export default {
     },
   },
   methods: {
+    handleChangeOriginSortData(){
+      if(!this.originalTableData) return
+      const list  = JSON.parse(JSON.stringify(this.originalTableData))
+        //x轴类型改变
+        if (this.xSort === "value") {
+          this.originalSortTableData = list.sort((a, b) => {
+            const numA = parseFloat(a[this.xAxisType.label]);
+            const numB = parseFloat(b[this.xAxisType.label]);
+            if (numA < numB) return -1;
+            if (numA > numB) return 1;
+            return 0;
+          });
+        } else if(this.xSort === 'category') {
+          this.originalSortTableData = list.sort((a, b) =>
+            String(a[this.xAxisType.label]).localeCompare(String(b[this.xAxisType.label]))
+          );
+        }else if(this.xSort === 'origin'){
+          this.originalSortTableData  = list
+        }
+        this.xData = this.handleGetColums(this.xAxisType.label);
+
+        // 由于大表的排序改变，所以y轴数据也需要重新生成
+        this.yData = this.yAxisType.map((item) => {
+          return {
+            itemStyle: {
+              color: item.color,
+            },
+            name: item.label,
+            data: this.handleGetColums(item.label),
+          };
+        });
+    },
     handleShowOriginDataTable(){
-      console.log(this.$refs)
-      this.$refs.OriginDataTableRef.show(this.originalData)
+      this.$refs.OriginDataTableRef.show(this.originalTableData)
     },
     handleCreatByQuery() {
       this.$event.emit("loading", true);
@@ -228,13 +197,14 @@ export default {
           this.$event.emit("loading", false);
           if (res.data.code === 200) {
             const list = res.data.data;
-            this.originalData = list;
+            this.originalSortTableData = list;
+            this.originalTableData = JSON.parse(JSON.stringify(list))
             this.tableData = Object.keys(list[0]).map((item) => {
               const obj = {
                 label: item,
                 data: [],
               };
-              this.originalData.forEach((v) => {
+              this.originalSortTableData.forEach((v) => {
                 obj.data.push(v[item]);
               });
               return obj;
@@ -315,7 +285,7 @@ export default {
     },
     handleGetColums(label) {
       let list = [];
-      this.originalData.forEach((item) => {
+      this.originalSortTableData.forEach((item) => {
         for (const key in item) {
           if (key === label) list.push(item[key]);
         }
@@ -334,13 +304,14 @@ export default {
 
         if (res.data.code === 200 && res.data.data.length) {
           const list = res.data.data;
-          this.originalData = list;
+          this.originalSortTableData = list;
+          this.originalTableData = JSON.parse(JSON.stringify(list))
           this.tableData = Object.keys(list[0]).map((item) => {
             const obj = {
               label: item,
               data: [],
             };
-            this.originalData.forEach((v) => {
+            this.originalSortTableData.forEach((v) => {
               obj.data.push(v[item]);
             });
             return obj;
@@ -353,10 +324,14 @@ export default {
               xAxisType,
               yAxisType,
               chartType,
+              xSort,
+              float
             } = JSON.parse(this.graphConf.configInfo);
             this.$store.dispatch("graphConf/changexAxisType", xAxisType);
             this.$store.dispatch("graphConf/changeyAxisType", yAxisType);
             this.$store.dispatch("graphConf/changeChartType", chartType);
+            this.$store.dispatch("graphConf/changexSort", xSort);
+            this.$store.dispatch("graphConf/changeFloat", float);
             this.$store.dispatch(
               "graphConf/changeBaseOptions",
               handleDeepMerge(this.baseOptions, baseOptions)
@@ -402,6 +377,8 @@ export default {
         extraOptions: this[this.chartType],
         xAxisType: this.xAxisType,
         yAxisType: this.yAxisType,
+        xSort:this.xSort,
+        float:this.float
       };
       if (action !== "auto") {
         this.$event.emit("loading", true);
@@ -454,7 +431,6 @@ export default {
     height: 100%;
     > section:last-child {
       flex-grow: 1;
-      overflow: hidden;
     }
   }
 }

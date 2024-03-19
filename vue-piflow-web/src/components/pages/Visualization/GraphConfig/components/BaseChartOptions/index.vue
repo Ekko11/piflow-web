@@ -9,13 +9,17 @@
         <Input v-model="baseOptions.title.text" />
       </div>
       <div>
-        <label>横轴类型：</label>
-        <Select v-model="baseOptions.xAxis.type">
-          <Option value="value">数值轴</Option>
-          <Option value="category">类目轴</Option>
+        <label>横轴排序：</label>
+        <Select v-model="xType"  @on-change="handleXTypeChange">
+          <Option value="origin">原始</Option>
+          <Option value="value">数值</Option>
+          <Option value="category">字符</Option>
         </Select>
       </div>
-
+      <div>
+          <label>小数位数：</label>
+          <InputNumber  @on-change="handleFloatChange"  v-model="float1" type="number"  :min="-1"  :max="30"/>
+       </div>
     </div>
     <ExtraChartOptions />
 
@@ -280,14 +284,43 @@
 </template>
   
   <script>
-import { mapGetters } from "vuex";
+import { mapGetters,mapActions } from "vuex";
 import ExtraChartOptions from "../ExtraChartOptions";
 export default {
   name: "BaseChartOptions",
   components: { ExtraChartOptions },
-  computed: {
-    ...mapGetters("graphConf", ["baseOptions", "yAxisType"]),
+  data() {
+    return {
+      xType: ''
+    }
   },
+  watch:{
+    xSort:{
+      handler(val){
+          this.xType = val
+      },
+      immediate:true
+    },
+    float:{
+      handler(val){
+          this.float1 = val
+      },
+      immediate:true
+    },
+    
+  },
+  computed: {
+    ...mapGetters("graphConf", ["baseOptions",'xSort','float']),
+  },
+  methods:{
+    ...mapActions("graphConf",['changexSort','changeFloat']),
+    handleXTypeChange(val){
+      this.changexSort(val)
+    },
+    handleFloatChange(val){
+      this.changeFloat(val)
+    },
+  }
 };
 </script>
 <style lang="scss" scoped>
