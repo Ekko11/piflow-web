@@ -420,9 +420,12 @@ export default {
     border: 1px dashed #3974aa;
     h4 {
       line-height: 26px;
-      background: #3974aa;
+      background: #3974AA;
       text-indent: 10px;
       color: #fff;
+      display: inline-block;
+      padding-right: 10px;
+      border-radius: 6px;
     }
     > div {
       display: flex;
@@ -433,9 +436,10 @@ export default {
   }
 
   .config_input {
-    width: 25%;
+    width: 30%;
     padding: 10px 10px;
     box-sizing: border-box;
+    margin: 0 16px;
 
     .ivu-input,
     .ivu-select-selection {

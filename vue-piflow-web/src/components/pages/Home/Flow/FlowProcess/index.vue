@@ -87,6 +87,9 @@ export default {
         onOk: async () => {
           const res = await stopProcessOrProcessGroup(this.$qs.stringify(data));
           if (res.data.code === 200) {
+            clearTimeout(this.timer);
+            this.processIng = []
+            this.state = 'KILLED'
             this.$Message.success({
               content: this.$t("tip.stop_success_content"),
               duration: 3,
@@ -144,13 +147,16 @@ export default {
             this.processMonitoring(appid);
           }, 5000);
         } else {
-          clearTimeout(this.timer);
-          const res = await getByProcessId(this.$route.query.processId);
-          this.data = res.data.data;
-          this.publishInfo = this.data.flowPublishing;
+          this.handleClear()
         }
       } else {
       }
+    },
+   async handleClear(){
+      clearTimeout(this.timer);
+          const res = await getByProcessId(this.$route.query.processId);
+          this.data = res.data.data;
+          this.publishInfo = this.data.flowPublishing;
     },
     handDataPublish() {
       this.$refs.PublishModalRef.handleAdd(this.data);

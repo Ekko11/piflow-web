@@ -90,6 +90,10 @@ export default {
           align: "center",
         },
         {
+          title: "结束时间",
+          key: "lastUpdateDttm",
+        },
+        {
           title: "运行状态",
           key: "state",
           render: (h, params) => {
@@ -99,10 +103,6 @@ export default {
           },
           width: 150,
           align: "center",
-        },
-        {
-          title: "结束时间",
-          key: "lastUpdateDttm",
         },
         {
           title: "操作",
