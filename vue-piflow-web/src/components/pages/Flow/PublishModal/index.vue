@@ -484,7 +484,6 @@ export default {
         this.selectedList = [...publishStops];
         this.groupList.sort((a, b) => a.sort - b.sort);
         this.groupList = [...this.groupList];
-        console.log(this.groupList)
       }
     },
 
@@ -535,7 +534,6 @@ export default {
       this.formData.productTypeDescription = productNode.description;
 
       let errMsg = "";
-      console.log(stopList)
       // 筛选stops中的选中项
       stopList = stopList.map((item) => ({
         ...item,
@@ -566,7 +564,6 @@ export default {
         });
         return;
       }
-      console.log(stopList)
       this.handlePublish(stopList);
     },
     // 请求发送接口
@@ -581,13 +578,20 @@ export default {
         let promiseList = [];
         if (this.fileList.length || this.coverFile || this.instructionFile) {
           const returnPropsList = res.data.data;
-          if (this.fileList.length) {
+           if (this.fileList.length) {
+
             // 多次上传文件
             this.fileList.forEach((item) => {
+                let obj = null
+                if(returnPropsList.length){
+                  obj = returnPropsList.find(
+                    (v) => v.propertyId === item.id
+                  );
+                }
                 // 组件stop上传文件
                 const res = uploadFile({
                   associateType: 3,
-                  associateId: item.id,
+                  associateId: (obj && obj.id) ||  item.id,
                   file: item.file,
                 });
                 promiseList.push(res);

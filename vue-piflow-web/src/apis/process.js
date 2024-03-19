@@ -48,6 +48,18 @@ export function getProcessHistoryPageOfSelf (data) {
     })
 }
 
+// 停止运行
+export function stopProcessOrProcessGroup (data) {
+    return axios({
+        method:'post',
+        url:`/processAndProcessGroup/stopProcessOrProcessGroup`,
+        data
+    })
+}
+
+
+
+
 
 // 获取日志地址
 export function getLogUrl (data) {

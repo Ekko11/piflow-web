@@ -57,3 +57,11 @@ export function runPublishFlow (data) {
     })
 }
 
+// 暂存流水线
+export function tempSaveFlow (data) {
+    return axios({
+        method:'post',
+        url:'/flowPublish/tempSave',
+        data
+    })
+}

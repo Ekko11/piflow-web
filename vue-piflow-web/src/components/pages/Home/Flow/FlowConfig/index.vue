@@ -10,7 +10,7 @@
           />
         </Button>
         <div>
-          <!-- <Button class="stop" @click="handleRun()">暂存</Button> -->
+          <Button class="stop" @click="handleSave()">暂存</Button>
           <Button class="run" @click="handleRun()">运行</Button>
         </div>
       </div>
@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { getPublishingById, runPublishFlow } from "@/apis/flowPublish";
+import { getPublishingById, runPublishFlow,tempSaveFlow } from "@/apis/flowPublish";
 import { getProcessPageByPublishingId, getLogUrl } from "@/apis/process";
 import { downloadFile, download, downloadFileByIds } from "@/apis/file";
 import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
@@ -136,8 +136,23 @@ export default {
     handleNameMap(val){
       this.nameMap = val
     },
-    // 暂停
-    async handleStop() {},
+    // 暂存
+    async handleSave() {
+      this.$event.emit("loading", true);
+      const data = JSON.parse(JSON.stringify(this.publishInfo));
+     data.stops.forEach((v) => {
+        v.stopPublishingPropertyVos.forEach((k) => {
+          k.tempSaveValue = k.customValue   //暂存
+          k.customValue = k.customValue1 ;    //推荐值
+          delete k.allowableValues1;
+          delete k.customValue1;
+        });
+      });
+      const  res = await tempSaveFlow(data)  
+      this.$event.emit("loading", false);
+
+
+    },
     // 运行
     async handleRun() {
       this.$event.emit("loading", true);
@@ -145,7 +160,6 @@ export default {
       data.stops.forEach((v) => {
         v.stopPublishingPropertyVos.forEach((k) => {
           k.customValue = k.customValue ? k.customValue : k.customValue1;
-
           // 同名属性 赋值
           for (const key in this.nameMap) {
             const i = this.nameMap[key].findIndex(t=>t === k.id)
@@ -158,13 +172,12 @@ export default {
               k.customValue = targetProp.customValue ? targetProp.customValue : targetProp.customValue1;
             }
           }
-
+          k.tempSaveValue = k.customValue  
           delete k.allowableValues1;
+          delete k.customValue1;
         });
       });
-
-
-      const res = await runPublishFlow(data);
+       const res = await runPublishFlow(data);
       this.$event.emit("loading", false);
       this.$router.push(
         `/home/flowProcess?processId=${res.data.data.processId}`
@@ -181,7 +194,7 @@ export default {
           stopPublishingPropertyVos: v.stopPublishingPropertyVos.map((k) => ({
             ...k,
             customValue1: k.customValue,
-            customValue: "",
+            customValue: k.tempSaveValue,
           })),
         }));
         this.publishInfo = res.data.data;
