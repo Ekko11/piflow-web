@@ -591,7 +591,7 @@ export default {
           okText: this.$t("modal.confirm"),
           width:'700',
           cancelText: this.$t("modal.cancel_text"),
-          content: `<div style="line-height: 28px;"> ${emptyMessge}  以下 组件-属性: ${emptyProps} 尚未指定发布类型，将自动为您设置为普通输入，是否确认发布？</div>`,
+          content: `<div style="line-height: 28px;"> ${emptyMessge}  以下 组件-属性: ${emptyProps} 尚未指定发布类型，系统将自动为您设置为普通输入，是否确认发布？</div>`,
           onOk: () => {
              this.handlePublish(stopList);
           }
