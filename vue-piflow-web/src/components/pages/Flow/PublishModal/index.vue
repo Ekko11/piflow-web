@@ -291,7 +291,7 @@
 
     <!-- footer -->
     <div class="footer">
-      <Button @click="handleSave" class="custom-btn-primary">{{
+      <Button @click="handleSave" type="primary" style="background: var(--primary-color);">{{
         $t("modal.confirm")
       }}</Button>
       <Button @click="open = false" class="custom-btn-default">{{
@@ -460,25 +460,26 @@ export default {
             );
             child.checked = true
             child.cascaderType = child.type === 2 ? [child.type] : [1, child.type]
-            this.stops[index].bak1 = child.bak1;
-            this.stops[index].stopPublishingPropertyVos[idx].checked = true;
-            this.stops[index].stopPublishingPropertyVos[idx].id = child.id;
-            this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
-            this.stops[index].stopPublishingPropertyVos[idx].description =
-              child.description;
-            this.stops[index].stopPublishingPropertyVos[idx].description1 =
-              child.description;
+            this.stops[index].stopPublishingPropertyVos[idx] = child
+            // this.stops[index].bak1 = child.bak1;
+            // this.stops[index].stopPublishingPropertyVos[idx].checked = true;
+            // this.stops[index].stopPublishingPropertyVos[idx].id = child.id;
+            // this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
+            // this.stops[index].stopPublishingPropertyVos[idx].description =
+            //   child.description;
+            // this.stops[index].stopPublishingPropertyVos[idx].description1 =
+            //   child.description;
 
-            this.stops[index].stopPublishingPropertyVos[idx].fileId =
-              child.fileId;
-            this.stops[index].stopPublishingPropertyVos[idx].fileName =
-              child.fileName;
-            this.stops[index].stopPublishingPropertyVos[idx].version =
-              child.version;
-            this.stops[index].stopPublishingPropertyVos[idx].publishingId =
-              child.publishingId;
-            this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
-            this.stops[index].stopPublishingPropertyVos[idx].cascaderType =child.cascaderType
+            // this.stops[index].stopPublishingPropertyVos[idx].fileId =
+            //   child.fileId;
+            // this.stops[index].stopPublishingPropertyVos[idx].fileName =
+            //   child.fileName;
+            // this.stops[index].stopPublishingPropertyVos[idx].version =
+            //   child.version;
+            // this.stops[index].stopPublishingPropertyVos[idx].publishingId =
+            //   child.publishingId;
+            // this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
+            // this.stops[index].stopPublishingPropertyVos[idx].cascaderType =child.cascaderType
           });
         });
         this.selectedList = [...publishStops];
@@ -534,6 +535,10 @@ export default {
       this.formData.productTypeDescription = productNode.description;
 
       let errMsg = "";
+      let emptyProps = ""
+      let  haveFileInput = false
+      let  haveOutPut = false
+      const style = 'padding: 5px 10px;border-radius: 5px;margin-right: 5px;color: #5d9be5;'
       // 筛选stops中的选中项
       stopList = stopList.map((item) => ({
         ...item,
@@ -548,8 +553,13 @@ export default {
                   errMsg = `请确保组件 ${item.stopName} 的参数 ${prop.propertyName} 的文件不为空`;
                 }
                 prop.type = prop.cascaderType[1];
-              } else {
-                prop.type = prop.cascaderType[0] || 1; //默认普通输入
+                haveFileInput = true
+              } else if((prop.cascaderType.length === 1)){  //普通输出
+                haveOutPut = true
+                prop.type = prop.cascaderType[0] 
+              }else{   // 没选默认设为普通输入
+                emptyProps +=  `<p style="${style}">  ${item.stopName} - ${prop.propertyName}  </p>`
+                prop.type = 1   
               }
             }
             return prop.checked;
@@ -564,7 +574,31 @@ export default {
         });
         return;
       }
-      this.handlePublish(stopList);
+      let emptyMessge = ''
+      if(!haveFileInput || !haveOutPut){
+        if( !haveFileInput && !haveOutPut ){
+          emptyMessge = "当前所有选中组件中未包含文件输入和输出类型组件"
+        }else if(!haveFileInput){
+          emptyMessge = "当前所有选中组件中未包含文件输入类型组件"
+        }else{
+          emptyMessge = "当前所有选中组件中未包含输出类型组件"
+        }
+        emptyMessge = `<p style="color: #e64b4b;"> ${emptyMessge} </p>`
+      }
+      if(emptyProps){
+        this.$Modal.confirm({
+          title: this.$t("tip.title"),
+          okText: this.$t("modal.confirm"),
+          width:'700',
+          cancelText: this.$t("modal.cancel_text"),
+          content: `<div style="line-height: 28px;"> ${emptyMessge}  以下 组件-属性: ${emptyProps} 尚未指定发布类型，将自动为您设置为普通输入，是否确认发布？</div>`,
+          onOk: () => {
+             this.handlePublish(stopList);
+          }
+        })
+      }else{
+        this.handlePublish(stopList);
+      }
     },
     // 请求发送接口
     async handlePublish(data) {
