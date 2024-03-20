@@ -80,6 +80,7 @@ export default {
         {
           title: "描述信息",
           key: "description",
+          className:'desc',
         },
         {
           title: "所属类型",
@@ -88,6 +89,8 @@ export default {
         {
           title: "创建时间",
           key: "crtDttm",
+          width:'180',
+          align: "center",
         },
         {
           title: "操作",
@@ -274,5 +277,14 @@ export default {
   .legend {
     margin: 0 4px;
   }
+}
+
+
+::v-deep  .desc span{
+    display: -webkit-box;  
+    -webkit-line-clamp: 2;  
+    -webkit-box-orient: vertical;  
+    overflow: hidden;  
+    text-overflow: ellipsis;  
 }
 </style>

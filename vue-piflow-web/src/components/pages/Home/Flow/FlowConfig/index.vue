@@ -179,9 +179,17 @@ export default {
       });
        const res = await runPublishFlow(data);
       this.$event.emit("loading", false);
-      this.$router.push(
-        `/home/flowProcess?processId=${res.data.data.processId}`
-      );
+      if(res.data.code === 200){
+        this.$router.push(
+          `/home/flowProcess?processId=${res.data.data.processId}`
+        );
+      }else{
+        this.$Message.error({
+          content: res.data.errorMsg,
+          duration: 3,
+        });
+      }
+
 
 
     },

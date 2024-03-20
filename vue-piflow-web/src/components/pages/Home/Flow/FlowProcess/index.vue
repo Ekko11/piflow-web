@@ -7,7 +7,7 @@
         <Button class="log" v-if="appId" @click="handleShowLog">日志查看</Button>
       </div>
       <div class="progress">
-        <div>
+        <div v-if="state !== 'KILLED' && state !== 'FAILED'">
           <p v-if="process === 0 && !processIng.length" class="processIng">
             排队中
           </p>
@@ -15,6 +15,13 @@
             正在进行 <span style="font-weight: 600">{{ item.name }} </span>
           </p>
         </div>
+        <div v-else-if="state == 'FAILED'">
+          <p class="process_failed">
+            运行失败
+          </p>
+
+        </div>
+
         <Progress :percent="process" :stroke-width="12" :status="(state =='FAILED' || state =='KILLED')?'normal':'active'"  :stroke-color="(state =='FAILED' || state =='KILLED')?'#c4c4bf':'#3974aa'"/>
         <div class="btn">
           <Button
@@ -70,6 +77,7 @@ export default {
       data: {},
       processIng: [],
       state: "",
+      appId:'',
       completedStatus: ["COMPLETED", "FAILED", "KILLED"],
     };
   },
@@ -157,6 +165,8 @@ export default {
           const res = await getByProcessId(this.$route.query.processId);
           this.data = res.data.data;
           this.publishInfo = this.data.flowPublishing;
+          this.state = res.data.data.state.text
+          console.log(this.state)
     },
     handDataPublish() {
       this.$refs.PublishModalRef.handleAdd(this.data);
@@ -186,7 +196,8 @@ export default {
     },
   },
   beforeDestroy() {
-    clearTimeout(this.timer);
+   if(this.timer)clearTimeout(this.timer);
+    if(this.appIdTimer) clearTimeout(this.appIdTimer)
   },
 };
 </script>
@@ -214,6 +225,10 @@ export default {
   i {
     font-size: 16px;
   }
+}
+
+.process_failed{
+  text-align: center;
 }
 
 .progressWrap {

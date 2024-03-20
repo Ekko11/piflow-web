@@ -88,7 +88,7 @@
                 v-if="child.cascaderType[1] === 0"
                 @click="handleClickUpload(child)"
               >
-                <label>上传文件：</label>
+                <label>样例文件：</label>
                 <div>
                   <Upload action="/aaa" :before-upload="handleBeforeUpload">
                     <Button icon="ios-cloud-upload-outline"
