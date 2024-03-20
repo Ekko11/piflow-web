@@ -52,7 +52,7 @@ module.exports = {
         loading: "Loading..."
     },
     tip: {
-        title: "πFlow system tips",
+        title: "System tips",
         existed: "UserName Existed！",
         success:'Operation successful!',
         fault_content: "An unknown error occurred in the background run！",

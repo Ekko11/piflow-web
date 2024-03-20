@@ -52,7 +52,7 @@ module.exports = {
         loading: "加载中..."
     },
     tip: {
-        title: "πFlow系统提示",
+        title: "系统提示",
         existed: "用户名重复！",
         success: "操作成功！",
         fault_content: "后台程序运行发生未知错误！",
