@@ -141,7 +141,7 @@ const InitState = () => ({
   },
   lineChart: {
     type: "line",
-    smooth: true,
+    smooth: false,
     label: {
       show: false,
     },

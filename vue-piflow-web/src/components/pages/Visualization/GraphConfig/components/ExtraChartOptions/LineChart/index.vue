@@ -9,12 +9,19 @@
         <label>显示标签：</label>
         <Checkbox v-model="lineChart.label.show">是</Checkbox>
       </div>
+
+      <div>
+        <label>是否曲线：</label>
+        <Checkbox v-model="lineChart.smooth">是</Checkbox>
+      </div>
+
+      
       <div>
         <label>线宽：</label>
         <InputNumber v-model="lineChart.lineStyle.width" :max="10" :min="0" />
       </div>
       <div>
-        <label>线样式：</label>
+        <label>线条样式：</label>
         <Select v-model="lineChart.lineStyle.type">
           <Option :value="'solid'">实线</Option>
           <Option :value="'dotted'">点线</Option>
