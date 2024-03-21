@@ -166,27 +166,43 @@ export default {
       }
     },
     async handShowInstructions(row) {
+      if (!Cookies.get("setUser")) {
+        this.$router.push({
+          path: "/login",
+          query: { redirect: `/home/list?type=${this.$route.query.type}` },
+        });
+          return
+      }
       this.$event.emit('loading',true)
       const res = await downloadFile(row.instructionFileId);
-      // 将文件流转化为本地blod地址
-      var binaryData = [];
-      binaryData.push(res.data);
-      // 记得一定要设置application的类型
-      let url = window.URL.createObjectURL(
-        new Blob(binaryData, {
-          type: "application/pdf;charset=utf-8",
-        })
-      );
-      if (url != null && url != undefined && url) {
-        const { href } = this.$router.resolve({
-          path: "/pdf",
-          query: {
-            url: url,
-          },
+      console.log(res)
+      if(!res.data.code){
+        // 将文件流转化为本地blod地址
+        var binaryData = [];
+        binaryData.push(res.data);
+        // 记得一定要设置application的类型
+        let url = window.URL.createObjectURL(
+          new Blob(binaryData, {
+            type: "application/pdf;charset=utf-8",
+          })
+        );
+        if (url != null && url != undefined && url) {
+          const { href } = this.$router.resolve({
+            path: "/pdf",
+            query: {
+              url: url,
+            },
+          });
+          // 新页面打开
+          window.open(url, "_blank");
+        }
+      }else{
+        this.$Message.error({
+          title: this.$t("tip.title"),
+          content: res.data.errorMsg,
         });
-        // 新页面打开
-        window.open(href, "_blank");
       }
+
       this.$event.emit('loading',false)
     },
     onPageChange(pageNo) {
