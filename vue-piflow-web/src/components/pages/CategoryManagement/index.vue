@@ -76,9 +76,9 @@
             >
               <div>
                 <img
-                  v-if="this.file"
+                  v-if="formData.filePath || this.file"
                   style="width: 100px"
-                  :src="this.file"
+                  :src="formData.filePath ||this.file"
                   alt=""
                 />
                 <Icon
@@ -173,7 +173,7 @@ export default {
   },
   methods: {
     async handleComfirm() {
-      if (!this.formData.name || !this.formData.name.trim()|| !this.file){
+      if (!this.formData.name || !this.formData.name.trim()|| !(this.file || this.formData.filePath)){
         this.$refs.formValidate.validate((valid) => {})
         this.$Message.error({
           content: '请按要求填写表单',
@@ -236,12 +236,13 @@ export default {
     async handleEdit(row) {
       this.isOpen = true;
       this.file = null;
-      const { id, parentId, level, name, description } = row;
-      this.formData = { id, parentId, level, name, description };
-      if (row.fileId) {
-        const res = await downloadFile(row.fileId);
-        this.renderImg(res.data);
-      }
+      const obj = JSON.parse(JSON.stringify(row))
+      delete obj.children
+      this.formData = obj
+      // if (row.fileId) {
+      //   const res = await downloadFile(row.fileId);
+      //   this.renderImg(res.data);
+      // }
     },
     async handleGetData() {
       const res = await getDataProductType();

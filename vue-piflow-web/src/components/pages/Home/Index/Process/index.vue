@@ -12,7 +12,7 @@
           :key="idx"
           @click="handleEnter(child.id)"
         >
-          <img :src=" fileMap[child.fileId] || imgList[0]" alt="" />
+          <img :src="child.filePath || imgList[0]" alt="" />
           <div>
             <p>{{ child.name }}生产流水线</p>
           </div>
@@ -51,24 +51,23 @@ export default {
             }
           })
       });
-      if(Object.keys(fileMap).length){
-        this.getImg(Object.keys(fileMap).join(','),fileMap)
-      }
+      // if(Object.keys(fileMap).length){
+      //   this.getImg(Object.keys(fileMap).join(','),fileMap)
+      // }
     },
-    async getImg(ids,fileMap){
-      const _this = this
-      const res = await downloadFileByIds(ids)
-      const zip = new JSZip()
-      zip.loadAsync(res.data).then((res) => {
-        for (const key in fileMap) {
-          var base = res.file(res.files[fileMap[key]].name).async("base64");
-          base.then(function (res) {
-            _this.$set(_this.fileMap,key,'data:image/png;base64,' + res)
-           })
-
-        }
-      }) 
-    }
+    // async getImg(ids,fileMap){
+    //   const _this = this
+    //   const res = await downloadFileByIds(ids)
+    //   const zip = new JSZip()
+    //   zip.loadAsync(res.data).then((res) => {
+    //     for (const key in fileMap) {
+    //       var base = res.file(res.files[fileMap[key]].name).async("base64");
+    //       base.then(function (res) {
+    //         _this.$set(_this.fileMap,key,'data:image/png;base64,' + res)
+    //        })
+    //     }
+    //   }) 
+    // }
 
   },
 };

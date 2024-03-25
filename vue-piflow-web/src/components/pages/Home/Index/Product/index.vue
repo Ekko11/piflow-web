@@ -21,8 +21,7 @@
       </div>
       <div class="contain_r">
         <div v-for="item in tableData" :key="item.id" class="product_item">
-          <img v-if="item.coverFile" :src=" fileMap[item.coverFile.id] || '@/assets/img/home/p1.png'" alt="" />
-          <img v-else src="@/assets/img/home/p1.png" alt="" />
+          <img  :src=" item.coverFile.filePath || '@/assets/img/home/p1.png'" alt="" />
           <div>
             <h4>{{ item.name }}</h4>
             <div class="contain_r-desc">
@@ -44,6 +43,7 @@
             show-elevator
             :show-total="true"
             :total="total"
+            :current="page"
             show-sizer
             @on-change="onPageChange"
             @on-page-size-change="onPageSizeChange"
@@ -152,7 +152,6 @@ export default {
       this.userName = Cookies.get("usre");
       if (Cookies.get("setUser") && user[0].role.stringValue) {
         let user = JSON.parse(Cookies.get("setUser"));
-        console.log(user[0].role.stringValue);
         this.role = user[0].role.stringValue;
       } else {
         this.role = "USER";
@@ -182,15 +181,15 @@ export default {
       if(this.keyword)  data.keyword = this.keyword
       const res = await getDataProductByPage(data);
       this.tableData = res.data.data;
-      const ids = [];
-      res.data.data.forEach((item) => {
-        if (item.coverFile && item.coverFile.id && !this.copyFileMap[item.coverFile.id]) {
-          ids.push(item.coverFile.id);
-          this.$set(this.copyFileMap, item.coverFile.id, item.coverFile.fileName);
-        }
-      });
       this.total = res.data.count;
-      ids.length &&this.getImg(ids.join(","));
+      // const ids = [];
+      // res.data.data.forEach((item) => {
+      //   if (item.coverFile && item.coverFile.id && !this.copyFileMap[item.coverFile.id]) {
+      //     ids.push(item.coverFile.id);
+      //     this.$set(this.copyFileMap, item.coverFile.id, item.coverFile.fileName);
+      //   }
+      // });
+      // ids.length &&this.getImg(ids.join(","));
     },
         // 下载
     async handleDown(row) {

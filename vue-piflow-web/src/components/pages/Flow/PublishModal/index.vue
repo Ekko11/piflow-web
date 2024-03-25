@@ -801,7 +801,7 @@ export default {
           });
         } else {
           //未分组
-          this.waitingList.splice(index, 1);
+          this.waitingList.splice(i, 1);
         }
       } else {
         // 如果选中且未加入已选中列表，加入已分组待分组列表
