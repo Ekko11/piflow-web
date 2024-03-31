@@ -76,16 +76,31 @@
               </div>
               <div class="item">
                 <label>发布类型：</label>
+                <Select
+                  style="width: 300px"
+                  v-model="child.type"
+                >
+                <Option :value="0">文件输入</Option>
+                <Option :value="1">普通输入</Option>
+                <Option :value="2">输出</Option>
+              </Select>
+              </div>
+              <div class="item">
+                <label>属性排序：</label>
+                <InputNumber  v-model="child.propertySort" :max="99" :min="0" />
+              </div>
+              <!-- <div class="item">
+                <label>发布类型：</label>
                 <Cascader
                   :data="cascaderData"
                   trigger="hover"
                   style="width: 300px"
                   v-model="child.cascaderType"
                 ></Cascader>
-              </div>
+              </div> -->
               <div
                 class="item"
-                v-if="child.cascaderType[1] === 0"
+                v-if="child.type === 0"
                 @click="handleClickUpload(child)"
               >
                 <label>样例文件：</label>
@@ -98,7 +113,7 @@
                   <p>{{ child.fileName }}</p>
                 </div>
               </div>
-              <div class="item" v-if="child.cascaderType[1] === 1">
+              <div class="item" v-if="child.type === 1">
                 <label>自定义值：</label>
                 <Input
                   disabled
@@ -309,7 +324,7 @@ import { getPublishingById, publishingStops } from "@/apis/flowPublish";
 import { uploadFile, downloadFile } from "@/apis/file";
 
 import draggable from "vuedraggable";
-import { Form, FormItem } from "view-design";
+import { Form, FormItem, Select } from "view-design";
 export default {
   components: { draggable },
   data() {
@@ -459,7 +474,6 @@ export default {
               (v) => v.propertyId === child.propertyId
             );
             child.checked = true
-            child.cascaderType = child.type === 2 ? [child.type] : [1, child.type]
             this.stops[index].stopPublishingPropertyVos[idx] = child
             // this.stops[index].bak1 = child.bak1;
             // this.stops[index].stopPublishingPropertyVos[idx].checked = true;
@@ -479,7 +493,6 @@ export default {
             // this.stops[index].stopPublishingPropertyVos[idx].publishingId =
             //   child.publishingId;
             // this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
-            // this.stops[index].stopPublishingPropertyVos[idx].cascaderType =child.cascaderType
           });
         });
         this.selectedList = [...publishStops];
@@ -547,16 +560,14 @@ export default {
             if (prop.checked) {
               prop.description = prop.description1 || prop.description;
               //输入类型
-              if (prop.cascaderType.length === 2) {
-                if (prop.cascaderType[1] === 0 && !prop.fileName) {
+              if (prop.type === 0) {
+                if (!prop.fileName) {
                   //文件
                   errMsg = `请确保组件 ${item.stopName} 的参数 ${prop.propertyName} 的文件不为空`;
                 }
-                prop.type = prop.cascaderType[1];
                 haveFileInput = true
-              } else if((prop.cascaderType.length === 1)){  //普通输出
+              } else if((prop.type === 2)){  //普通输出
                 haveOutPut = true
-                prop.type = prop.cascaderType[0] 
               }else{   // 没选默认设为普通输入
                 emptyProps +=  `<p style="${style}">  ${item.stopName} - ${prop.propertyName}  </p>`
                 prop.type = 1   
@@ -708,7 +719,6 @@ export default {
             fileName: item.fileName,
             name: item.name,
             type: item.type,
-            cascaderType: [],
             allowableValues: item.allowableValues,
             customValue: item.customValue,
             description: item.description,

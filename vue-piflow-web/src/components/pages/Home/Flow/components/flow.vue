@@ -225,6 +225,7 @@ export default {
       let list = [];
       const nameMap = {}
       this.publishInfo.stops.forEach((item) => {
+        item.stopPublishingPropertyVos.sort((a, b) => a.propertySort - b.propertySort)
         let t = list.findIndex((v) => v.name === item.bak2);
           if (t === -1) {
             list.push({
@@ -263,13 +264,12 @@ export default {
 
       // 分组排序
       list.sort((a, b) => a.sort - b.sort);
-      // 分组内属性排序
+      // 分组内按组件排序
       list.forEach(v=>{
             v.list.sort((a,b)=>a.bak3 - b.bak3)
       })
       // 去除全是输出的分组
       list = list.filter(v=>v.list.some(it=>it.showType))
-
       this.list = list;
       this.$emit('nameMap',nameMap)
     },
@@ -385,7 +385,7 @@ export default {
 ::v-deep .config {
   overflow: hidden;
   background: #f7f9fa;
-  padding: 48px 40px;
+  padding: 20px 40px 48px;
   margin-top: 32px;
   border-radius: 8px 8px 0 0;
   &_r {
@@ -394,17 +394,21 @@ export default {
     background-repeat: no-repeat;
     margin-bottom: 20px;
     background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+   // display: flex;
+   // align-items: center;
+   // justify-content: center;
+   
     background: #fff;
     border-radius: 6px;
     position: relative;
+    height: 300px;
     cursor: pointer;
-      img{
-        max-width: 100%;
-        max-height: 100%;
-      }
+    text-align: center;
+    img{
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
       i{
       position: absolute;
       right: 10px;

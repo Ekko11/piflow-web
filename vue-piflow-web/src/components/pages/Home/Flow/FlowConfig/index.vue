@@ -34,6 +34,15 @@
                 @click="handDataPublish(row)"
                 >数据产品发布</Button
               >
+              <Button
+                v-if="
+                  row.dataProductList &&
+                    row.dataProductList.length &&
+                    !row.dataProductList.some((v) => v.state === 5)
+                "
+                @click="handDataPublish(row)"
+                >删除</Button
+              >
             </div>
           </template>
         </Table>
@@ -92,6 +101,8 @@ export default {
         {
           title: "结束时间",
           key: "lastUpdateDttm",
+          width: 200,
+          align: "center",
         },
         {
           title: "运行状态",
@@ -107,7 +118,7 @@ export default {
         {
           title: "操作",
           slot: "action",
-          width: 400,
+          width: 460,
           align: "center",
         },
       ],
@@ -237,7 +248,7 @@ export default {
         publishingId: this.publishInfo.id,
       };
       const res = await getProcessPageByPublishingId(data);
-      this.historyData = res.data.data;
+      this.historyData = res.data.data
       this.total = res.data.count;
       if (this.historyData.length) {
         this.historyIsShow = true;
