@@ -61,7 +61,7 @@
             <Input
               v-model="formData.description"
               type="textarea"
-              :rows="3"
+              :rows="6"
               placeholder="Enter publish description"
             ></Input>
           </FormItem>
