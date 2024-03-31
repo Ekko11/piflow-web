@@ -370,6 +370,10 @@ export default {
       _this.visualizationData = value;
       _this.getTitle(_this.visualizationData);
     }
+    window["linkToVisualization"] = (url) => {
+       _this.$router.push(url)
+    }
+    
     //  process to release
     window["processToRelease"] = ({value,type,id}) => {
       _this.gettingStopList(value,type,id);

@@ -5,7 +5,7 @@ var thisEditor = null;
 var drawingBoardType = "PROCESS"
 var index = true
 var nodeArr, xmlDate, parentsId, processType, processGroupId, parentProcessId, pID, appId, processState,
-    getCheckpointParam, progress;
+    getCheckpointParam, progress,currentProcessStops;
 
 
 function initProcessCrumbs(parentAccessPath) {
@@ -362,10 +362,13 @@ function queryProcessStopsProperty(processId, pageId) {
             $("#div_processStopVo_processStopPropertyVo").html("");
             if (200 === dataMap.code) {
                 var processStopVo = dataMap.processStopVo;
+                console.log(processStopVo)
+                $('#process_info_inc_load_link_visualization').hide()
+                $("#process_info_inc_load_chart").css('display','none');
                 if (!processStopVo) {
                     $('#process_property_inc_no_data').show();
                 } else {
-
+                    currentProcessStops = processStopVo
                     // Stop Basic Information
                     $("#stopNameShow").text(processStopVo.name);
                     $("#span_processStopVo_description").text(processStopVo.description);
@@ -373,10 +376,12 @@ function queryProcessStopsProperty(processId, pageId) {
                     $("#stopsBundleShow").text(processStopVo.bundel);
                     $("#span_processStopVo_owner").text(processStopVo.owner);
                     if ( processStopVo.visualizationType === '' ){
-                        $("#process_info_inc_load_chart").css('display','none');
                     } else if (processStopVo.visualizationType === 'CustomView') {
+
                         getCustomView(processStopVo.id);
-                    } else {
+                    }else if(processStopVo.visualizationType === "VisualDisplay"){
+                        $('#process_info_inc_load_link_visualization').show()
+                    }else {
                         $("#process_info_inc_load_chart").css('display','block');
                         $("#process_info_inc_load_getChartBtn").attr('data', processStopVo.visualizationType);
                         $("#process_info_inc_load_getChartBtn").attr('name', processStopVo.name);
@@ -388,7 +393,7 @@ function queryProcessStopsProperty(processId, pageId) {
                     if (processStopPropertyVoList) {
                         var processStopPropertyVoListHtml = '<span>';
                         processStopPropertyVoList.forEach(item => {
-                            if (item) {
+                            if (item && item.name !== 'visTableName') {
                                 var processStopPropertyVo = '<span>' + item.displayName + ':</span><span class="open_action">' + item.customValue + '</span><br>';
                                 processStopPropertyVoListHtml += processStopPropertyVo;
                             }
@@ -534,6 +539,29 @@ function ClickSlider() {
         $(this).toggleClass("triggerSlider-open");
         index = !index
     });
+}
+
+function linkToVisualization(...params){
+    console.log(currentProcessStops)
+    const map = {
+        "X_axis":'x',
+        "Y_axis":'y',
+        'visTableName':'tableName'
+    }
+    let link = '/graphconfig?'
+    if(currentProcessStops.processStopPropertyVoList && currentProcessStops.processStopPropertyVoList.length){
+        currentProcessStops.processStopPropertyVoList.forEach(v=>{
+            if(map[v.name]){
+                if(v.name === 'visTableName'){
+                    link +=  `tableName=vis_flow_${v.customValue}&`
+                }else{
+                    link += `${map[v.name]}=${v.customValue}&`
+                }
+            }
+        })
+    }
+    top.document.getElementById('BreadcrumbProcess').style.display = 'none';
+    window.parent['linkToVisualization'](link.substring(0,link.length-1));
 }
 
 function getChart(e,softData,isSoft, ifTheFirst) {

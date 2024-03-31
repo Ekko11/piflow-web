@@ -1,61 +1,81 @@
 <template>
-  <div style="height:600px">
-    <!-- Table button -->
-    <Table border size="small"  height="560" :columns="columns" :data="tableData"> </Table>
-    <!-- paging -->
-    <div class="page" style="margin-top: 10px;display: flex;justify-content: flex-end;">
-      <Page
-        :prev-text="$t('page.prev_text')"
-        :next-text="$t('page.next_text')"
-        show-elevator
-        :show-total="true"
-        :total="total"
-        show-sizer
-        @on-change="onPageChange"
-        @on-page-size-change="onPageSizeChange"
-      />
-    </div>
-  </div>
+  <vxe-modal
+    v-model="open"
+    title="原始数据预览"
+    resize
+    show-zoom
+    width="60vw"
+    destroy-on-close
+  >
+    <template #default>
+      <div style="height:600px">
+        <!-- Table button -->
+        <Table
+          border
+          size="small"
+          height="560"
+          :columns="columns"
+          :data="tableData"
+        >
+        </Table>
+        <!-- paging -->
+        <div
+          class="page"
+          style="margin-top: 10px;display: flex;justify-content: flex-end;"
+        >
+          <Page
+            :prev-text="$t('page.prev_text')"
+            :next-text="$t('page.next_text')"
+            show-elevator
+            :show-total="true"
+            :total="total"
+            show-sizer
+            @on-change="onPageChange"
+            @on-page-size-change="onPageSizeChange"
+          />
+        </div>
+      </div>
+    </template>
+  </vxe-modal>
 </template>
 
 <script>
 export default {
   name: "OriginDataTable",
-  props: {
-    originalData: Array,
-  },
   data() {
     return {
+      open:false,
       tableData: [],
       total: 0,
-      page:1,
-      limit:10
+      page: 1,
+      limit: 10,
     };
   },
-  computed:{
-      columns(){
-        if(this.tableData.length){
-          return Object.keys(this.tableData[0]).map(v=>({title:v,key:v,minWidth:80}))
-        }
-        return []
+  computed: {
+    columns() {
+      if (this.tableData.length) {
+        return Object.keys(this.tableData[0]).map((v) => ({
+          title: v,
+          key: v,
+          minWidth: 80,
+        }));
       }
-  },
-  watch: {
-    originalData(val) {
-      if(val !== this.tableData){
-        this.total = val.length
-        this.getTableData()
-      }
+      return [];
     },
   },
+
   methods: {
-
-    getTableData(){
-      const p = this.page
-      const s = this.limit
-      this.tableData = this.originalData.slice((p - 1) * s, p * s)
+    show(data){
+      this.open = true
+      this.getTableData(data);
     },
+    getTableData(data) {
+      const p = this.page;
+      const s = this.limit;
+      this.tableData = data.slice((p - 1) * s, p * s);
+      this.total = data.length;
 
+    },
 
     onPageChange(pageNo) {
       this.page = pageNo;
@@ -69,5 +89,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

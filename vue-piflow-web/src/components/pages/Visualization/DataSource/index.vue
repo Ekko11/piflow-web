@@ -73,8 +73,6 @@
           <label>{{ $t("datasource.name") }}：</label>
           <Input
             v-model="formData.name"
-            show-word-limit
-            maxlength="100"
             :placeholder="$t('modal.placeholder')"
             style="width: 350px"
           />
@@ -115,7 +113,24 @@
             <Icon type="ios-trash"  @click="handleDelFile"/>
           </div>
         </div>
-        <div class="item" v-if="formData.type === 'mysql' || formData.id">
+        <div class="item" v-if="formData.type === 'excel' && formData.id">
+          <label>{{ $t("datasource.excelName") }}：</label>
+          <Input
+            v-model="formData.tableName"
+            :disabled="formData.id"
+            style="width: 350px"
+          />
+        </div>
+        <div class="item" v-if="formData.type === 'excel'">
+          <label>{{ $t("datasource.sheetName") }}：</label>
+          <Input
+            v-model="formData.sheetName"
+            :disabled="formData.id"
+            :placeholder="$t('datasource.sheetNamePlaceholder')"
+            style="width: 350px"
+          />
+        </div>
+        <div class="item" v-if="formData.type === 'mysql' ||  (formData.id && formData.type === 'mysql' )">
           <label class="self">{{ $t("datasource.database") }}：</label>
           <Select
             v-model="formData.dataBaseId"
@@ -136,7 +151,9 @@
           v-if="dataSheetList.length && (formData.type === 'mysql' || formData.id)"
         >
           <label class="self">{{ $t("datasource.datasheet") }}：</label>
-          <Select v-model="formData.tableName" style="width: 350px">
+          <Select v-model="formData.tableName"
+          :transfer="true"
+           style="width: 350px">
             <Option v-for="item in dataSheetList" :value="item" :key="item">
               {{ item }}</Option
             >
@@ -273,8 +290,8 @@ export default {
       }
     },
     handleEdit(row) {
-      const { id, name, description, dataBaseId, tableName,type } = row;
-      this.formData = { id, name, description, dataBaseId, tableName ,type};
+      const { id, name, description, dataBaseId, tableName,sheetName,type } = row;
+      this.formData = { id, name, description, dataBaseId, tableName,sheetName ,type};
       this.handleDatabaseChange(dataBaseId);
       this.isOpen = true;
     },

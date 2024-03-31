@@ -1,6 +1,8 @@
 const InitState = () => ({
   chartType: "lineChart", //  lineChart  | barChart | PieChart
   xAxisType: "",
+  xSort:'origin',
+  float:2,
   xData: [],
   yAxisType: [],
   yData: [],
@@ -30,13 +32,28 @@ const InitState = () => ({
     },
     dataZoom:[
       {
+        type: 'inside',
+        xAxisIndex: [0],
+        disabled:false,
+        end :100
+      },
+      {
         type: 'slider',
-        id : 'sliderX',
-        show: false,
-        bottom: 5,
-        height: 10
+        show:false,
+        xAxisIndex: [0],
+        bottom: 0,
+        height: 20,
+        end :100
       }
     ],
+
+    brush: {
+      xAxisIndex: 'all',
+      brushLink: 'all',
+      outOfBrush: {
+        colorAlpha: 0.1
+      }
+    },
     legend: {
       show: true,
       orient: "horizontal",
@@ -124,23 +141,23 @@ const InitState = () => ({
   },
   lineChart: {
     type: "line",
-    smooth: true,
+    smooth: false,
     label: {
-      show: true,
+      show: false,
     },
     lineStyle: {
       // color: "#000",
-      width: "2",
+      width: 2,
       type: "solid",
-      opacity: "1",
+      opacity: 1,
     },
 
   },
   barChart: {
     type: "bar",
-    barMaxWidth: "20",
+    barMaxWidth: 20,
     label: {
-      show: true,
+      show: false,
       distance: 10,
       color: "#000",
       position: "top",
@@ -153,10 +170,13 @@ const InitState = () => ({
     },
     lineStyle: {
       // color: "#000",
-      width: "2",
+      width: 2,
       type: "solid",
-      opacity: "1",
+      opacity: 1,
     },
+  },
+  brush:{
+    toolbox:['rect','clear']
   },
   extraOptions: {},
 });
@@ -167,6 +187,8 @@ const state = {
 const getters = {
   chartType: (state) => state.chartType,
   xAxisType: (state) => state.xAxisType,
+  xSort: (state) => state.xSort,
+  float: (state) => state.float,
   xData: (state) => state.xData,
   yAxisType: (state) => state.yAxisType,
   yData: (state) => state.yData,
@@ -176,12 +198,20 @@ const getters = {
   barChart: (state) => state.barChart,
   PieChart: (state) => state.PieChart,
 };
+
+
 const mutations = {
   CHANGE_CHARTTYPE: (state, val) => {
     state.chartType = val;
   },
   CHANGE_XAXISTYPE: (state, val) => {
     state.xAxisType = val;
+  },
+  CHANGE_XSORT: (state, val) => {
+    state.xSort = val;
+  },
+  CHANGE_FLOAT: (state, val) => {
+    state.float = val;
   },
   CHANGE_YAXISTYPE: (state, val) => {
     state.yAxisType = val;
@@ -221,6 +251,12 @@ const actions = {
   },
   changexAxisType({ commit }, val) {
     commit("CHANGE_XAXISTYPE", val);
+  },
+  changexSort({ commit }, val) {
+    commit("CHANGE_XSORT", val);
+  },
+  changeFloat({ commit }, val) {
+    commit("CHANGE_FLOAT", val);
   },
   changeyAxisType({ commit }, val) {
     commit("CHANGE_YAXISTYPE", val);

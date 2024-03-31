@@ -8,7 +8,11 @@
           <div class="formWrap">
             <div>
               <label>最大柱宽：</label>
-              <Input v-model="barChart.barMaxWidth" />
+              <InputNumber  v-model="barChart.barMaxWidth" type="number"   :max="30"/>
+            </div>
+            <div>
+                <label>显示标签：</label>
+                <Checkbox v-model="barChart.label.show">是</Checkbox>
             </div>
           </div>
         </template>
@@ -18,13 +22,10 @@
       标签设置(label)
       <template #content>
         <div class="formWrap">
-          <div>
-            <label>显示label：</label>
-            <Checkbox v-model="barChart.label.show">是</Checkbox>
-          </div>
+
           <div>
             <label>与柱间隔：</label>
-            <Input v-model="barChart.label.distance" type="number" />
+            <InputNumber v-model="barChart.label.distance" type="number"  :max="20"/>
           </div>
           <div>
             <label>颜色：</label>

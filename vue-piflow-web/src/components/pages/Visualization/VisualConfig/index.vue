@@ -74,9 +74,11 @@
           :placeholder="$t('modal.placeholder')"
           style="width: 350px"/>
     </div>
-    <div class="item" v-if="!formData.id">
+    <div class="item">
       <label class="self">{{$t('visualconfig.datasource')}}：</label>
       <Select v-model="formData.graphTemplateId" 
+      :transfer="true"
+      :disabled="formData.id"
         style="width:350px">
         <Option
             v-for="item in dataSourceList"
@@ -184,8 +186,8 @@ export default {
       }
     },
     handleEdit(row){
-      const {id,name,description} = row
-      this.formData = {id,name,description}
+      const {id,name,description,graphTemplateId} = row
+      this.formData = {id,name,description,graphTemplateId}
       this.isOpen = true
     },
     handleConfirm(){
@@ -273,7 +275,7 @@ export default {
           })
             .then((res) => {
               if (res.data.code === 200) {
-                this.$Modal.success({
+                this.$Message.success({
                   title: this.$t("tip.title"),
                   content:
                     `${row.name} ` + this.$t("tip.delete_success_content"),
@@ -310,7 +312,7 @@ export default {
         .then((res) => {
           if (res.data.code === 200) {
             this.tableData = res.data.data;
-            this.total = res.data.count;
+            this.total = res.data.totalCount;
           } else {
             this.$Message.error({
               content: this.$t("tip.request_fail_content"),

@@ -16,28 +16,6 @@
         <div @dragover.prevent @drop="handleXDrop">
           <p v-if="!xAxisType" class="placehold">请拖入上方字段</p>
           <div v-else class="options">
-            <Tooltip placement="top" theme="light">
-              <span class="checkedSpan">{{ xAxisType.sort }}</span>
-              <div slot="content">
-                <span
-                  :class="{
-                    optionsSpan: 'true',
-                    active: xAxisType.sort === '字符',
-                  }"
-                  @click="xAxisType.sort = '字符'"
-                  >字符型</span
-                >
-                <span
-                  :class="{
-                    optionsSpan: 'true',
-                    active: xAxisType.sort === '数值',
-                  }"
-                  @click="xAxisType.sort = '数值'"
-                  >数值型</span
-                >
-              </div>
-            </Tooltip>
-
             {{ xAxisType.label }}
             <span class="close" @click="handleRemoveX">x</span>
           </div>
@@ -76,7 +54,6 @@ export default {
     handleXDrop(e) {
       e.preventDefault();
       const data = {
-        sort: "字符",
         label: this.dragType,
       };
       this.$store.dispatch("graphConf/changexAxisType", data);
