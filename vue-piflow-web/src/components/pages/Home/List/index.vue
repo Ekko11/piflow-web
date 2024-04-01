@@ -80,7 +80,7 @@ export default {
         {
           title: "描述信息",
           key: "description",
-          className:'desc',
+          tooltip:true
         },
         {
           title: "所属类型",

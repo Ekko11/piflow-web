@@ -3,8 +3,14 @@
     <Flow mode="process" :flowInfo="publishInfo" />
     <div class="progressWrap">
       <div class="stop">
+      <div>
+        <Button  class="returnBtn" v-if="state !== 'STARTED'" icon="md-return-left"  @click="handleReturn">返回配置</Button>
+      </div>
+      <div>
         <Button  class="stopBtn" v-if="state == 'STARTED'" @click="handleStop">停止</Button>
         <Button class="log" v-if="appId" @click="handleShowLog">日志查看</Button>
+      </div>
+
       </div>
       <div class="progress">
         <div v-if="state !== 'KILLED' && state !== 'FAILED'">
@@ -194,6 +200,9 @@ export default {
       });
       download(downloadFileByIds, ids, this.data.name, true);
     },
+    handleReturn(){
+      this.$router.push(`/home/flowConfig?id=${this.publishInfo.id}&type=${this.publishInfo.productTypeId}`)
+    }
   },
   beforeDestroy() {
    if(this.timer)clearTimeout(this.timer);
@@ -256,7 +265,14 @@ export default {
   display: flex;
   padding-right: 20px;
   margin-bottom: 20px;
-  justify-content: flex-end;
+  justify-content: space-between;
+  >div{
+    display: flex;
+  }
+  .returnBtn {
+    background: #fff;
+    color: #3974AA;
+  }
   .stopBtn {
     background: #724343;
     color: #fff;

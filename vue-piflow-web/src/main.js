@@ -47,7 +47,13 @@ Vue.use(VXETable);
 import Treeselect from "@riophae/vue-treeselect"; // 导入vue-treeselect
 import "@riophae/vue-treeselect/dist/vue-treeselect.css"; // 导入样式
 
-import { Notification } from "element-ui";
+import { 
+  Notification,
+  Table,
+  TableColumn
+} from "element-ui";
+Vue.use(Table);
+Vue.use(TableColumn);
 Vue.prototype.$notify = Notification;
 
 Vue.component("Treeselect", Treeselect); // 注册组件

@@ -86,6 +86,7 @@
         :before-upload="handleFileBefore"
         :show-upload-list="false"
         style="width: 350px"
+        accept=".jpg, .jpeg, .png"
         class="upload"
       >
         <div>

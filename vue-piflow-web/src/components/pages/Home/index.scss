@@ -1,4 +1,4 @@
-.head{
+.h_head{
     height: 79px;
     display: flex;
     justify-content: space-between;
@@ -69,7 +69,31 @@
         background: url('~@/assets/img/home/headR.png') no-repeat;
     }
 }
-
+.h_content{
+    min-height: calc( 100vh - 199px );
+}
+.h_footer{
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.8);
+    background: linear-gradient(180deg, #3974AA 0%, #2F587D 100%);
+    &-l{
+        margin-right: 10px;
+        img{
+            height: 70px;
+        }
+    }
+    &-r{
+        border-left: 1px solid rgba(255,255,255,0.6);
+        padding-left: 20px;
+        margin-left: 30px;
+        span{
+            margin-right: 10px;
+        }
+    }
+}
 .desc{
     border: 1px dashed rgba(0, 111, 238, 1);
     padding: 24px 100px;
@@ -84,6 +108,7 @@
     max-width: 1306px;
     margin: 0 auto;
     padding-bottom: 100px;
+    overflow: hidden;
     &_title{
         color: #3974AA;
         font-size: 20px;

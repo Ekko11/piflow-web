@@ -34,7 +34,7 @@
                 @click="handDataPublish(row)"
                 >数据产品发布</Button
               >
-              <Button
+              <!-- <Button
                 v-if="
                   row.dataProductList &&
                     row.dataProductList.length &&
@@ -42,7 +42,7 @@
                 "
                 @click="handDataPublish(row)"
                 >删除</Button
-              >
+              > -->
             </div>
           </template>
         </Table>
@@ -118,7 +118,7 @@ export default {
         {
           title: "操作",
           slot: "action",
-          width: 460,
+          width: 400,
           align: "center",
         },
       ],

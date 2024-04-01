@@ -1,9 +1,9 @@
 <template>
   <div style="background: #fff;" >
-    <div class="head">
-      <div class="head-l" @click="handleBack">生态站监测数据产品生产系统</div>
-      <div class="head-m"></div>
-      <div class="head-r" >
+    <div class="h_head">
+      <div class="h_head-l" @click="handleBack">生态站监测数据产品生产系统</div>
+      <div class="h_head-m"></div>
+      <div class="h_head-r" >
         <div v-if="!user.username" @click="handleLogin">
           <img src="@/assets/img/home/user.png" alt="" />
           <span >登录</span>
@@ -23,7 +23,20 @@
         </div>
       </div>
     </div>
-    <router-view></router-view>
+    <div class="h_content">
+      <router-view></router-view>
+    </div>
+
+    <div class="h_footer">
+          <div class="h_footer-l">
+            <img src="/img/footer_logo.png" alt="">
+          </div>
+          <div class="h_footer-r">
+                <p> <span>地址:{{add}}</span> <span>邮编:100101</span>  <span>电话:{{tel}}</span></p>
+                <p>Email: {{email}}</p>
+                <p>版权所有 &copy; {{copy}}</p>
+          </div>
+    </div>
   </div>
 </template>
 <script>
@@ -33,6 +46,11 @@ export default {
   data() {
     return {
       user: {},
+      add:window.$FOOTER_ADD,
+      tel:window.$FOOTER_TEL,
+      email:window.$FOOTER_EMAIL,
+      copy:window.$FOOTER_COPY,
+
     };
   },
   created() {

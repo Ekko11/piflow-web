@@ -141,6 +141,13 @@ export default {
       })
     },
     handleApply(row){
+      if(!this.userName){
+        this.$router.push({
+          path: "/login",
+          query: { redirect: `/home/product` },
+        });
+        return 
+      }
       this.$refs.formValidate.resetFields();
       this.formApplyInfo  = {
         reason:'',
@@ -193,6 +200,13 @@ export default {
     },
         // 下载
     async handleDown(row) {
+      if(!this.userName){
+        this.$router.push({
+          path: "/login",
+          query: { redirect: `/home/product` },
+        });
+        return 
+      }
       download(downloadFile, row.file.id,row.file.fileName,true);
     },
     async getImg(ids) {

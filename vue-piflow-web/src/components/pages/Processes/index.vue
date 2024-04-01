@@ -133,6 +133,7 @@ export default {
         {
           title: this.$t("progress_columns.description"),
           key: "description",
+          tooltip:true
         },
         {
           title: this.$t("progress_columns.startTime"),

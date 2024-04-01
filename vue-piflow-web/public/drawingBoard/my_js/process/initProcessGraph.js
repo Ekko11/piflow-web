@@ -394,7 +394,7 @@ function queryProcessStopsProperty(processId, pageId) {
                         var processStopPropertyVoListHtml = '<span>';
                         processStopPropertyVoList.forEach(item => {
                             if (item && item.name !== 'visTableName') {
-                                var processStopPropertyVo = '<span>' + item.displayName + ':</span><span class="open_action">' + item.customValue + '</span><br>';
+                                var processStopPropertyVo = '<span>' + item.name + ':</span><span class="open_action">' + item.customValue + '</span><br>';
                                 processStopPropertyVoListHtml += processStopPropertyVo;
                             }
                         });

@@ -568,7 +568,9 @@ export default {
                 haveFileInput = true
               } else if((prop.type === 2)){  //普通输出
                 haveOutPut = true
-              }else{   // 没选默认设为普通输入
+              }else if(prop.type === 1){
+                  // 普通输入
+              }else{   // 没选默认设为普通输入并提示
                 emptyProps +=  `<p style="${style}">  ${item.stopName} - ${prop.propertyName}  </p>`
                 prop.type = 1   
               }
@@ -725,7 +727,7 @@ export default {
             description1: "",
             propertySort: item.propertySort,
             example: item.example,
-          })),
+          })).sort((a,b)=>a.name.localeCompare(b.name)),
         };
       });
       // 筛选有属性的组件

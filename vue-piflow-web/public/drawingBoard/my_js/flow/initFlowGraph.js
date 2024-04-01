@@ -658,18 +658,20 @@ function queryStopsProperty(stopPageId, loadId) {
                     $("#div_properties_example_table").html("");
                     var tbody_example = document.createElement("tbody");
                     // propertiesVo
-                    stopsVoData.propertiesVo.sort((a,b)=>{  
-                        const nameA = a.name.toLowerCase(); // 转换为小写以便不区分大小写排序  
-                        const nameB = b.name.toLowerCase(); // 转换为小写以便不区分大小写排序  
-                        if (nameA < nameB) {  
-                            return -1;  
-                        }  
-                        if (nameA > nameB) {  
-                            return 1;  
-                        }  
-                        // 如果名称相同，则返回0  
-                        return 0;  
-                    })
+                    if(stopsVoData.propertiesVo){
+                        stopsVoData.propertiesVo.sort((a,b)=>{  
+                            const nameA = a.name.toLowerCase(); // 转换为小写以便不区分大小写排序  
+                            const nameB = b.name.toLowerCase(); // 转换为小写以便不区分大小写排序  
+                            if (nameA < nameB) {  
+                                return -1;  
+                            }  
+                            if (nameA > nameB) {  
+                                return 1;  
+                            }  
+                            // 如果名称相同，则返回0  
+                            return 0;  
+                        })
+                    }
                     var propertiesVo = stopsVoData.propertiesVo;
                     if(stopsVoData.bundel === "cn.piflow.bundle.visualization.VisualDisplay"){
                         const i = propertiesVo.findIndex(v=>v.displayName === 'visTableName')

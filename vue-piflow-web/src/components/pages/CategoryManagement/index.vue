@@ -33,7 +33,7 @@
     </div>
 
     <!-- add / update -->
-    <Modal v-model="isOpen" footer-hide :title="formData.id ? '编辑' : '新增'">
+    <Modal v-model="isOpen" width="700" footer-hide :title="formData.id ? '编辑' : '新增'">
       <div class="modal-warp">
         <Form
           ref="formValidate"
@@ -70,7 +70,7 @@
               action="/null"
               :before-upload="handleBeforeUpload"
               :show-upload-list="false"
-              style="width: 350px"
+              style="width: 550px"
               accept=".jpg, .jpeg, .png"
               class="upload"
             >

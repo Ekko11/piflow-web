@@ -16,14 +16,30 @@
       />
     </div>
     <!-- Table button -->
-    <Table border :columns="columns" :data="tableData">
+    <el-table :data="tableData" border>
+      <el-table-column prop="name" label="姓名" />
+      <el-table-column prop="productTypeName" label="类型" />
+      <el-table-column prop="description" label="描述"  show-overflow-tooltip/>
+      <el-table-column prop="crtUser" label="创建人"  width="120" align="center"/>
+      <el-table-column prop="crtDttm" label="创建时间" width="180" align="center" />
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+        <div class="btn">
+           <Button @click="handleEdit(scope.row)">编辑</Button>
+          <Button @click="handleDelete(scope.row)">删除</Button>
+        </div>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- <Table border :columns="columns" :data="tableData" >
       <template slot-scope="{ row }" slot="action">
         <div class="btn">
           <Button @click="handleEdit(row)">编辑</Button>
           <Button @click="handleDelete(row)">删除</Button>
         </div>
       </template>
-    </Table>
+    </Table> -->
     <!-- paging -->
     <div class="page">
       <Page
@@ -57,11 +73,7 @@ export default {
       total: 0,
       tableData: [],
       param: "",
-    };
-  },
-  computed: {
-    columns() {
-      return [
+      columns:[
         {
           title: "名称",
           key: "name",
@@ -73,23 +85,30 @@ export default {
         {
           title: "描述",
           key: "description",
+          tooltip:true,
+          width:480,
+          resizable:true
         },
         {
           title: "创建人",
           key: "crtUser",
+          width:'120',
+          align:'center'
         },
         {
           title: "创建时间",
           key: "crtDttm",
+          width:'180',
+          align:'center'
         },
         {
-          title: this.$t("database.action"),
+          title: '操作',
           slot: "action",
           width: 180,
           align: "center",
-        },
-      ];
-    },
+        }
+      ]
+    };
   },
   created() {
     this.getTableData();
