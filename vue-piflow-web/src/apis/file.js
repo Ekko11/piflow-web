@@ -99,7 +99,7 @@ export function downloadFile(id,showProgress) {
 
 export function getFileNameByHeaders(headers, defaultFileName) {
   try{
-    return  headers["content-disposition"].split(";")[1].split("=")[1].replaceAll("\"",'')
+    return  window.decodeURIComponent(headers["content-disposition"].split("filename=")[1].replaceAll('"',''))
   }catch(err){
     return defaultFileName
   }

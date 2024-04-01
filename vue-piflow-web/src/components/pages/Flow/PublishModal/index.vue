@@ -448,22 +448,7 @@ export default {
 
       if (publishStops.length) {
         publishStops.forEach((item) => {
-          let t = this.groupList.findIndex((v) => v.name === item.bak2);
-          item.stopPublishingPropertyVos.forEach(v=>v.checked = true)
-          if (t === -1) {
-            this.groupList.push({
-              name: item.bak2,
-              sort: item.bak1,
-              list: [item],
-            });
-          } else {
-            this.groupList[t].list.push(item);
-          }
-
-          this.groupList.forEach(v=>{
-            v.list.sort((a,b)=>a.bak3 - b.bak3)
-          })
-
+          // item.stopPublishingPropertyVos.forEach(v=>v.checked = true)
           // 属性回填
           let index = this.stops.findIndex((v) => v.stopId === item.stopId);
           this.stops[index].checked = true;
@@ -475,25 +460,25 @@ export default {
             );
             child.checked = true
             this.stops[index].stopPublishingPropertyVos[idx] = child
-            // this.stops[index].bak1 = child.bak1;
-            // this.stops[index].stopPublishingPropertyVos[idx].checked = true;
-            // this.stops[index].stopPublishingPropertyVos[idx].id = child.id;
-            // this.stops[index].stopPublishingPropertyVos[idx].name = child.name;
-            // this.stops[index].stopPublishingPropertyVos[idx].description =
-            //   child.description;
-            // this.stops[index].stopPublishingPropertyVos[idx].description1 =
-            //   child.description;
-
-            // this.stops[index].stopPublishingPropertyVos[idx].fileId =
-            //   child.fileId;
-            // this.stops[index].stopPublishingPropertyVos[idx].fileName =
-            //   child.fileName;
-            // this.stops[index].stopPublishingPropertyVos[idx].version =
-            //   child.version;
-            // this.stops[index].stopPublishingPropertyVos[idx].publishingId =
-            //   child.publishingId;
-            // this.stops[index].stopPublishingPropertyVos[idx].type = child.type;
           });
+
+          // 已选列表回填
+          let t = this.groupList.findIndex((v) => v.name === item.bak2);
+          if (t === -1) {
+            this.groupList.push({
+              name: item.bak2,
+              sort: item.bak1,
+              list: [this.stops[index]],
+            });
+          } else {
+            this.groupList[t].list.push(this.stops[index]);
+          }
+
+          this.groupList.forEach(v=>{
+            v.list.sort((a,b)=>a.bak3 - b.bak3)
+          })
+
+
         });
         this.selectedList = [...publishStops];
         this.groupList.sort((a, b) => a.sort - b.sort);
@@ -598,6 +583,7 @@ export default {
         }
         emptyMessge = `<p style="color: #e64b4b;"> ${emptyMessge} </p>`
       }
+      console.assert(stopList)
       if(emptyProps){
         this.$Modal.confirm({
           title: this.$t("tip.title"),
@@ -830,6 +816,7 @@ export default {
 
     // 标记选择上传的节点
     handleClickUpload(item) {
+      console.log(this.stops,item)
       this.currentProps = item;
     },
     handleBeforeCoverFileUpload(e) {
@@ -848,7 +835,7 @@ export default {
       return false;
     },
     handleBeforeUpload(e) {
-      this.currentProps.fileName = e.name;
+      this.$set(this.currentProps,'fileName',e.name)
       // 编辑模式下有id
       this.fileList.push({ id:this.currentProps.id || this.currentProps.propertyId, file: e });
       return false;

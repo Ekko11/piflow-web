@@ -3,7 +3,7 @@
     <!-- header -->
     <div class="navbar">
       <div class="left">
-        <span>数据产品发布管理</span>
+        <span>流水线发布管理</span>
       </div>
     </div>
     <!-- search -->
@@ -17,7 +17,7 @@
     </div>
     <!-- Table button -->
     <el-table :data="tableData" border>
-      <el-table-column prop="name" label="姓名" />
+      <el-table-column prop="name" label="名称" />
       <el-table-column prop="productTypeName" label="类型" />
       <el-table-column prop="description" label="描述"  show-overflow-tooltip/>
       <el-table-column prop="crtUser" label="创建人"  width="120" align="center"/>
@@ -179,6 +179,11 @@ export default {
 
 .btn button {
   margin-right: 3px;
+}
+
+::v-deep .el-table th.el-table__cell>.cell{
+  color: #515a6e;
+  font-size: 14px;
 }
 </style>
 

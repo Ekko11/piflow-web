@@ -375,6 +375,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 99;
   cursor: pointer;
   img {
     max-width: 90%;
