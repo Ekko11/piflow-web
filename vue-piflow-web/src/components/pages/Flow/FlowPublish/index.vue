@@ -20,9 +20,9 @@
       <el-table-column prop="name" label="名称" />
       <el-table-column prop="productTypeName" label="类型" />
       <el-table-column prop="description" label="描述"  show-overflow-tooltip/>
-      <el-table-column prop="crtUser" label="创建人"  width="120" align="center"/>
-      <el-table-column prop="crtDttm" label="创建时间" width="180" align="center" />
-      <el-table-column label="操作">
+      <el-table-column prop="crtUser" label="创建人"  width="120" />
+      <el-table-column prop="crtDttm" label="创建时间"  width="180" />
+      <el-table-column label="操作" width="180"  align="center">
         <template slot-scope="scope">
         <div class="btn">
            <Button @click="handleEdit(scope.row)">编辑</Button>
@@ -181,9 +181,17 @@ export default {
   margin-right: 3px;
 }
 
-::v-deep .el-table th.el-table__cell>.cell{
-  color: #515a6e;
-  font-size: 14px;
+::v-deep .el-table {
+  th.el-table__cell>.cell{
+    color: #515a6e;
+    font-size: 14px;
+  }
+   th{
+    background: #f8f8f9;
+  }
+  .el-table__cell{
+    padding: 8px 0;
+  }
 }
 </style>
 
