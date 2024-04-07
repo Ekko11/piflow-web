@@ -1,5 +1,5 @@
 .h_head{
-    height: 79px;
+    height: 60px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -7,6 +7,7 @@
     background: linear-gradient(180deg, #3974AA 0%, #2F587D 100%);
     color:#fff;
     position: relative;
+    overflow: hidden;
     &-m{
         position: absolute;
         right: 0;
@@ -77,8 +78,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255,255,255,0.8);
-    background: linear-gradient(180deg, #3974AA 0%, #2F587D 100%);
+    color: rgba(0,0,0,0.8);
+    background: rgba(233, 233, 233, 0.6);
     &-l{
         margin-right: 10px;
         img{
@@ -86,7 +87,7 @@
         }
     }
     &-r{
-        border-left: 1px solid rgba(255,255,255,0.6);
+        border-left: 1px solid rgba(0,0,0,0.1);
         padding-left: 20px;
         margin-left: 30px;
         span{

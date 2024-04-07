@@ -14,7 +14,7 @@
         >
           <img :src="child.filePath || imgList[0]" alt="" />
           <div>
-            <p>{{ child.name }}生产流水线</p>
+            <p>{{ child.name }}</p>
           </div>
         </div>
       </div>

@@ -15,7 +15,7 @@
         </div>
       </div>
       <div v-show="historyIsShow" class="history_list">
-        <Table :columns="columns" :data="historyData">
+        <Table :columns="columns" :data="historyData" :loading="loading">
           <template slot-scope="{ row }" slot="action">
             <div class="btn">
               <Button @click="handleEnter(row)">查看</Button>
@@ -27,12 +27,23 @@
               >
               <Button
                 v-if="
-                  row.dataProductList &&
+                ( row.state && row.state.text === 'COMPLETED') &&  row.dataProductList &&
                     row.dataProductList.length &&
                     row.dataProductList.some((v) => v.state === 3)
                 "
                 @click="handDataPublish(row)"
                 >数据产品发布</Button
+              >
+              <Button
+                v-if="
+                  ( row.state && row.state.text === 'COMPLETED')  && row.dataProductList &&
+                    row.dataProductList.length &&
+                    row.dataProductList.every((v) => v.state === 5)
+                "
+                disabled
+                class="disabled"
+                @click="handDataPublish(row)"
+                >数据产品已发布</Button
               >
               <!-- <Button
                 v-if="
@@ -80,7 +91,8 @@ export default {
   data() {
     return {
       page: 1,
-      limit: 5,
+      loading:false,
+      limit: 10,
       total: 0,
       historyIsShow: false,
       publishInfo: {},
@@ -243,11 +255,13 @@ export default {
     },
     async getHistoryList() {
       const data = {
-        limit: 10,
+        limit: this.limit,
         page: this.page,
         publishingId: this.publishInfo.id,
       };
+      this.loading =  true
       const res = await getProcessPageByPublishingId(data);
+      this.loading =  false
       this.historyData = res.data.data
       this.total = res.data.count;
       if (this.historyData.length) {
@@ -256,12 +270,12 @@ export default {
     },
     onPageChange(pageNo) {
       this.page = pageNo;
-      this.getTableData();
+      this.getHistoryList();
     },
 
     onPageSizeChange(pageSize) {
       this.limit = pageSize;
-      this.getTableData();
+      this.getHistoryList();
     },
   },
 };
@@ -337,6 +351,7 @@ export default {
   margin-top: 32px;
 }
 .btn {
+  text-align: left;
   button {
     line-height: 24px;
     height: 24px;
@@ -347,6 +362,10 @@ export default {
     background: #e6f1fe;
     color: #005bc4;
     border: none;
+  }
+  .disabled{
+    background: #eee;
+    color: #3f3f46;
   }
 }
 .page {
