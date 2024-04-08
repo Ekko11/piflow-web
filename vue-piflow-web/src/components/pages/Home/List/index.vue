@@ -7,9 +7,11 @@
       </p>
     </div> -->
     <h4 class="content_title">
-      <span @click="$router.push('/home')" style="cursor: pointer;text-decoration: underline;">{{
-        parentList.length && parentList[0].name
-      }}</span>
+      <span
+        @click="$router.push('/home')"
+        style="cursor: pointer;text-decoration: underline;"
+        >{{ parentList.length && parentList[0].name }}</span
+      >
       >>
       <span style="color:rgb(82, 82, 91)">{{ currentNode.name }}</span>
     </h4>
@@ -37,7 +39,11 @@
         <template slot-scope="{ row }" slot="action">
           <div class="btn">
             <Button @click="handleEnter(row)">进入</Button>
-            <Button v-if="row.instructionFileId" @click="handShowInstructions(row)">说明</Button>
+            <Button
+              v-if="row.instructionFileId"
+              @click="handShowInstructions(row)"
+              >说明</Button
+            >
           </div>
         </template>
       </Table>
@@ -80,7 +86,21 @@ export default {
         {
           title: "描述信息",
           key: "description",
-          tooltip:true
+
+          render: (h, params) => {
+            return h("div", {class:'desc'}, [
+              h("Tooltip", { props:
+                {
+                  content: params.row.description,
+                  maxWidth:"300",
+                  placement:"top"
+                }
+              
+              },
+              [h('span',null,params.row.description)]
+            ),
+            ]);
+          },
         },
         {
           title: "所属类型",
@@ -89,7 +109,7 @@ export default {
         {
           title: "创建时间",
           key: "crtDttm",
-          width:'180',
+          width: "180",
           align: "center",
         },
         {
@@ -148,16 +168,25 @@ export default {
     async handleEnter(row) {
       if (Cookies.get("setUser")) {
         this.$event.emit("loading", true);
-        const res = await getProcessPageByPublishingId({limit:10,page:1,publishingId:row.id});
+        const res = await getProcessPageByPublishingId({
+          limit: 10,
+          page: 1,
+          publishingId: row.id,
+        });
         this.$event.emit("loading", false);
         let link;
-        if (res.data.data.length && res.data.data[0].state && (res.data.data[0].state.text === "STARTED" || res.data.data[0].state.text === "INIT"  )) {  //如果正在运行，直接进入运行界面
+        if (
+          res.data.data.length &&
+          res.data.data[0].state &&
+          (res.data.data[0].state.text === "STARTED" ||
+            res.data.data[0].state.text === "INIT")
+        ) {
+          //如果正在运行，直接进入运行界面
           link = `/home/flowProcess?processId=${res.data.data[0].id}&type=${this.$route.query.type}&productTypeName=${this.currentNode.name}`;
         } else {
           link = `/home/flowConfig?id=${row.id}&type=${this.$route.query.type}&productTypeName=${this.currentNode.name}`;
         }
         this.$router.push(link);
-
       } else {
         this.$router.push({
           path: "/login",
@@ -171,12 +200,12 @@ export default {
           path: "/login",
           query: { redirect: `/home/list?type=${this.$route.query.type}` },
         });
-          return
+        return;
       }
-      this.$event.emit('loading',true)
+      this.$event.emit("loading", true);
       const res = await downloadFile(row.instructionFileId);
-      console.log(res)
-      if(!res.data.code){
+      console.log(res);
+      if (!res.data.code) {
         // 将文件流转化为本地blod地址
         var binaryData = [];
         binaryData.push(res.data);
@@ -196,14 +225,14 @@ export default {
           // 新页面打开
           window.open(url, "_blank");
         }
-      }else{
+      } else {
         this.$Message.error({
           title: this.$t("tip.title"),
           content: res.data.errorMsg,
         });
       }
 
-      this.$event.emit('loading',false)
+      this.$event.emit("loading", false);
     },
     onPageChange(pageNo) {
       this.page = pageNo;
@@ -295,12 +324,11 @@ export default {
   }
 }
 
-
-::v-deep  .desc span{
-    display: -webkit-box;  
-    -webkit-line-clamp: 2;  
-    -webkit-box-orient: vertical;  
-    overflow: hidden;  
-    text-overflow: ellipsis;  
+::v-deep .desc span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
