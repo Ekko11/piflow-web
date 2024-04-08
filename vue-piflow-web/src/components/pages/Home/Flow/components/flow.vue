@@ -116,8 +116,8 @@
                     <Input
                       :disabled="mode !== 'edit'"
                       :placeholder="child.customValue1"
-                      :type="child.customValue1.includes('\n')?'textarea':'text' "
-                      :rows="3"
+                      :type="handleSetType(child)"
+                      :rows="1"
                       v-model="child.customValue"
                     ></Input>
                   </div>
@@ -208,11 +208,19 @@ export default {
   },
 
   created() {
-    console.log(this.$route)
     this.productTypeName = this.$route.productTypeName
     this.type = this.$route.type
   },
   methods: {
+    handleSetType(child){
+      if(child.customValue1){
+        return child.customValue1.includes('\n')?'textarea':'text' 
+      }else{
+        return child.customValue.includes('\n')?'textarea':'text' 
+      }
+      
+
+    },
     handleViewShow(flag) {
       this.previewShow = flag;
     },
