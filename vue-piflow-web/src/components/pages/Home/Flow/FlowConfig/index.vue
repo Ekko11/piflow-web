@@ -204,7 +204,7 @@ export default {
       this.$event.emit("loading", false);
       if(res.data.code === 200){
         this.$router.push(
-          `/home/flowProcess?processId=${res.data.data.processId}`
+          `/home/flowProcess?processId=${res.data.data.processId}&productTypeName=${this.$route.query.productTypeName}`
         );
       }else{
         this.$Message.error({
@@ -239,7 +239,7 @@ export default {
     },
     //查看进程
     handleEnter(row) {
-      this.$router.push(`/home/flowProcess?processId=${row.id}`);
+      this.$router.push(`/home/flowProcess?processId=${row.id}&productTypeName=${this.$route.query.productTypeName}`);
     },
     // 查看日志
     async handleShowLog(row) {

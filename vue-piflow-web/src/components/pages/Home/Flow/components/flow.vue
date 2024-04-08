@@ -3,8 +3,8 @@
     <h4 class="content_title">
       <span
         style="cursor: pointer"
-        @click="$router.push(`/home/list?type=${publishInfo.productTypeId}`)"
-        >{{ publishInfo.productTypeName }}</span
+        @click="$router.push(`/home/list?type=${$route.query.type}`)"
+        >{{ $route.query.productTypeName }}</span
       >
       >>
       <span style="color: rgb(82, 82, 91)">{{ publishInfo.name }}</span>
@@ -205,6 +205,11 @@ export default {
     };
   },
 
+  created() {
+    console.log(this.$route)
+    this.productTypeName = this.$route.productTypeName
+    this.type = this.$route.type
+  },
   methods: {
     handleViewShow(flag) {
       this.previewShow = flag;

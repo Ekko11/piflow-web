@@ -152,9 +152,9 @@ export default {
         this.$event.emit("loading", false);
         let link;
         if (res.data.data.length && res.data.data[0].state && (res.data.data[0].state.text === "STARTED" || res.data.data[0].state.text === "INIT"  )) {  //如果正在运行，直接进入运行界面
-          link = `/home/flowProcess?processId=${res.data.data[0].id}&type=${this.$route.query.type}`;
+          link = `/home/flowProcess?processId=${res.data.data[0].id}&type=${this.$route.query.type}&productTypeName=${this.parentList[0].name}`;
         } else {
-          link = `/home/flowConfig?id=${row.id}&type=${this.$route.query.type}`;
+          link = `/home/flowConfig?id=${row.id}&type=${this.$route.query.type}&productTypeName=${this.parentList[0].name}`;
         }
         this.$router.push(link);
 
