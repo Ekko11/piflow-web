@@ -1,6 +1,11 @@
 <template>
   <div class="content">
-    <Flow mode="edit" ref="flow" :flowInfo="publishInfo" @nameMap="handleNameMap"/>
+    <Flow
+      mode="edit"
+      ref="flow"
+      :flowInfo="publishInfo"
+      @nameMap="handleNameMap"
+    />
     <div class="history">
       <div class="history_btn">
         <Button @click="historyIsShow = !historyIsShow"
@@ -11,7 +16,7 @@
         </Button>
         <div>
           <Button class="stop" @click="handleSave()">暂存</Button>
-          <Button class="run" @click="handleRun()">运行</Button>
+          <Button class="run" @click="handleReName()">运行</Button>
         </div>
       </div>
       <div v-show="historyIsShow" class="history_list">
@@ -19,41 +24,60 @@
           <template slot-scope="{ row }" slot="action">
             <div class="btn">
               <Button @click="handleEnter(row)">查看</Button>
-              <Button @click="handleShowLog(row)">日志查看</Button>
-              <Button
-                v-if="row.dataProductList.some((v) => v.file)"
-                @click="handleDownDataProduct(row)"
-                >数据产品下载</Button
-              >
-              <Button
-                v-if="
-                ( row.state && row.state.text === 'COMPLETED') &&  row.dataProductList &&
-                    row.dataProductList.length &&
-                    row.dataProductList.some((v) => v.state === 3)
-                "
-                @click="handDataPublish(row)"
-                >数据产品发布</Button
-              >
-              <Button
-                v-if="
-                  ( row.state && row.state.text === 'COMPLETED')  && row.dataProductList &&
-                    row.dataProductList.length &&
-                    row.dataProductList.every((v) => v.state === 5)
-                "
-                disabled
-                class="disabled"
-                @click="handDataPublish(row)"
-                >数据产品已发布</Button
-              >
-              <!-- <Button
-                v-if="
-                  row.dataProductList &&
-                    row.dataProductList.length &&
-                    !row.dataProductList.some((v) => v.state === 5)
-                "
-                @click="handDataPublish(row)"
-                >删除</Button
-              > -->
+
+              <template v-if="!row.dataProductList.some((v) => v.file)">
+                <Button @click="handleShowLog(row)">日志查看</Button>
+                <Button
+                  v-if="
+                    !row.dataProductList.length ||
+                      !row.dataProductList.some((v) => v.state === 5)
+                  "
+                  @click="handleDelete(row)"
+                  >删除</Button
+                >
+              </template>
+              <template v-else>
+                <Button
+                  v-if="row.dataProductList.some((v) => v.file)"
+                  @click="handleDownDataProduct(row)"
+                  >数据产品下载</Button
+                >
+                <Button
+                  v-if="row.dataProductList.some((v) => v.state === 3)"
+                  @click="handDataPublish(row)"
+                  >数据产品发布</Button
+                >
+
+                <Button
+                  v-if="row.dataProductList.every((v) => v.state === 5)"
+                  disabled
+                  class="disabled"
+                  @click="handDataPublish(row)"
+                  >数据产品已发布</Button
+                >
+
+                <Dropdown :transfer="true" >
+                  <a href="javascript:void(0)" style="font-size: 11px;">
+                    更多
+                    <Icon type="ios-arrow-down"></Icon>
+                  </a>
+                  <DropdownMenu slot="list">
+                    <DropdownItem>
+                      <Button @click="handleShowLog(row)">日志查看</Button>
+                    </DropdownItem>
+                    <DropdownItem
+                      v-if="
+                        !row.dataProductList.length ||
+                          !row.dataProductList.some((v) => v.state === 5)
+                      "
+                    >
+                      <Button @click="handleDelete(row)"
+                        >删除</Button
+                      ></DropdownItem
+                    >
+                  </DropdownMenu>
+                </Dropdown>
+              </template>
             </div>
           </template>
         </Table>
@@ -72,26 +96,39 @@
 
     <PublishModal ref="PublishModalRef" />
     <Log ref="LogRef" />
+    <Rename ref="RenameRef" @submit="handleRun" />
   </div>
 </template>
 
 <script>
-import { getPublishingById, runPublishFlow,tempSaveFlow } from "@/apis/flowPublish";
-import { getProcessPageByPublishingId, getLogUrl } from "@/apis/process";
-import { downloadFile, download, downloadFileByIds } from "@/apis/file";
+import {
+  getPublishingById,
+  runPublishFlow,
+  tempSaveFlow,
+} from "@/apis/flowPublish";
+import {
+  getProcessPageByPublishingId,
+  getLogUrl,
+  getByProcessId,
+  deleteForPublishing,
+} from "@/apis/process";
+import { download, downloadFileByIds } from "@/apis/file";
 import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
 import Flow from "../components/flow";
 import Log from "../components/Log";
+import Rename from "../components/Rename";
+
 export default {
   components: {
     PublishModal,
     Flow,
     Log,
+    Rename,
   },
   data() {
     return {
       page: 1,
-      loading:false,
+      loading: false,
       limit: 10,
       total: 0,
       historyIsShow: false,
@@ -107,13 +144,13 @@ export default {
         {
           title: "运行时间",
           key: "crtDttm",
-          width: 200,
+          width: 180,
           align: "center",
         },
         {
           title: "结束时间",
           key: "lastUpdateDttm",
-          width: 200,
+          width: 180,
           align: "center",
         },
         {
@@ -124,13 +161,17 @@ export default {
               (params.row.state && params.row.state.text) || "INIT",
             ]);
           },
-          width: 150,
+          width: 140,
           align: "center",
+        },
+        {
+          title: "备注",
+          key: "pageId",
         },
         {
           title: "操作",
           slot: "action",
-          width: 400,
+          width: 340,
           align: "center",
         },
       ],
@@ -156,80 +197,61 @@ export default {
     handDataPublish(row) {
       this.$refs.PublishModalRef.handleAdd(row);
     },
-    handleNameMap(val){
-      this.nameMap = val
+    handleNameMap(val) {
+      this.nameMap = val;
     },
     // 暂存
     async handleSave() {
       this.$event.emit("loading", true);
       const data = JSON.parse(JSON.stringify(this.publishInfo));
-     data.stops.forEach((v) => {
+      data.stops.forEach((v) => {
         v.stopPublishingPropertyVos.forEach((k) => {
-          k.tempSaveValue = k.customValue   //暂存
-          k.customValue = k.customValue1 ;    //推荐值
+          k.tempSaveValue = k.customValue; //暂存
+          k.customValue = k.customValue1; //推荐值
           delete k.allowableValues1;
           delete k.customValue1;
         });
       });
-      const  res = await tempSaveFlow(data)  
+      const res = await tempSaveFlow(data);
       this.$event.emit("loading", false);
-
-
+    },
+    handleReName() {
+      this.$refs.RenameRef.handleOpen();
     },
     // 运行
-    async handleRun() {
+    async handleRun(formData) {
       this.$event.emit("loading", true);
       const data = JSON.parse(JSON.stringify(this.publishInfo));
+      data.name = formData.name;
+      data.bak1 = formData.bak1;
       data.stops.forEach((v) => {
         v.stopPublishingPropertyVos.forEach((k) => {
           k.customValue = k.customValue ? k.customValue : k.customValue1;
           // 同名属性 赋值
           for (const key in this.nameMap) {
-            const i = this.nameMap[key].findIndex(t=>t === k.id)
-            if(i !== -1){
-              let targetProp
-              data.stops.forEach(q=>{
-                let obj =  q.stopPublishingPropertyVos.find(m => m.id === key)
-                if(obj) targetProp = obj
-              })
-              k.customValue = targetProp.customValue ? targetProp.customValue : targetProp.customValue1;
+            const i = this.nameMap[key].findIndex((t) => t === k.id);
+            if (i !== -1) {
+              let targetProp;
+              data.stops.forEach((q) => {
+                let obj = q.stopPublishingPropertyVos.find((m) => m.id === key);
+                if (obj) targetProp = obj;
+              });
+              k.customValue = targetProp.customValue
+                ? targetProp.customValue
+                : targetProp.customValue1;
             }
           }
-          k.tempSaveValue = k.customValue  
+          k.tempSaveValue = k.customValue;
           delete k.allowableValues1;
           delete k.customValue1;
         });
       });
-       const res = await runPublishFlow(data);
+      const res = await runPublishFlow(data);
       this.$event.emit("loading", false);
-      if(res.data.code === 200){
+      if (res.data.code === 200) {
         this.$router.push(
           `/home/flowProcess?processId=${res.data.data.processId}&productTypeName=${this.$route.query.productTypeName}`
         );
-      }else{
-        this.$Message.error({
-          content: res.data.errorMsg,
-          duration: 3,
-        });
-      }
-
-
-
-    },
-    // 根据流水线id 获取组件发布信息
-    async handleGetStopsById() {
-      const res = await getPublishingById(this.$route.query.id);
-      if (res.data.code === 200) {
-        res.data.data.stops = res.data.data.stops.map((v) => ({
-          ...v,
-          stopPublishingPropertyVos: v.stopPublishingPropertyVos.map((k) => ({
-            ...k,
-            customValue1: k.customValue,
-            customValue: k.tempSaveValue,
-          })),
-        }));
-        this.publishInfo = res.data.data;
-        this.getHistoryList();
       } else {
         this.$Message.error({
           content: res.data.errorMsg,
@@ -237,9 +259,45 @@ export default {
         });
       }
     },
+    // 根据流水线id 获取组件发布信息
+    async handleGetStopsById() {
+      if (this.$route.query.processId) {
+        const res = await getByProcessId(this.$route.query.processId);
+        if (res.data.code === 200) {
+          this.publishInfo = res.data.data.flowPublishing;
+        } else {
+          this.$Message.error({
+            content: res.data.errorMsg,
+            duration: 3,
+          });
+        }
+      } else {
+        const res = await getPublishingById(this.$route.query.id);
+        if (res.data.code === 200) {
+          res.data.data.stops = res.data.data.stops.map((v) => ({
+            ...v,
+            stopPublishingPropertyVos: v.stopPublishingPropertyVos.map((k) => ({
+              ...k,
+              customValue1: k.customValue,
+              customValue: k.tempSaveValue,
+            })),
+          }));
+          this.publishInfo = res.data.data;
+        } else {
+          this.$Message.error({
+            content: res.data.errorMsg,
+            duration: 3,
+          });
+        }
+      }
+
+      this.getHistoryList();
+    },
     //查看进程
     handleEnter(row) {
-      this.$router.push(`/home/flowProcess?processId=${row.id}&productTypeName=${this.$route.query.productTypeName}`);
+      this.$router.push(
+        `/home/flowProcess?processId=${row.id}&productTypeName=${this.$route.query.productTypeName}`
+      );
     },
     // 查看日志
     async handleShowLog(row) {
@@ -259,14 +317,37 @@ export default {
         page: this.page,
         publishingId: this.publishInfo.id,
       };
-      this.loading =  true
+      this.loading = true;
       const res = await getProcessPageByPublishingId(data);
-      this.loading =  false
-      this.historyData = res.data.data
+      this.loading = false;
+      this.historyData = res.data.data;
       this.total = res.data.count;
       if (this.historyData.length) {
         this.historyIsShow = true;
       }
+    },
+    handleDelete(row) {
+      this.$Modal.confirm({
+        title: this.$t("tip.title"),
+        okText: this.$t("modal.confirm"),
+        cancelText: this.$t("modal.cancel_text"),
+        content: `${this.$t("modal.delete_content")} ${row.name}?`,
+        onOk: async () => {
+          const res = await deleteForPublishing(row.id);
+          if (res.data.code === 200) {
+            this.$Modal.success({
+              title: this.$t("tip.title"),
+              content: `${row.name} ` + this.$t("tip.delete_success_content"),
+            });
+            this.getHistoryList();
+          } else {
+            this.$Message.error({
+              content: `${row.name} ` + this.$t("tip.delete_fail_content"),
+              duration: 3,
+            });
+          }
+        },
+      });
     },
     onPageChange(pageNo) {
       this.page = pageNo;
@@ -350,6 +431,12 @@ export default {
 ::v-deep .list {
   margin-top: 32px;
 }
+::v-deep .ivu-dropdown-item {
+  button {
+    width: 100%;
+  }
+}
+::v-deep .ivu-dropdown-item,
 .btn {
   text-align: left;
   button {
@@ -363,7 +450,7 @@ export default {
     color: #005bc4;
     border: none;
   }
-  .disabled{
+  .disabled {
     background: #eee;
     color: #3f3f46;
   }

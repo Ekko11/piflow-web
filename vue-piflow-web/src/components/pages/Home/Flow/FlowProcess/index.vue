@@ -23,7 +23,7 @@
         </div>
         <div v-else-if="state == 'FAILED'">
           <p class="process_failed">
-            运行失败
+            运行失败    <Icon type="ios-alert"  style="color: #e72525;cursor: pointer;" @click="getErrorLog"/>
           </p>
 
         </div>
@@ -54,7 +54,8 @@
 
     <PublishModal ref="PublishModalRef" />
     <Log ref="LogRef" />
-
+    <ErrorLog ref="ErrorLogRef" />
+    
   </div>
 </template>
     
@@ -64,17 +65,20 @@ import {
   getByProcessId,
   getAppIdByProcessId,
   stopProcessOrProcessGroup,
-  getLogUrl
+  getLogUrl,
+  getErrorLogInfo
 } from "@/apis/process";
 import PublishModal from "@/components/pages/DataProductManagement/Publish/PublishModal";
 import { download, downloadFileByIds } from "@/apis/file";
 import Flow from "../components/flow";
 import Log from "../components/Log";
+import ErrorLog from "../components/ErrorLog";
 export default {
   components: {
     Flow,
     PublishModal,
-    Log
+    Log,
+    ErrorLog
   },
   data() {
     return {
@@ -166,13 +170,15 @@ export default {
       } else {
       }
     },
+    getErrorLog(){
+          this.$refs.ErrorLogRef.handleOpen(this.appId)
+    },
    async handleClear(){
       clearTimeout(this.timer);
           const res = await getByProcessId(this.$route.query.processId);
           this.data = res.data.data;
           this.publishInfo = this.data.flowPublishing;
           this.state = res.data.data.state.text
-          console.log(this.state)
     },
     handDataPublish() {
       this.$refs.PublishModalRef.handleAdd(this.data);
@@ -201,7 +207,7 @@ export default {
       download(downloadFileByIds, ids, this.data.name, true);
     },
     handleReturn(){
-      this.$router.push(`/home/flowConfig?id=${this.publishInfo.id}&type=${this.publishInfo.productTypeId}`)
+      this.$router.push(`/home/flowConfig?id=${this.publishInfo.id}&type=${this.publishInfo.productTypeId}&processId=${this.$route.query.processId}&productTypeName=${this.$route.query.productTypeName}`)
     }
   },
   beforeDestroy() {

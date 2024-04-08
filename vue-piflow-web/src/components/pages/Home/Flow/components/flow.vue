@@ -116,6 +116,8 @@
                     <Input
                       :disabled="mode !== 'edit'"
                       :placeholder="child.customValue1"
+                      :type="child.customValue1.includes('\n')?'textarea':'text' "
+                      :rows="3"
                       v-model="child.customValue"
                     ></Input>
                   </div>
@@ -320,10 +322,12 @@ export default {
       this.currentPropos = child;
     },
     async realUpload(e) {
+      let unzip =  e.name.split('.').pop() === 'zip'
       const res = await uploadFile({
         file: e,
         associateType: 4,
         associateId: this.currentPropos.id,
+        unzip
       });
 
       this.$set(this.fileMap, this.currentPropos.id, e.name);

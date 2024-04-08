@@ -48,6 +48,15 @@ export function getProcessHistoryPageOfSelf (data) {
     })
 }
 
+
+// 删除某条历史
+export function deleteForPublishing (id) {
+    return axios({
+        method:'post',
+        url:`/process/deleteForPublishing?id=${id}`,
+    })
+}
+
 // 停止运行
 export function stopProcessOrProcessGroup (data) {
     return axios({
@@ -56,7 +65,13 @@ export function stopProcessOrProcessGroup (data) {
         data
     })
 }
-
+// 获取错误日志
+export function getErrorLogInfo (appId) {
+    return axios({
+        method:'get',
+        url:`/process/getErrorLogInfo?appId=${appId}`,
+    })
+}
 
 
 
