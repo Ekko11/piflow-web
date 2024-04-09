@@ -11,6 +11,7 @@
     <div style="width: 100%; height: 100%">
       <Form
         class="formInfo"
+        ref="formValidate"
         :rules="ruleValidate"
         :model="formInfo"
         :label-width="100"
@@ -54,12 +55,28 @@ export default {
   methods: {
     handleOpen(){
         this.open = true
+        window.addEventListener('keydown',this.keyDown);
+
     },
     handleComfirm() {
-      this.$emit("submit", this.formInfo);
-      this.open = false
+      this.$refs.formValidate.validate( (valid) => {
+          if(valid){
+            this.$emit("submit", this.formInfo);
+            this.open = false
+            window.removeEventListener('keydown',this.keyDown,false);
+          }
+      })
+
     },
+    keyDown(e){
+      if(e.keyCode === 13 || e.keyCode === 100){
+        this.handleComfirm()
+      }
+    }
   },
+  destroyed() {
+    window.removeEventListener('keydown',this.keyDown,false);
+  }
 };
 </script>
 

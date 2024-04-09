@@ -250,7 +250,7 @@ export default {
       this.$event.emit("loading", false);
       if (res.data.code === 200) {
         this.$router.push(
-          `/home/flowProcess?processId=${res.data.data.processId}&productTypeName=${this.$route.query.productTypeName}`
+          `/home/flowProcess?processId=${res.data.data.processId}&productTypeName=${this.$route.query.productTypeName}&type=${this.$route.query.type}`
         );
       } else {
         this.$Message.error({
@@ -296,7 +296,7 @@ export default {
     //查看进程
     handleEnter(row) {
       this.$router.push(
-        `/home/flowProcess?processId=${row.id}&productTypeName=${this.$route.query.productTypeName}`
+        `/home/flowProcess?processId=${row.id}&productTypeName=${this.$route.query.productTypeName}&type=${this.$route.query.type}`
       );
     },
     // 查看日志
@@ -342,7 +342,7 @@ export default {
             this.getHistoryList();
           } else {
             this.$Message.error({
-              content: `${row.name} ` + this.$t("tip.delete_fail_content"),
+              content: res.data.errorMsg,
               duration: 3,
             });
           }
