@@ -26,11 +26,7 @@
         </div>
 
         <div v-if="list.length">
-          <div
-            v-for="(item, index) in list"
-            class="config_l"
-            :key="index"
-          >
+          <div v-for="(item, index) in list" class="config_l" :key="index">
             <h4>{{ item.name }}</h4>
             <div>
               <div
@@ -208,18 +204,16 @@ export default {
   },
 
   created() {
-    this.productTypeName = this.$route.productTypeName
-    this.type = this.$route.type
+    this.productTypeName = this.$route.productTypeName;
+    this.type = this.$route.type;
   },
   methods: {
-    handleSetType(child){
-      if(child.customValue1){
-        return child.customValue1.includes('\n')?'textarea':'text' 
-      }else{
-        return child.customValue.includes('\n')?'textarea':'text' 
+    handleSetType(child) {
+      if (child.customValue1) {
+        return child.customValue1.includes("\n") ? "textarea" : "text";
+      } else {
+        return child.customValue.includes("\n") ? "textarea" : "text";
       }
-      
-
     },
     handleViewShow(flag) {
       this.previewShow = flag;
@@ -238,35 +232,43 @@ export default {
       this.publishInfo = val;
       val.coverFileId && this.getCoverImg(val.coverFileId);
       let list = [];
-      const nameMap = {}
+      const nameMap = {};
       this.publishInfo.stops.forEach((item) => {
-        item.stopPublishingPropertyVos.sort((a, b) => a.propertySort - b.propertySort)
+        item.stopPublishingPropertyVos.sort(
+          (a, b) => a.propertySort - b.propertySort
+        );
         let t = list.findIndex((v) => v.name === item.bak2);
-          if (t === -1) {
-            list.push({
-              name: item.bak2,
-              sort: item.bak1,
-              list: [...item.stopPublishingPropertyVos],
-            });
-          } else {
-            item.stopPublishingPropertyVos.forEach(v=>{
-              const k = list[t].list.findIndex(t => t.name === v.name)
-              if(k === -1){
+        if (t === -1) {
+          console.log(item.stopPublishingPropertyVos.filter(v=>v.type !== 2))
+          list.push({
+            name: item.bak2,
+            sort: item.bak1,
+            list: [...item.stopPublishingPropertyVos.filter(v=>v.type !== 2)],
+          });
+        } else {
+          item.stopPublishingPropertyVos.forEach((v) => {
+            if (v.type !== 2) {
+              const k = list[t].list.findIndex((t) => t.name === v.name);
+              if (k === -1) {
                 list[t].list.push(v);
-              }else{
-                nameMap[list[t].list[k].id] =nameMap[list[t].list[k].id]?[...nameMap[list[t].list[k].id],v.id]:[v.id]
+              } else {
+                nameMap[list[t].list[k].id] = nameMap[list[t].list[k].id]
+                  ? [...nameMap[list[t].list[k].id], v.id]
+                  : [v.id];
               }
-            })
-
-          }
-
+            }
+          });
+        }
 
         item.stopPublishingPropertyVos.forEach((v) => {
           if (v.type === 1) {
             let type = "input";
             try {
               v.allowableValues1 = JSON.parse(v.allowableValues);
-              if (v.allowableValues1.length > 0 && v.allowableValues1[0].trim()) {
+              if (
+                v.allowableValues1.length > 0 &&
+                v.allowableValues1[0].trim()
+              ) {
                 type = "select";
               }
             } catch (err) {}
@@ -280,13 +282,13 @@ export default {
       // 分组排序
       list.sort((a, b) => a.sort - b.sort);
       // 分组内按组件排序
-      list.forEach(v=>{
-            v.list.sort((a,b)=>a.bak3 - b.bak3)
-      })
+      list.forEach((v) => {
+        v.list.sort((a, b) => a.bak3 - b.bak3);
+      });
       // 去除全是输出的分组
       list = list.filter(v=>v.list.some(it=>it.showType))
       this.list = list;
-      this.$emit('nameMap',nameMap)
+      this.$emit("nameMap", nameMap);
     },
     async handShowInstructions() {
       this.$event.emit("loading", true);
@@ -324,26 +326,26 @@ export default {
       this.currentPropos = child;
     },
     async realUpload(e) {
-      let unzip =  e.name.split('.').pop() === 'zip'
+      let unzip = e.name.split(".").pop() === "zip";
       const res = await uploadFile({
         file: e,
         associateType: 4,
         associateId: this.currentPropos.id,
-        unzip
+        unzip,
       });
 
       this.$set(this.fileMap, this.currentPropos.id, e.name);
       this.currentPropos.customValue = res.data.data.filePath;
     },
     handleBeforeUpload(e) {
-      const blackList = ['rar','7z','tar','gz']
-      const type = e.name.split('.').pop()
-      if(blackList.includes(type)){
+      const blackList = ["rar", "7z", "tar", "gz"];
+      const type = e.name.split(".").pop();
+      if (blackList.includes(type)) {
         this.$Message.error({
-          content: '请将压缩包类型改为zip',
+          content: "请将压缩包类型改为zip",
           duration: 3,
         });
-      }else{
+      } else {
         this.realUpload(e);
       }
       return false;
@@ -415,28 +417,28 @@ export default {
     background-repeat: no-repeat;
     margin-bottom: 20px;
     background-position: center;
-   // display: flex;
-   // align-items: center;
-   // justify-content: center;
-   
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+
     background: #fff;
     border-radius: 6px;
     position: relative;
     height: 300px;
     cursor: pointer;
     text-align: center;
-    img{
+    img {
       max-width: 100%;
       max-height: 100%;
       object-fit: cover;
     }
-      i{
+    i {
       position: absolute;
       right: 10px;
       top: 6px;
       font-size: 23px;
       opacity: 0.9;
-      }
+    }
   }
   .config_l {
     overflow: hidden;
@@ -445,7 +447,7 @@ export default {
     border: 1px dashed #3974aa;
     h4 {
       line-height: 26px;
-      background: #3974AA;
+      background: #3974aa;
       text-indent: 10px;
       color: #fff;
       display: inline-block;

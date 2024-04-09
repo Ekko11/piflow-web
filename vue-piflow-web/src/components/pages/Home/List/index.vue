@@ -38,8 +38,9 @@
       <Table :columns="columns" :data="tableData">
         <template slot-scope="{ row }" slot="action">
           <div class="btn">
-            <Button @click="handleEnter(row)">进入</Button>
+            <Button class="enter" @click="handleEnter(row)">进入</Button>
             <Button
+             class="instruction"
               v-if="row.instructionFileId"
               @click="handShowInstructions(row)"
               >说明</Button
@@ -291,11 +292,11 @@ export default {
     padding: 0 12px;
     margin-right: 8px;
     border-radius: 8px;
-    &:first-child {
+    &.enter {
       background: #006fee;
       color: #fff;
     }
-    &:last-child {
+    &.instruction {
       background: #f2eafa;
       border: 1px solid #6020a0;
       color: #6020a0;

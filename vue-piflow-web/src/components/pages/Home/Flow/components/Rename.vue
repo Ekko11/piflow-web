@@ -61,13 +61,12 @@ export default {
 
     },
     handleComfirm() {
-      this.$refs.formValidate.validate( (valid) => {
-          if(valid){
-            this.$emit("submit", this.formInfo);
-            this.open = false
-            window.removeEventListener('keydown',this.keyDown,false);
-          }
-      })
+      if(!this.formInfo.name){
+        this.formInfo.name = this.name
+      }
+        this.$emit("submit", this.formInfo);
+        this.open = false
+        window.removeEventListener('keydown',this.keyDown,false);
 
     },
     keyDown(e){
