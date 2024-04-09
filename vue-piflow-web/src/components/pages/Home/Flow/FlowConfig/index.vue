@@ -217,7 +217,7 @@ export default {
       this.$event.emit("loading", false);
     },
     handleReName() {
-      this.$refs.RenameRef.handleOpen();
+      this.$refs.RenameRef.handleOpen(this.publishInfo.name);
     },
     // 运行
     async handleRun(formData) {

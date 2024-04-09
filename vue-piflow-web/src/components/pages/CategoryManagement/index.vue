@@ -76,9 +76,9 @@
             >
               <div>
                 <img
-                  v-if="formData.filePath || this.file"
+                  v-if="this.file || formData.filePath"
                   style="width: 100px"
-                  :src="formData.filePath ||this.file"
+                  :src="this.file || formData.filePath"
                   alt=""
                 />
                 <Icon
@@ -294,6 +294,13 @@ export default {
       });
     },
     handleBeforeUpload(e) {
+      if(e.size/1024 >200){
+        this.$Message.error({
+              content: '图片大小超过200k,请重新上传！',
+              duration: 3,
+        });
+        return false
+      }
       this.formData.file = e;
       this.renderImg(e);
       return false;

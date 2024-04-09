@@ -17,7 +17,7 @@
         :label-width="100"
       >
         <Form-item label="名称" prop="name">
-          <Input v-model="formInfo.name" placeholder="请输入"></Input>
+          <Input v-model="formInfo.name" :placeholder="name"></Input>
         </Form-item>
         <Form-item label="备注">
           <Input
@@ -37,6 +37,7 @@ export default {
   data() {
     return {
       open: false,
+      name:'',
       formInfo: {
         name: "",
         bak1: "",
@@ -53,8 +54,9 @@ export default {
     };
   },
   methods: {
-    handleOpen(){
+    handleOpen(name){
         this.open = true
+        this.name = name
         window.addEventListener('keydown',this.keyDown);
 
     },

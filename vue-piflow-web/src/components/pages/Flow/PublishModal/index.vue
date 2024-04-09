@@ -459,6 +459,7 @@ export default {
               (v) => v.propertyId === child.propertyId
             );
             child.checked = true
+            child.customValue = this.stops[index].stopPublishingPropertyVos[idx].customValue
             this.stops[index].stopPublishingPropertyVos[idx] = child
           });
 
