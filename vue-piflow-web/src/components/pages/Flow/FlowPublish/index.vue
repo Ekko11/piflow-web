@@ -54,6 +54,7 @@
         show-elevator
         :show-total="true"
         :total="total"
+        :current="page"
         show-sizer
         @on-change="onPageChange"
         @on-page-size-change="onPageSizeChange"

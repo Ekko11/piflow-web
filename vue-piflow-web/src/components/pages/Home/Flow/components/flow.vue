@@ -301,14 +301,8 @@ export default {
         })
       );
       if (url != null && url != undefined && url) {
-        const { href } = this.$router.resolve({
-          path: "/pdf",
-          query: {
-            url: url,
-          },
-        });
         // 新页面打开
-        window.open(href, "_blank");
+        window.open(url, "_blank");
       }
       this.$event.emit("loading", false);
     },

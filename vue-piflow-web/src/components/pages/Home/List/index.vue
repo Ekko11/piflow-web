@@ -52,6 +52,7 @@
           show-elevator
           size="small"
           :total="total"
+          :current="page"
           show-sizer
           @on-change="onPageChange"
           @on-page-size-change="onPageSizeChange"
@@ -216,12 +217,6 @@ export default {
           })
         );
         if (url != null && url != undefined && url) {
-          const { href } = this.$router.resolve({
-            path: "/pdf",
-            query: {
-              url: url,
-            },
-          });
           // 新页面打开
           window.open(url, "_blank");
         }
