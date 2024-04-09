@@ -19,7 +19,13 @@
     <el-table :data="tableData" border>
       <el-table-column prop="name" label="名称" />
       <el-table-column prop="productTypeName" label="类型" />
-      <el-table-column prop="description" label="描述"  show-overflow-tooltip/>
+      <el-table-column label="描述" >
+        <template slot-scope="scope">
+          <Tooltip :content="scope.row.description" placement="top"  maxWidth="340">
+              <span class="desc">{{scope.row.description}}</span>
+          </Tooltip>
+        </template>
+      </el-table-column>
       <el-table-column prop="crtUser" label="创建人"  width="120" />
       <el-table-column prop="crtDttm" label="创建时间"  width="180" />
       <el-table-column label="操作" width="180"  align="center">
@@ -192,6 +198,18 @@ export default {
   .el-table__cell{
     padding: 8px 0;
   }
+
+  .desc{
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
 }
+
+
+
+
 </style>
 
