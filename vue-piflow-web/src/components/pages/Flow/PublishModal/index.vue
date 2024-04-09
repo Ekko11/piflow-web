@@ -626,6 +626,7 @@ export default {
                   associateType: 3,
                   associateId: (obj && obj.id) ||  item.id,
                   file: item.file,
+                  unzip:item.file.name.split('.').pop() === 'zip'
                 });
                 promiseList.push(res);
             });
