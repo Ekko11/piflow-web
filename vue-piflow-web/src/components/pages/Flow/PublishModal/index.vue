@@ -684,7 +684,7 @@ export default {
         this.$event.emit("loading", false);
         this.$emit('publishOver')
         this.$Message.error({
-          content: this.$t("tip.fault_content"),
+          content: res.data.errorMsg,
           duration: 3,
         });
         this.open = false;
