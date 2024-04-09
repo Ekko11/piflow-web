@@ -583,7 +583,6 @@ export default {
         }
         emptyMessge = `<p style="color: #e64b4b;"> ${emptyMessge} </p>`
       }
-      console.assert(stopList)
       if(emptyProps){
         this.$Modal.confirm({
           title: this.$t("tip.title"),
@@ -626,7 +625,7 @@ export default {
                   associateType: 3,
                   associateId: (obj && obj.id) ||  item.id,
                   file: item.file,
-                  unzip:item.file.name.split('.').pop() === 'zip'
+                  unzip:false
                 });
                 promiseList.push(res);
             });
@@ -817,7 +816,6 @@ export default {
 
     // 标记选择上传的节点
     handleClickUpload(item) {
-      console.log(this.stops,item)
       this.currentProps = item;
     },
     handleBeforeCoverFileUpload(e) {
@@ -836,9 +834,19 @@ export default {
       return false;
     },
     handleBeforeUpload(e) {
-      this.$set(this.currentProps,'fileName',e.name)
-      // 编辑模式下有id
-      this.fileList.push({ id:this.currentProps.id || this.currentProps.propertyId, file: e });
+      const blackList = ['rar','7z','tar','gz']
+      const type = e.name.split('.').pop()
+      if(blackList.includes(type)){
+        this.$Message.error({
+          content: '请将压缩包类型改为zip',
+          duration: 3,
+        });
+      }else{
+        this.$set(this.currentProps,'fileName',e.name)
+        // 编辑模式下有id
+        this.fileList.push({ id:this.currentProps.id || this.currentProps.propertyId, file: e });
+      }
+
       return false;
     },
 

@@ -342,7 +342,16 @@ export default {
       this.currentPropos.customValue = res.data.data.filePath;
     },
     handleBeforeUpload(e) {
-      this.realUpload(e);
+      const blackList = ['rar','7z','tar','gz']
+      const type = e.name.split('.').pop()
+      if(blackList.includes(type)){
+        this.$Message.error({
+          content: '请将压缩包类型改为zip',
+          duration: 3,
+        });
+      }else{
+        this.realUpload(e);
+      }
       return false;
     },
   },
