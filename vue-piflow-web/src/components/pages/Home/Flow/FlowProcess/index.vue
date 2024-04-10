@@ -4,7 +4,7 @@
     <div class="progressWrap">
       <div class="stop">
       <div>
-        <Button  class="returnBtn" v-if="state !== 'STARTED'" icon="md-return-left"  @click="handleReturn">返回配置</Button>
+        <Button  class="returnBtn"  icon="md-return-left"  @click="handleReturn">返回配置</Button>
       </div>
       <div>
         <Button  class="stopBtn" v-if="state == 'STARTED'" @click="handleStop">停止</Button>
