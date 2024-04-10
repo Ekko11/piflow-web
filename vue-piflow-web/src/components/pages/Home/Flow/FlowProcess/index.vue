@@ -52,7 +52,7 @@
       </div>
     </div>
 
-    <PublishModal ref="PublishModalRef" />
+    <PublishModal ref="PublishModalRef" @onSubmit="init"/>
     <Log ref="LogRef" />
     <ErrorLog ref="ErrorLogRef" />
     

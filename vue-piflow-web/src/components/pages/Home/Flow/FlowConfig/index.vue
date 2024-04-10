@@ -95,7 +95,7 @@
       </div>
     </div>
 
-    <PublishModal ref="PublishModalRef" />
+    <PublishModal ref="PublishModalRef"  @onSubmit="getHistoryList"/>
     <Log ref="LogRef" />
     <Rename ref="RenameRef" @submit="handleRun" />
   </div>

@@ -154,6 +154,7 @@ export default {
 
     async handleAdd(row) {
       this.dataProductList = row.dataProductList.filter(v=>v.state === 3)
+      this.file = null
       this.formData = {
         name:row.flowPublishing.name,
         description:row.flowPublishing.description,
@@ -166,6 +167,7 @@ export default {
     },
 
     async handleEdit(row) {
+      this.file = null
       const { id,name,productTypeId,productTypeName,keyword,description,permission,sdPublisher,email,state,version} = row
       this.formData = { id,name,productTypeId,productTypeName,keyword,description,permission,sdPublisher,email,state,version}
       this.open = true;
