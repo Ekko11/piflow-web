@@ -207,13 +207,6 @@ export default {
 
     // 手动上传
     handleFileBefore(file) {
-      if(file.size/1024 >200){
-        this.$Message.error({
-              content: '图片大小超过200k,请重新上传！',
-              duration: 3,
-        });
-        return false
-      }
       this.formData.file = file;
       const reader = new FileReader();
       reader.readAsDataURL(file);
